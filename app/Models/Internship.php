@@ -30,8 +30,8 @@ class Internship extends Model
         return $this->belongsTo(Service::class);
     }
 
-    // public function students(): HasMany
-    // {
-    //     return $this->hasMany(Student::class);
-    // }
+    public function students(): HasMany
+    {
+        return $this->hasMany(Student::class);
+    }
 }

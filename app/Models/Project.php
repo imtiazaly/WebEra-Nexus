@@ -39,4 +39,11 @@ class Project extends Model
     {
         return $this->belongsTo(Service::class);
     }
+
+    public function students(): BelongsToMany
+    {
+        return $this->belongsToMany(Student::class, 'project_student')
+            ->withPivot('id', 'role', 'progress', 'submission_status')
+            ->withTimestamps();
+    }
 }
