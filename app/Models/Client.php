@@ -29,8 +29,8 @@ class Client extends Model
             ->withTimestamps();
     }
 
-    // public function projects(): HasMany
-    // {
-    //     return $this->hasMany(Project::class);
-    // }
+    public function projects(): HasMany
+    {
+        return $this->hasMany(Project::class);
+    }
 }
