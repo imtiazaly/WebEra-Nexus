@@ -33,4 +33,9 @@ class Service extends Model
     {
         return $this->hasMany(Project::class);
     }
+
+    public function internships(): HasMany
+    {
+        return $this->hasMany(Internship::class);
+    }
 }
