@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Service extends Model
 {
@@ -19,4 +20,11 @@ class Service extends Model
     protected $casts = [
         'is_active' => 'boolean',
     ];
+
+    public function clients(): BelongsToMany
+    {
+        return $this->belongsToMany(Client::class, 'client_services')
+            ->withPivot('requirements', 'estimated_budget')
+            ->withTimestamps();
+    }
 }
