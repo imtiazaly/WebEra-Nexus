@@ -1,5 +1,9 @@
 import type { Auth } from '@/types/auth';
 
+declare global {
+    function route(name?: string, params?: any): any;
+}
+
 // Extend ImportMeta interface for Vite...
 declare module 'vite/client' {
     interface ImportMetaEnv {
@@ -24,7 +28,7 @@ declare module '@inertiajs/core' {
     }
 }
 
-declare module 'vue' {
+declare module "vue" {
     interface ComponentCustomProperties {
         $inertia: typeof Router;
         $page: Page;
