@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { Head, Link } from "@inertiajs/vue3";
-import AppLayout from "@/layouts/AppLayout.vue";
-import { index, show, edit } from "@/routes/internships";
+import { Head, Link } from '@inertiajs/vue3';
+import AppLayout from '@/layouts/AppLayout.vue';
+import { index, show, edit } from '@/routes/internships';
 
 interface Service {
     id: number;
@@ -33,7 +33,7 @@ const props = defineProps<{
 }>();
 
 const formatStatus = (status: string) => {
-    return status.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase());
+    return status.replace('_', ' ').replace(/\b\w/g, (l) => l.toUpperCase());
 };
 </script>
 
@@ -46,7 +46,7 @@ const formatStatus = (status: string) => {
             { title: internship.name, href: show.url(internship.id) },
         ]"
     >
-        <div class="max-w-5xl mx-auto p-6 space-y-6">
+        <div class="mx-auto max-w-5xl space-y-6 p-6">
             <div class="flex items-center justify-between">
                 <div>
                     <h1
@@ -54,9 +54,9 @@ const formatStatus = (status: string) => {
                     >
                         {{ internship.name }}
                     </h1>
-                    <div class="flex items-center space-x-2 mt-1">
+                    <div class="mt-1 flex items-center space-x-2">
                         <span
-                            class="inline-flex items-center px-2 py-0.5 text-xs font-bold rounded bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-700"
+                            class="inline-flex items-center rounded border border-gray-300 bg-gray-100 px-2 py-0.5 text-xs font-bold text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
                         >
                             🏷️ {{ internship.batch_no }}
                         </span>
@@ -71,23 +71,23 @@ const formatStatus = (status: string) => {
                 <div class="space-x-3">
                     <Link
                         :href="edit.url(internship.id)"
-                        class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700"
+                        class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
                         >Edit Batch</Link
                     >
                     <Link
                         :href="index.url()"
-                        class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200"
+                        class="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300"
                         >Back</Link
                     >
                 </div>
             </div>
 
             <!-- Overview Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
                 <div
-                    class="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-800 space-y-2"
+                    class="space-y-2 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900"
                 >
-                    <div class="text-xs text-gray-500 uppercase font-semibold">
+                    <div class="text-xs font-semibold text-gray-500 uppercase">
                         Start Date
                     </div>
                     <div class="font-medium text-gray-900 dark:text-white">
@@ -96,9 +96,9 @@ const formatStatus = (status: string) => {
                 </div>
 
                 <div
-                    class="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-800 space-y-2"
+                    class="space-y-2 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900"
                 >
-                    <div class="text-xs text-gray-500 uppercase font-semibold">
+                    <div class="text-xs font-semibold text-gray-500 uppercase">
                         End Date (~6 Weeks)
                     </div>
                     <div class="font-medium text-gray-900 dark:text-white">
@@ -107,9 +107,9 @@ const formatStatus = (status: string) => {
                 </div>
 
                 <div
-                    class="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-800 space-y-2"
+                    class="space-y-2 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900"
                 >
-                    <div class="text-xs text-gray-500 uppercase font-semibold">
+                    <div class="text-xs font-semibold text-gray-500 uppercase">
                         Status
                     </div>
                     <div
@@ -122,7 +122,7 @@ const formatStatus = (status: string) => {
 
             <!-- Enrolled Students Section -->
             <div
-                class="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-800 space-y-4"
+                class="space-y-4 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900"
             >
                 <h2 class="text-lg font-bold text-gray-900 dark:text-white">
                     Enrolled Interns ({{ internship.students?.length || 0 }})
@@ -135,7 +135,7 @@ const formatStatus = (status: string) => {
                     <div
                         v-for="student in internship.students"
                         :key="student.id"
-                        class="py-3 flex items-center justify-between"
+                        class="flex items-center justify-between py-3"
                     >
                         <div>
                             <div

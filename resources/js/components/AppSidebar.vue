@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, FolderGit2, LayoutGrid } from '@lucide/vue';
+import {
+    Briefcase,
+    GraduationCap,
+    LayoutGrid,
+    UserCheck,
+    Users,
+} from '@lucide/vue';
 import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
@@ -15,6 +21,10 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
+import { index as clientsIndex } from '@/routes/clients';
+import { index as projectsIndex } from '@/routes/projects';
+import { index as internshipsIndex } from '@/routes/internships';
+import { index as studentsIndex } from '@/routes/students';
 import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
@@ -23,20 +33,29 @@ const mainNavItems: NavItem[] = [
         href: dashboard(),
         icon: LayoutGrid,
     },
+    {
+        title: 'Clients & Leads',
+        href: clientsIndex(),
+        icon: Users,
+    },
+    {
+        title: 'Projects Portal',
+        href: projectsIndex(),
+        icon: Briefcase,
+    },
+    {
+        title: 'Internship Batches',
+        href: internshipsIndex(),
+        icon: GraduationCap,
+    },
+    {
+        title: 'Students & Reports',
+        href: studentsIndex(),
+        icon: UserCheck,
+    },
 ];
 
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/vue-starter-kit',
-        icon: FolderGit2,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#vue',
-        icon: BookOpen,
-    },
-];
+const footerNavItems: NavItem[] = [];
 </script>
 
 <template>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { Head, Link, useForm } from "@inertiajs/vue3";
-import AppLayout from "@/layouts/AppLayout.vue";
-import { index, create, store } from "@/routes/internships";
+import { Head, Link, useForm } from '@inertiajs/vue3';
+import AppLayout from '@/layouts/AppLayout.vue';
+import { index, create, store } from '@/routes/internships';
 
 interface Service {
     id: number;
@@ -22,12 +22,12 @@ interface InternshipForm {
 }
 
 const form = useForm<InternshipForm>({
-    service_id: "",
-    name: "",
-    batch_no: "",
-    start_date: "",
-    end_date: "",
-    status: "upcoming",
+    service_id: '',
+    name: '',
+    batch_no: '',
+    start_date: '',
+    end_date: '',
+    status: 'upcoming',
 });
 
 const submit = () => {
@@ -44,50 +44,126 @@ const submit = () => {
             { title: 'Create Batch', href: create.url() },
         ]"
     >
-        <div class="max-w-3xl mx-auto p-6 space-y-6">
+        <div class="mx-auto max-w-3xl space-y-6 p-6">
             <div class="flex items-center justify-between">
-                <h1 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Create Internship Batch</h1>
-                <Link :href="index.url()" class="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">← Back to List</Link>
+                <h1
+                    class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
+                >
+                    Create Internship Batch
+                </h1>
+                <Link
+                    :href="index.url()"
+                    class="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                    >← Back to List</Link
+                >
             </div>
 
-            <form @submit.prevent="submit" class="bg-white dark:bg-gray-900 shadow-sm rounded-xl border border-gray-200 dark:border-gray-800 p-6 space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <form
+                @submit.prevent="submit"
+                class="space-y-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900"
+            >
+                <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Internship Batch Title *</label>
-                        <input v-model="form.name" type="text" required placeholder="e.g. Front-End Development Bootcamp" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white shadow-sm focus:border-indigo-500 sm:text-sm" />
-                        <span v-if="form.errors.name" class="text-xs text-rose-500 mt-1 block">{{ form.errors.name }}</span>
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                            >Internship Batch Title *</label
+                        >
+                        <input
+                            v-model="form.name"
+                            type="text"
+                            required
+                            placeholder="e.g. Front-End Development Bootcamp"
+                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                        />
+                        <span
+                            v-if="form.errors.name"
+                            class="mt-1 block text-xs text-rose-500"
+                            >{{ form.errors.name }}</span
+                        >
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Batch Number (Free Text) *</label>
-                        <input v-model="form.batch_no" type="text" required placeholder="e.g. BATCH-04 or WEB-2026-A" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white shadow-sm focus:border-indigo-500 sm:text-sm" />
-                        <span v-if="form.errors.batch_no" class="text-xs text-rose-500 mt-1 block">{{ form.errors.batch_no }}</span>
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                            >Batch Number (Free Text) *</label
+                        >
+                        <input
+                            v-model="form.batch_no"
+                            type="text"
+                            required
+                            placeholder="e.g. BATCH-04 or WEB-2026-A"
+                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                        />
+                        <span
+                            v-if="form.errors.batch_no"
+                            class="mt-1 block text-xs text-rose-500"
+                            >{{ form.errors.batch_no }}</span
+                        >
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Service Track *</label>
-                        <select v-model="form.service_id" required class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white shadow-sm focus:border-indigo-500 sm:text-sm">
-                            <option value="" disabled>-- Select Internship Track --</option>
-                            <option v-for="service in services" :key="service.id" :value="service.id">
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                            >Service Track *</label
+                        >
+                        <select
+                            v-model="form.service_id"
+                            required
+                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                        >
+                            <option value="" disabled>
+                                -- Select Internship Track --
+                            </option>
+                            <option
+                                v-for="service in services"
+                                :key="service.id"
+                                :value="service.id"
+                            >
                                 {{ service.name }}
                             </option>
                         </select>
-                        <span v-if="form.errors.service_id" class="text-xs text-rose-500 mt-1 block">{{ form.errors.service_id }}</span>
+                        <span
+                            v-if="form.errors.service_id"
+                            class="mt-1 block text-xs text-rose-500"
+                            >{{ form.errors.service_id }}</span
+                        >
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Start Date *</label>
-                        <input v-model="form.start_date" type="date" required class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white shadow-sm focus:border-indigo-500 sm:text-sm" />
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                            >Start Date *</label
+                        >
+                        <input
+                            v-model="form.start_date"
+                            type="date"
+                            required
+                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                        />
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">End Date (~6 weeks) *</label>
-                        <input v-model="form.end_date" type="date" required class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white shadow-sm focus:border-indigo-500 sm:text-sm" />
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                            >End Date (~6 weeks) *</label
+                        >
+                        <input
+                            v-model="form.end_date"
+                            type="date"
+                            required
+                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                        />
                     </div>
 
                     <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Batch Status *</label>
-                        <select v-model="form.status" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white shadow-sm focus:border-indigo-500 sm:text-sm">
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                            >Batch Status *</label
+                        >
+                        <select
+                            v-model="form.status"
+                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                        >
                             <option value="upcoming">Upcoming</option>
                             <option value="active">Active (Ongoing)</option>
                             <option value="completed">Completed</option>
@@ -95,9 +171,21 @@ const submit = () => {
                     </div>
                 </div>
 
-                <div class="flex justify-end space-x-3 border-t border-gray-200 dark:border-gray-800 pt-6">
-                    <Link :href="index.url()" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200">Cancel</Link>
-                    <button type="submit" :disabled="form.processing" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">Save Batch</button>
+                <div
+                    class="flex justify-end space-x-3 border-t border-gray-200 pt-6 dark:border-gray-800"
+                >
+                    <Link
+                        :href="index.url()"
+                        class="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300"
+                        >Cancel</Link
+                    >
+                    <button
+                        type="submit"
+                        :disabled="form.processing"
+                        class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    >
+                        Save Batch
+                    </button>
                 </div>
             </form>
         </div>

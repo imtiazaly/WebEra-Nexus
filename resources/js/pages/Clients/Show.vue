@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { Head, Link } from "@inertiajs/vue3";
-import AppLayout from "@/layouts/AppLayout.vue";
-import { index, show, edit } from "@/routes/clients";
+import { Head, Link } from '@inertiajs/vue3';
+import AppLayout from '@/layouts/AppLayout.vue';
+import { index, show, edit } from '@/routes/clients';
 
 interface Service {
     id: number;
@@ -37,7 +37,7 @@ const props = defineProps<{
 }>();
 
 const formatStatus = (status: string) => {
-    return status.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase());
+    return status.replace('_', ' ').replace(/\b\w/g, (l) => l.toUpperCase());
 };
 </script>
 
@@ -50,7 +50,7 @@ const formatStatus = (status: string) => {
             { title: client.name, href: show.url(client.id) },
         ]"
     >
-        <div class="max-w-5xl mx-auto p-6 space-y-6">
+        <div class="mx-auto max-w-5xl space-y-6 p-6">
             <div class="flex items-center justify-between">
                 <div>
                     <h1
@@ -59,29 +59,29 @@ const formatStatus = (status: string) => {
                         {{ client.name }}
                     </h1>
                     <p class="text-sm text-gray-500 dark:text-gray-400">
-                        {{ client.company_name || "Individual Client" }}
+                        {{ client.company_name || 'Individual Client' }}
                     </p>
                 </div>
                 <div class="space-x-3">
                     <Link
                         :href="edit.url(client.id)"
-                        class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700"
+                        class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
                         >Edit Details</Link
                     >
                     <Link
                         :href="index.url()"
-                        class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200"
+                        class="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300"
                         >Back</Link
                     >
                 </div>
             </div>
 
             <!-- Overview Card -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
                 <div
-                    class="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-800 space-y-2"
+                    class="space-y-2 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900"
                 >
-                    <div class="text-xs text-gray-500 uppercase font-semibold">
+                    <div class="text-xs font-semibold text-gray-500 uppercase">
                         Contact Email
                     </div>
                     <div class="font-medium text-gray-900 dark:text-white">
@@ -89,19 +89,19 @@ const formatStatus = (status: string) => {
                     </div>
                 </div>
                 <div
-                    class="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-800 space-y-2"
+                    class="space-y-2 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900"
                 >
-                    <div class="text-xs text-gray-500 uppercase font-semibold">
+                    <div class="text-xs font-semibold text-gray-500 uppercase">
                         Phone / WhatsApp
                     </div>
                     <div class="font-medium text-gray-900 dark:text-white">
-                        {{ client.phone || "N/A" }}
+                        {{ client.phone || 'N/A' }}
                     </div>
                 </div>
                 <div
-                    class="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-800 space-y-2"
+                    class="space-y-2 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900"
                 >
-                    <div class="text-xs text-gray-500 uppercase font-semibold">
+                    <div class="text-xs font-semibold text-gray-500 uppercase">
                         Current Status
                     </div>
                     <div
@@ -114,7 +114,7 @@ const formatStatus = (status: string) => {
 
             <!-- Requested Services -->
             <div
-                class="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-800 space-y-4"
+                class="space-y-4 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900"
             >
                 <h2 class="text-lg font-bold text-gray-900 dark:text-white">
                     Services Requested
@@ -126,7 +126,7 @@ const formatStatus = (status: string) => {
                     <div
                         v-for="service in client.services"
                         :key="service.id"
-                        class="py-3 flex flex-col md:flex-row md:items-center justify-between gap-2"
+                        class="flex flex-col justify-between gap-2 py-3 md:flex-row md:items-center"
                     >
                         <div>
                             <span
@@ -134,11 +134,11 @@ const formatStatus = (status: string) => {
                                 >{{ service.name }}</span
                             >
                             <p
-                                class="text-xs text-gray-500 dark:text-gray-400 mt-1"
+                                class="mt-1 text-xs text-gray-500 dark:text-gray-400"
                             >
                                 {{
                                     service.pivot?.requirements ||
-                                    "No specific requirements noted."
+                                    'No specific requirements noted.'
                                 }}
                             </p>
                         </div>
@@ -149,7 +149,7 @@ const formatStatus = (status: string) => {
                             {{
                                 service.pivot?.estimated_budget
                                     ? `$${service.pivot.estimated_budget}`
-                                    : "TBD"
+                                    : 'TBD'
                             }}
                         </div>
                     </div>
@@ -162,13 +162,13 @@ const formatStatus = (status: string) => {
             <!-- Notes -->
             <div
                 v-if="client.notes"
-                class="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-800 space-y-2"
+                class="space-y-2 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900"
             >
                 <h2 class="text-lg font-bold text-gray-900 dark:text-white">
                     Communication Notes
                 </h2>
                 <p
-                    class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line"
+                    class="text-sm whitespace-pre-line text-gray-700 dark:text-gray-300"
                 >
                     {{ client.notes }}
                 </p>

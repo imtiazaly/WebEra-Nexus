@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { Head, Link, useForm, router } from "@inertiajs/vue3";
-import AppLayout from "@/layouts/AppLayout.vue";
-import { index, show, edit } from "@/routes/students";
-import { update as updateWeeklyReport } from "@/routes/weekly-reports";
-import { ref } from "vue";
+import { Head, Link, useForm, router } from '@inertiajs/vue3';
+import AppLayout from '@/layouts/AppLayout.vue';
+import { index, show, edit } from '@/routes/students';
+import { update as updateWeeklyReport } from '@/routes/weekly-reports';
+import { ref } from 'vue';
 
 interface Project {
     id: number;
@@ -58,10 +58,10 @@ const props = defineProps<{
 
 // Assign Project Form
 const assignForm = useForm({
-    project_id: "" as string | number,
-    role: "Frontend Developer",
+    project_id: '' as string | number,
+    role: 'Frontend Developer',
     progress_val: 0,
-    submission_status: "assigned",
+    submission_status: 'assigned',
 });
 
 const submitAssignProject = () => {
@@ -72,7 +72,7 @@ const submitAssignProject = () => {
             progress: data.progress_val,
             submission_status: data.submission_status,
         }))
-        .post(route("students.assign-project", props.student.id), {
+        .post(route('students.assign-project', props.student.id), {
             onSuccess: () => assignForm.reset(),
         });
 };
@@ -80,14 +80,14 @@ const submitAssignProject = () => {
 // Submit Weekly Report Form
 const reportForm = useForm({
     week_number: (props.student.weekly_reports?.length || 0) + 1,
-    tasks_completed: "",
-    learnings: "",
-    blockers: "",
-    status: "submitted",
+    tasks_completed: '',
+    learnings: '',
+    blockers: '',
+    status: 'submitted',
 });
 
 const submitWeeklyReport = () => {
-    reportForm.post(route("weekly-reports.store", props.student.id), {
+    reportForm.post(route('weekly-reports.store', props.student.id), {
         onSuccess: () => reportForm.reset(),
     });
 };
@@ -95,14 +95,14 @@ const submitWeeklyReport = () => {
 // Review Weekly Report (Admin Feedback)
 const editingReportId = ref<number | null>(null);
 const reviewForm = useForm({
-    status: "approved",
-    feedback: "",
+    status: 'approved',
+    feedback: '',
 });
 
 const openReview = (report: WeeklyReport) => {
     editingReportId.value = report.id;
     reviewForm.status = report.status;
-    reviewForm.feedback = report.feedback || "";
+    reviewForm.feedback = report.feedback || '';
 };
 
 const submitReportReview = (reportId: number) => {
@@ -114,7 +114,7 @@ const submitReportReview = (reportId: number) => {
 };
 
 const formatStatus = (status: string) => {
-    return status.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase());
+    return status.replace('_', ' ').replace(/\b\w/g, (l) => l.toUpperCase());
 };
 </script>
 
@@ -127,7 +127,7 @@ const formatStatus = (status: string) => {
             { title: student.name, href: show.url(student.id) },
         ]"
     >
-        <div class="max-w-6xl mx-auto p-6 space-y-6">
+        <div class="mx-auto max-w-6xl space-y-6 p-6">
             <!-- Header -->
             <div class="flex items-center justify-between">
                 <div>
@@ -137,11 +137,11 @@ const formatStatus = (status: string) => {
                         {{ student.name }}
                     </h1>
                     <div
-                        class="flex items-center space-x-2 mt-1 text-sm text-gray-500 dark:text-gray-400"
+                        class="mt-1 flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400"
                     >
                         <span>{{ student.email }}</span>
                         <span>•</span>
-                        <span>{{ student.phone || "No phone" }}</span>
+                        <span>{{ student.phone || 'No phone' }}</span>
                         <span>•</span>
                         <span
                             class="font-medium text-gray-800 dark:text-gray-200"
@@ -154,12 +154,12 @@ const formatStatus = (status: string) => {
                 <div class="space-x-3">
                     <Link
                         :href="edit.url(student.id)"
-                        class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700"
+                        class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
                         >Edit Profile</Link
                     >
                     <Link
                         :href="index.url()"
-                        class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200"
+                        class="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300"
                         >Back</Link
                     >
                 </div>
@@ -167,9 +167,9 @@ const formatStatus = (status: string) => {
 
             <!-- Overall Progress Card -->
             <div
-                class="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-800 space-y-3"
+                class="space-y-3 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900"
             >
-                <div class="flex justify-between items-center">
+                <div class="flex items-center justify-between">
                     <h2 class="text-lg font-bold text-gray-900 dark:text-white">
                         Overall Internship Performance Progress
                     </h2>
@@ -179,22 +179,22 @@ const formatStatus = (status: string) => {
                     >
                 </div>
                 <div
-                    class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden"
+                    class="h-3 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700"
                 >
                     <div
-                        class="bg-indigo-600 h-3 rounded-full transition-all duration-500"
+                        class="h-3 rounded-full bg-indigo-600 transition-all duration-500"
                         :style="{ width: `${student.overall_progress}%` }"
                     ></div>
                 </div>
             </div>
 
             <!-- Main Content Grid (Left: Projects & Reports, Right: Forms) -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
                 <!-- Left 2 Cols: Assigned Projects & Weekly Reports List -->
-                <div class="lg:col-span-2 space-y-6">
+                <div class="space-y-6 lg:col-span-2">
                     <!-- Assigned Projects Card -->
                     <div
-                        class="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-800 space-y-4"
+                        class="space-y-4 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900"
                     >
                         <h2
                             class="text-lg font-bold text-gray-900 dark:text-white"
@@ -210,7 +210,7 @@ const formatStatus = (status: string) => {
                             <div
                                 v-for="proj in student.projects"
                                 :key="proj.id"
-                                class="py-3 space-y-2"
+                                class="space-y-2 py-3"
                             >
                                 <div class="flex items-center justify-between">
                                     <span
@@ -218,7 +218,7 @@ const formatStatus = (status: string) => {
                                         >{{ proj.title }}</span
                                     >
                                     <span
-                                        class="text-xs font-bold px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300"
+                                        class="rounded bg-indigo-50 px-2 py-0.5 text-xs font-bold text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300"
                                     >
                                         {{
                                             formatStatus(
@@ -248,7 +248,7 @@ const formatStatus = (status: string) => {
 
                     <!-- Weekly Reports History Card -->
                     <div
-                        class="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-800 space-y-4"
+                        class="space-y-4 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900"
                     >
                         <h2
                             class="text-lg font-bold text-gray-900 dark:text-white"
@@ -265,7 +265,7 @@ const formatStatus = (status: string) => {
                             <div
                                 v-for="report in student.weekly_reports"
                                 :key="report.id"
-                                class="border border-gray-200 dark:border-gray-800 rounded-lg p-4 bg-gray-50/50 dark:bg-gray-800/30 space-y-3"
+                                class="space-y-3 rounded-lg border border-gray-200 bg-gray-50/50 p-4 dark:border-gray-800 dark:bg-gray-800/30"
                             >
                                 <div class="flex items-center justify-between">
                                     <span
@@ -274,14 +274,14 @@ const formatStatus = (status: string) => {
                                         {{ report.week_number }} Report</span
                                     >
                                     <span
-                                        class="text-xs px-2 py-0.5 font-semibold rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+                                        class="rounded-full bg-gray-200 px-2 py-0.5 text-xs font-semibold text-gray-800 dark:bg-gray-700 dark:text-gray-200"
                                     >
                                         {{ formatStatus(report.status) }}
                                     </span>
                                 </div>
 
                                 <div
-                                    class="text-xs space-y-1 text-gray-700 dark:text-gray-300"
+                                    class="space-y-1 text-xs text-gray-700 dark:text-gray-300"
                                 >
                                     <div>
                                         <strong>Tasks:</strong>
@@ -302,7 +302,7 @@ const formatStatus = (status: string) => {
 
                                 <div
                                     v-if="report.feedback"
-                                    class="p-2.5 bg-indigo-50 dark:bg-indigo-950/40 rounded border border-indigo-100 dark:border-indigo-900 text-xs text-indigo-900 dark:text-indigo-200"
+                                    class="rounded border border-indigo-100 bg-indigo-50 p-2.5 text-xs text-indigo-900 dark:border-indigo-900 dark:bg-indigo-950/40 dark:text-indigo-200"
                                 >
                                     <strong>Admin Feedback:</strong>
                                     {{ report.feedback }}
@@ -310,7 +310,7 @@ const formatStatus = (status: string) => {
 
                                 <!-- Review Button / Inline Form -->
                                 <div
-                                    class="pt-2 border-t border-gray-200 dark:border-gray-800 flex justify-end"
+                                    class="flex justify-end border-t border-gray-200 pt-2 dark:border-gray-800"
                                 >
                                     <button
                                         v-if="editingReportId !== report.id"
@@ -329,12 +329,12 @@ const formatStatus = (status: string) => {
                                         <div class="grid grid-cols-2 gap-2">
                                             <div>
                                                 <label
-                                                    class="block text-[10px] uppercase font-bold text-gray-500"
+                                                    class="block text-[10px] font-bold text-gray-500 uppercase"
                                                     >Status</label
                                                 >
                                                 <select
                                                     v-model="reviewForm.status"
-                                                    class="w-full rounded border-gray-300 dark:border-gray-700 dark:bg-gray-800 text-xs text-white"
+                                                    class="w-full rounded border-gray-300 text-xs text-white dark:border-gray-700 dark:bg-gray-800"
                                                 >
                                                     <option value="submitted">
                                                         Submitted
@@ -356,7 +356,7 @@ const formatStatus = (status: string) => {
                                             </div>
                                             <div>
                                                 <label
-                                                    class="block text-[10px] uppercase font-bold text-gray-500"
+                                                    class="block text-[10px] font-bold text-gray-500 uppercase"
                                                     >Admin Feedback</label
                                                 >
                                                 <input
@@ -365,7 +365,7 @@ const formatStatus = (status: string) => {
                                                     "
                                                     type="text"
                                                     placeholder="Comments..."
-                                                    class="w-full rounded border-gray-300 dark:border-gray-700 dark:bg-gray-800 text-xs text-white"
+                                                    class="w-full rounded border-gray-300 text-xs text-white dark:border-gray-700 dark:bg-gray-800"
                                                 />
                                             </div>
                                         </div>
@@ -379,7 +379,7 @@ const formatStatus = (status: string) => {
                                             </button>
                                             <button
                                                 type="submit"
-                                                class="px-2 py-1 bg-indigo-600 text-white rounded text-xs font-semibold"
+                                                class="rounded bg-indigo-600 px-2 py-1 text-xs font-semibold text-white"
                                             >
                                                 Save Review
                                             </button>
@@ -401,7 +401,7 @@ const formatStatus = (status: string) => {
                 <div class="space-y-6">
                     <!-- Assign Project Form Card -->
                     <div
-                        class="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-800 space-y-4"
+                        class="space-y-4 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900"
                     >
                         <h3
                             class="text-md font-bold text-gray-900 dark:text-white"
@@ -420,7 +420,7 @@ const formatStatus = (status: string) => {
                                 <select
                                     v-model="assignForm.project_id"
                                     required
-                                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white text-xs"
+                                    class="mt-1 block w-full rounded-lg border-gray-300 text-xs dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                                 >
                                     <option value="" disabled>
                                         -- Select Project --
@@ -445,7 +445,7 @@ const formatStatus = (status: string) => {
                                     type="text"
                                     required
                                     placeholder="e.g. Frontend Developer"
-                                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white text-xs"
+                                    class="mt-1 block w-full rounded-lg border-gray-300 text-xs dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                                 />
                             </div>
 
@@ -459,7 +459,7 @@ const formatStatus = (status: string) => {
                                     type="number"
                                     min="0"
                                     max="100"
-                                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white text-xs"
+                                    class="mt-1 block w-full rounded-lg border-gray-300 text-xs dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                                 />
                             </div>
 
@@ -470,7 +470,7 @@ const formatStatus = (status: string) => {
                                 >
                                 <select
                                     v-model="assignForm.submission_status"
-                                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white text-xs"
+                                    class="mt-1 block w-full rounded-lg border-gray-300 text-xs dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                                 >
                                     <option value="assigned">Assigned</option>
                                     <option value="in_progress">
@@ -487,7 +487,7 @@ const formatStatus = (status: string) => {
                             <button
                                 type="submit"
                                 :disabled="assignForm.processing"
-                                class="w-full py-2 text-xs font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700"
+                                class="w-full rounded-lg bg-indigo-600 py-2 text-xs font-semibold text-white hover:bg-indigo-700"
                             >
                                 Assign Project
                             </button>
@@ -496,7 +496,7 @@ const formatStatus = (status: string) => {
 
                     <!-- Submit Weekly Report Form Card -->
                     <div
-                        class="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-800 space-y-4"
+                        class="space-y-4 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900"
                     >
                         <h3
                             class="text-md font-bold text-gray-900 dark:text-white"
@@ -517,7 +517,7 @@ const formatStatus = (status: string) => {
                                     type="number"
                                     min="1"
                                     required
-                                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white text-xs"
+                                    class="mt-1 block w-full rounded-lg border-gray-300 text-xs dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                                 />
                             </div>
 
@@ -531,7 +531,7 @@ const formatStatus = (status: string) => {
                                     rows="2"
                                     required
                                     placeholder="What was completed this week..."
-                                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white text-xs"
+                                    class="mt-1 block w-full rounded-lg border-gray-300 text-xs dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                                 ></textarea>
                             </div>
 
@@ -544,7 +544,7 @@ const formatStatus = (status: string) => {
                                     v-model="reportForm.learnings"
                                     rows="2"
                                     placeholder="Key concepts learned..."
-                                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white text-xs"
+                                    class="mt-1 block w-full rounded-lg border-gray-300 text-xs dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                                 ></textarea>
                             </div>
 
@@ -557,14 +557,14 @@ const formatStatus = (status: string) => {
                                     v-model="reportForm.blockers"
                                     rows="2"
                                     placeholder="Any issues faced..."
-                                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white text-xs"
+                                    class="mt-1 block w-full rounded-lg border-gray-300 text-xs dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                                 ></textarea>
                             </div>
 
                             <button
                                 type="submit"
                                 :disabled="reportForm.processing"
-                                class="w-full py-2 text-xs font-semibold text-white bg-emerald-600 rounded-lg hover:bg-emerald-700"
+                                class="w-full rounded-lg bg-emerald-600 py-2 text-xs font-semibold text-white hover:bg-emerald-700"
                             >
                                 Submit Report
                             </button>

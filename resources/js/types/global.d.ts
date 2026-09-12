@@ -28,7 +28,7 @@ declare module '@inertiajs/core' {
     }
 }
 
-declare module "vue" {
+declare module 'vue' {
     interface ComponentCustomProperties {
         $inertia: typeof Router;
         $page: Page;
