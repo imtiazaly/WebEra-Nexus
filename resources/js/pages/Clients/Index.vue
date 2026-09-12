@@ -1,11 +1,17 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
-import AppLayout from '@/layouts/AppLayout.vue';
-import Heading from '@/components/Heading.vue';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
 import { index, create, show, edit, destroy } from '@/routes/clients';
+
+defineOptions({
+    layout: {
+        breadcrumbs: [
+            {
+                title: 'Clients & Leads',
+                href: index.url(),
+            },
+        ],
+    },
+});
 import {
     Plus,
     Eye,
@@ -85,175 +91,155 @@ const deleteClient = (id: number) => {
 <template>
     <Head title="Clients & Leads" />
 
-    <AppLayout :breadcrumbs="[{ title: 'Clients & Leads', href: index.url() }]">
-        <div class="mx-auto max-w-7xl space-y-6 p-6">
-            <!-- Header -->
-            <div
-                class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
-            >
-                <Heading
-                    title="Clients & Leads Portal"
-                    description="Manage potential leads, client conversions, and service requests."
-                />
-                <div>
-                    <Button as-child>
-                        <Link
-                            :href="create.url()"
-                            class="flex items-center gap-2"
-                        >
-                            <Plus class="h-4 w-4" />
-                            <span>Add New Client / Lead</span>
-                        </Link>
-                    </Button>
-                </div>
+    <div class="mx-auto max-w-7xl space-y-6 p-6">
+        <!-- Header -->
+        <div
+            class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+        >
+            <Heading
+                title="Clients & Leads Portal"
+                description="Manage potential leads, client conversions, and service requests."
+            />
+            <div>
+                <Button as-child>
+                    <Link :href="create.url()" class="flex items-center gap-2">
+                        <Plus class="h-4 w-4" />
+                        <span>Add New Client / Lead</span>
+                    </Link>
+                </Button>
             </div>
-
-            <!-- Table Card -->
-            <Card>
-                <CardContent class="p-0">
-                    <div class="overflow-x-auto">
-                        <table class="w-full border-collapse text-left">
-                            <thead>
-                                <tr
-                                    class="border-border bg-muted/50 text-muted-foreground border-b text-xs font-semibold tracking-wider uppercase"
-                                >
-                                    <th class="px-4 py-3.5">Client Name</th>
-                                    <th class="px-4 py-3.5">Contact</th>
-                                    <th class="px-4 py-3.5">Company</th>
-                                    <th class="px-4 py-3.5">
-                                        Services Requested
-                                    </th>
-                                    <th class="px-4 py-3.5">Status</th>
-                                    <th class="px-4 py-3.5 text-right">
-                                        Actions
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-border divide-y text-sm">
-                                <tr v-if="clients.data.length === 0">
-                                    <td
-                                        colspan="6"
-                                        class="text-muted-foreground py-8 text-center"
-                                    >
-                                        No clients or leads found. Click "+ Add
-                                        New Client" to get started.
-                                    </td>
-                                </tr>
-                                <tr
-                                    v-for="client in clients.data"
-                                    :key="client.id"
-                                    class="hover:bg-muted/40 transition-colors"
-                                >
-                                    <td class="px-4 py-4 font-medium">
-                                        <Link
-                                            :href="show.url(client.id)"
-                                            class="text-primary hover:underline"
-                                        >
-                                            {{ client.name }}
-                                        </Link>
-                                    </td>
-                                    <td class="px-4 py-4">
-                                        <div
-                                            class="text-foreground flex items-center gap-1.5 text-xs"
-                                        >
-                                            <Mail
-                                                class="text-muted-foreground h-3.5 w-3.5"
-                                            />
-                                            <span>{{ client.email }}</span>
-                                        </div>
-                                        <div
-                                            v-if="client.phone"
-                                            class="text-muted-foreground mt-0.5 flex items-center gap-1.5 text-xs"
-                                        >
-                                            <Phone class="h-3.5 w-3.5" />
-                                            <span>{{ client.phone }}</span>
-                                        </div>
-                                    </td>
-                                    <td class="px-4 py-4">
-                                        <div
-                                            class="text-muted-foreground flex items-center gap-1.5 text-xs"
-                                        >
-                                            <Building class="h-3.5 w-3.5" />
-                                            <span>{{
-                                                client.company_name ||
-                                                'Individual'
-                                            }}</span>
-                                        </div>
-                                    </td>
-                                    <td class="px-4 py-4">
-                                        <div class="flex flex-wrap gap-1">
-                                            <Badge
-                                                v-for="service in client.services"
-                                                :key="service.id"
-                                                variant="outline"
-                                                class="text-[11px]"
-                                            >
-                                                {{ service.name }}
-                                            </Badge>
-                                            <span
-                                                v-if="
-                                                    !client.services ||
-                                                    client.services.length === 0
-                                                "
-                                                class="text-muted-foreground text-xs"
-                                                >-</span
-                                            >
-                                        </div>
-                                    </td>
-                                    <td class="px-4 py-4">
-                                        <Badge
-                                            :variant="
-                                                getStatusBadge(client.status)
-                                                    .variant
-                                            "
-                                            :class="
-                                                getStatusBadge(client.status)
-                                                    .class
-                                            "
-                                        >
-                                            {{
-                                                getStatusBadge(client.status)
-                                                    .label
-                                            }}
-                                        </Badge>
-                                    </td>
-                                    <td class="space-x-1 px-4 py-4 text-right">
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            as-child
-                                        >
-                                            <Link :href="show.url(client.id)">
-                                                <Eye class="h-4 w-4" />
-                                            </Link>
-                                        </Button>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            as-child
-                                        >
-                                            <Link :href="edit.url(client.id)">
-                                                <Pencil
-                                                    class="text-primary h-4 w-4"
-                                                />
-                                            </Link>
-                                        </Button>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            @click="deleteClient(client.id)"
-                                        >
-                                            <Trash2
-                                                class="text-destructive h-4 w-4"
-                                            />
-                                        </Button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </CardContent>
-            </Card>
         </div>
-    </AppLayout>
+
+        <!-- Table Card -->
+        <Card>
+            <CardContent class="p-0">
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse text-left">
+                        <thead>
+                            <tr
+                                class="border-border bg-muted/50 text-muted-foreground border-b text-xs font-semibold tracking-wider uppercase"
+                            >
+                                <th class="px-4 py-3.5">Client Name</th>
+                                <th class="px-4 py-3.5">Contact</th>
+                                <th class="px-4 py-3.5">Company</th>
+                                <th class="px-4 py-3.5">Services Requested</th>
+                                <th class="px-4 py-3.5">Status</th>
+                                <th class="px-4 py-3.5 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-border divide-y text-sm">
+                            <tr v-if="clients.data.length === 0">
+                                <td
+                                    colspan="6"
+                                    class="text-muted-foreground py-8 text-center"
+                                >
+                                    No clients or leads found. Click "+ Add New
+                                    Client" to get started.
+                                </td>
+                            </tr>
+                            <tr
+                                v-for="client in clients.data"
+                                :key="client.id"
+                                class="hover:bg-muted/40 transition-colors"
+                            >
+                                <td class="px-4 py-4 font-medium">
+                                    <Link
+                                        :href="show.url(client.id)"
+                                        class="text-primary hover:underline"
+                                    >
+                                        {{ client.name }}
+                                    </Link>
+                                </td>
+                                <td class="px-4 py-4">
+                                    <div
+                                        class="text-foreground flex items-center gap-1.5 text-xs"
+                                    >
+                                        <Mail
+                                            class="text-muted-foreground h-3.5 w-3.5"
+                                        />
+                                        <span>{{ client.email }}</span>
+                                    </div>
+                                    <div
+                                        v-if="client.phone"
+                                        class="text-muted-foreground mt-0.5 flex items-center gap-1.5 text-xs"
+                                    >
+                                        <Phone class="h-3.5 w-3.5" />
+                                        <span>{{ client.phone }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-4">
+                                    <div
+                                        class="text-muted-foreground flex items-center gap-1.5 text-xs"
+                                    >
+                                        <Building class="h-3.5 w-3.5" />
+                                        <span>{{
+                                            client.company_name || 'Individual'
+                                        }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-4">
+                                    <div class="flex flex-wrap gap-1">
+                                        <Badge
+                                            v-for="service in client.services"
+                                            :key="service.id"
+                                            variant="outline"
+                                            class="text-[11px]"
+                                        >
+                                            {{ service.name }}
+                                        </Badge>
+                                        <span
+                                            v-if="
+                                                !client.services ||
+                                                client.services.length === 0
+                                            "
+                                            class="text-muted-foreground text-xs"
+                                            >-</span
+                                        >
+                                    </div>
+                                </td>
+                                <td class="px-4 py-4">
+                                    <Badge
+                                        :variant="
+                                            getStatusBadge(client.status)
+                                                .variant
+                                        "
+                                        :class="
+                                            getStatusBadge(client.status).class
+                                        "
+                                    >
+                                        {{
+                                            getStatusBadge(client.status).label
+                                        }}
+                                    </Badge>
+                                </td>
+                                <td class="space-x-1 px-4 py-4 text-right">
+                                    <Button variant="ghost" size="sm" as-child>
+                                        <Link :href="show.url(client.id)">
+                                            <Eye class="h-4 w-4" />
+                                        </Link>
+                                    </Button>
+                                    <Button variant="ghost" size="sm" as-child>
+                                        <Link :href="edit.url(client.id)">
+                                            <Pencil
+                                                class="text-primary h-4 w-4"
+                                            />
+                                        </Link>
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        @click="deleteClient(client.id)"
+                                    >
+                                        <Trash2
+                                            class="text-destructive h-4 w-4"
+                                        />
+                                    </Button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </CardContent>
+        </Card>
+    </div>
 </template>
