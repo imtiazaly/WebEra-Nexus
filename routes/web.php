@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InternshipController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\StudentController;
@@ -11,7 +12,7 @@ Route::inertia('/', 'auth/Login')->name('home');
 
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::inertia('dashboard', 'Dashboard')->name('dashboard');
+    Route::get('dashboard', DashboardController::class)->name('dashboard');
 
     Route::resource('clients', ClientController::class);
     Route::resource('projects', ProjectController::class);
