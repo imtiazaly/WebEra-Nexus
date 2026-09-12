@@ -1,27 +1,21 @@
 <script setup lang="ts">
 import { Head, Link, useForm, router } from '@inertiajs/vue3';
-import { h } from 'vue';
-import AppLayout from '@/layouts/AppLayout.vue';
-import { index, show, edit } from '@/routes/students';
+import { ref } from 'vue';
+import { index, edit, assignProject } from '@/routes/students';
+import {
+    store as storeWeeklyReport,
+    update as updateWeeklyReport,
+    aiSummary as reportAiSummary,
+} from '@/routes/weekly-reports';
 
 defineOptions({
-    layout: (page: any) =>
-        h(
-            AppLayout,
-            {
-                breadcrumbs: [
-                    { title: 'Students Portal', href: index.url() },
-                    {
-                        title: page.props.student.name,
-                        href: show.url(page.props.student.id),
-                    },
-                ],
-            },
-            () => page,
-        ),
+    layout: {
+        breadcrumbs: [
+            { title: 'Students Portal', href: index.url() },
+            { title: 'Student Profile', href: '#' },
+        ],
+    },
 });
-import { update as updateWeeklyReport } from '@/routes/weekly-reports';
-import { ref } from 'vue';
 
 interface Project {
     id: number;
@@ -90,7 +84,7 @@ const submitAssignProject = () => {
             progress: data.progress_val,
             submission_status: data.submission_status,
         }))
-        .post(route('students.assign-project', props.student.id), {
+        .post(assignProject.url(props.student.id), {
             onSuccess: () => assignForm.reset(),
         });
 };
@@ -105,7 +99,7 @@ const reportForm = useForm({
 });
 
 const submitWeeklyReport = () => {
-    reportForm.post(route('weekly-reports.store', props.student.id), {
+    reportForm.post(storeWeeklyReport.url(props.student.id), {
         onSuccess: () => reportForm.reset(),
     });
 };
@@ -129,6 +123,22 @@ const submitReportReview = (reportId: number) => {
             editingReportId.value = null;
         },
     });
+};
+
+// AI Summary Generation per Weekly Report
+const generatingReportAi = ref<number | null>(null);
+
+const generateReportAi = (reportId: number) => {
+    generatingReportAi.value = reportId;
+    router.post(
+        reportAiSummary.url(reportId),
+        {},
+        {
+            onFinish: () => {
+                generatingReportAi.value = null;
+            },
+        },
+    );
 };
 
 const formatStatus = (status: string) => {
@@ -197,9 +207,8 @@ const formatStatus = (status: string) => {
             </div>
         </div>
 
-        <!-- Main Content Grid (Left: Projects & Reports, Right: Forms) -->
+        <!-- Main Content Grid -->
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            <!-- Left 2 Cols: Assigned Projects & Weekly Reports List -->
             <div class="space-y-6 lg:col-span-2">
                 <!-- Assigned Projects Card -->
                 <div
@@ -299,6 +308,14 @@ const formatStatus = (status: string) => {
                             </div>
 
                             <div
+                                v-if="report.ai_summary"
+                                class="rounded border border-purple-200 bg-purple-50/60 p-2.5 text-xs text-purple-900 dark:border-purple-900/60 dark:bg-purple-950/30 dark:text-purple-200"
+                            >
+                                <strong>🤖 AI Summary:</strong>
+                                {{ report.ai_summary }}
+                            </div>
+
+                            <div
                                 v-if="report.feedback"
                                 class="rounded border border-indigo-100 bg-indigo-50 p-2.5 text-xs text-indigo-900 dark:border-indigo-900 dark:bg-indigo-950/40 dark:text-indigo-200"
                             >
@@ -306,80 +323,94 @@ const formatStatus = (status: string) => {
                                 {{ report.feedback }}
                             </div>
 
-                            <!-- Review Button / Inline Form -->
                             <div
-                                class="flex justify-end border-t border-gray-200 pt-2 dark:border-gray-800"
+                                class="flex items-center justify-between border-t border-gray-200 pt-2 dark:border-gray-800"
                             >
                                 <button
-                                    v-if="editingReportId !== report.id"
-                                    @click="openReview(report)"
-                                    class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 dark:text-indigo-400"
-                                >
-                                    ✏️ Review / Add Feedback
-                                </button>
-                                <form
-                                    v-else
-                                    @submit.prevent="
-                                        submitReportReview(report.id)
+                                    @click="generateReportAi(report.id)"
+                                    :disabled="
+                                        generatingReportAi === report.id
                                     "
-                                    class="w-full space-y-2 pt-2"
+                                    class="text-xs font-semibold text-purple-600 hover:text-purple-800 disabled:opacity-50 dark:text-purple-400"
                                 >
-                                    <div class="grid grid-cols-2 gap-2">
-                                        <div>
-                                            <label
-                                                class="block text-[10px] font-bold text-gray-500 uppercase"
-                                                >Status</label
-                                            >
-                                            <select
-                                                v-model="reviewForm.status"
-                                                class="w-full rounded border-gray-300 text-xs text-white dark:border-gray-700 dark:bg-gray-800"
-                                            >
-                                                <option value="submitted">
-                                                    Submitted
-                                                </option>
-                                                <option value="under_review">
-                                                    Under Review
-                                                </option>
-                                                <option value="approved">
-                                                    Approved
-                                                </option>
-                                                <option
-                                                    value="revision_requested"
-                                                >
-                                                    Revision Requested
-                                                </option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label
-                                                class="block text-[10px] font-bold text-gray-500 uppercase"
-                                                >Admin Feedback</label
-                                            >
-                                            <input
-                                                v-model="reviewForm.feedback"
-                                                type="text"
-                                                placeholder="Comments..."
-                                                class="w-full rounded border-gray-300 text-xs text-white dark:border-gray-700 dark:bg-gray-800"
-                                            />
-                                        </div>
-                                    </div>
-                                    <div class="flex justify-end space-x-2">
-                                        <button
-                                            type="button"
-                                            @click="editingReportId = null"
-                                            class="text-xs text-gray-500"
-                                        >
-                                            Cancel
-                                        </button>
-                                        <button
-                                            type="submit"
-                                            class="rounded bg-indigo-600 px-2 py-1 text-xs font-semibold text-white"
-                                        >
-                                            Save Review
-                                        </button>
-                                    </div>
-                                </form>
+                                    {{
+                                        generatingReportAi === report.id
+                                            ? 'Generating AI...'
+                                            : '🤖 Generate AI Summary'
+                                    }}
+                                </button>
+
+                                <div>
+                                    <button
+                                        v-if="editingReportId !== report.id"
+                                        @click="openReview(report)"
+                                        class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 dark:text-indigo-400"
+                                    >
+                                        ✏️ Review / Feedback
+                                    </button>
+                                </div>
                             </div>
+
+                            <form
+                                v-if="editingReportId === report.id"
+                                @submit.prevent="
+                                    submitReportReview(report.id)
+                                "
+                                class="w-full space-y-2 border-t border-gray-200 pt-3 dark:border-gray-800"
+                            >
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label
+                                            class="block text-[10px] font-bold uppercase text-gray-500"
+                                            >Status</label
+                                        >
+                                        <select
+                                            v-model="reviewForm.status"
+                                            class="w-full rounded border-gray-300 text-xs dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                                        >
+                                            <option value="submitted">
+                                                Submitted
+                                            </option>
+                                            <option value="under_review">
+                                                Under Review
+                                            </option>
+                                            <option value="approved">
+                                                Approved
+                                            </option>
+                                            <option value="revision_requested">
+                                                Revision Requested
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label
+                                            class="block text-[10px] font-bold uppercase text-gray-500"
+                                            >Admin Feedback</label
+                                        >
+                                        <input
+                                            v-model="reviewForm.feedback"
+                                            type="text"
+                                            placeholder="Comments..."
+                                            class="w-full rounded border-gray-300 text-xs dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                                        />
+                                    </div>
+                                </div>
+                                <div class="flex justify-end space-x-2">
+                                    <button
+                                        type="button"
+                                        @click="editingReportId = null"
+                                        class="text-xs text-gray-500"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        class="rounded bg-indigo-600 px-2 py-1 text-xs font-semibold text-white"
+                                    >
+                                        Save Review
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                     <p v-else class="text-sm text-gray-500 dark:text-gray-400">
@@ -388,9 +419,8 @@ const formatStatus = (status: string) => {
                 </div>
             </div>
 
-            <!-- Right 1 Col: Assign Project & Submit Report Forms -->
             <div class="space-y-6">
-                <!-- Assign Project Form Card -->
+                <!-- Assign Project Form -->
                 <div
                     class="space-y-4 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900"
                 >
@@ -481,7 +511,7 @@ const formatStatus = (status: string) => {
                     </form>
                 </div>
 
-                <!-- Submit Weekly Report Form Card -->
+                <!-- Submit Weekly Report Form -->
                 <div
                     class="space-y-4 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900"
                 >

@@ -1,24 +1,14 @@
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { h } from 'vue';
-import AppLayout from '@/layouts/AppLayout.vue';
-import { index, edit, update } from '@/routes/internships';
+import { index, update } from '@/routes/internships';
 
 defineOptions({
-    layout: (page: any) =>
-        h(
-            AppLayout,
-            {
-                breadcrumbs: [
-                    { title: 'Internships Portal', href: index.url() },
-                    {
-                        title: `Edit ${page.props.internship.name}`,
-                        href: edit.url(page.props.internship.id),
-                    },
-                ],
-            },
-            () => page,
-        ),
+    layout: {
+        breadcrumbs: [
+            { title: 'Internships Portal', href: index.url() },
+            { title: 'Edit Batch', href: '#' },
+        ],
+    },
 });
 
 interface Service {
@@ -28,12 +18,12 @@ interface Service {
 
 interface Internship {
     id: number;
-    service_id: number;
     name: string;
     batch_no: string;
     start_date: string;
     end_date: string;
     status: string;
+    service_id: number;
 }
 
 const props = defineProps<{
@@ -41,19 +31,10 @@ const props = defineProps<{
     services: Service[];
 }>();
 
-interface InternshipForm {
-    service_id: number;
-    name: string;
-    batch_no: string;
-    start_date: string;
-    end_date: string;
-    status: string;
-}
-
-const form = useForm<InternshipForm>({
-    service_id: props.internship.service_id,
+const form = useForm({
     name: props.internship.name,
     batch_no: props.internship.batch_no,
+    service_id: props.internship.service_id,
     start_date: props.internship.start_date,
     end_date: props.internship.end_date,
     status: props.internship.status,
@@ -89,7 +70,7 @@ const submit = () => {
                 <div class="md:col-span-2">
                     <label
                         class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                        >Internship Batch Title *</label
+                        >Program / Batch Name *</label
                     >
                     <input
                         v-model="form.name"
@@ -102,12 +83,13 @@ const submit = () => {
                 <div>
                     <label
                         class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                        >Batch Number (Free Text) *</label
+                        >Batch Number (Free text code) *</label
                     >
                     <input
                         v-model="form.batch_no"
                         type="text"
                         required
+                        placeholder="e.g. BATCH-01, WEB-2026-A"
                         class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                     />
                 </div>
@@ -115,13 +97,14 @@ const submit = () => {
                 <div>
                     <label
                         class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                        >Service Track *</label
+                        >Track / Service Category *</label
                     >
                     <select
                         v-model="form.service_id"
                         required
                         class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                     >
+                        <option value="" disabled>-- Select Track --</option>
                         <option
                             v-for="service in services"
                             :key="service.id"
@@ -168,7 +151,7 @@ const submit = () => {
                         class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                     >
                         <option value="upcoming">Upcoming</option>
-                        <option value="active">Active (Ongoing)</option>
+                        <option value="active">Active</option>
                         <option value="completed">Completed</option>
                     </select>
                 </div>

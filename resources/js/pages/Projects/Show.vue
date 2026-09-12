@@ -1,24 +1,15 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
-import { h } from 'vue';
-import AppLayout from '@/layouts/AppLayout.vue';
-import { index, show, edit } from '@/routes/projects';
+import { Head, Link, router } from '@inertiajs/vue3';
+import { ref } from 'vue';
+import { index, edit, aiSummary } from '@/routes/projects';
 
 defineOptions({
-    layout: (page: any) =>
-        h(
-            AppLayout,
-            {
-                breadcrumbs: [
-                    { title: 'Projects Portal', href: index.url() },
-                    {
-                        title: page.props.project.title,
-                        href: show.url(page.props.project.id),
-                    },
-                ],
-            },
-            () => page,
-        ),
+    layout: {
+        breadcrumbs: [
+            { title: 'Projects Portal', href: index.url() },
+            { title: 'Project Details', href: '#' },
+        ],
+    },
 });
 
 interface Client {
@@ -40,6 +31,7 @@ interface Project {
     progress: number;
     start_date: string | null;
     deadline: string | null;
+    ai_status_summary: string | null;
     client: Client | null;
     service: Service | null;
     created_at: string;
@@ -48,6 +40,21 @@ interface Project {
 const props = defineProps<{
     project: Project;
 }>();
+
+const generatingSummary = ref(false);
+
+const generateSummary = () => {
+    generatingSummary.value = true;
+    router.post(
+        aiSummary.url(props.project.id),
+        {},
+        {
+            onFinish: () => {
+                generatingSummary.value = false;
+            },
+        },
+    );
+};
 
 const formatStatus = (status: string) => {
     return status.replace('_', ' ').replace(/\b\w/g, (l) => l.toUpperCase());
@@ -95,12 +102,11 @@ const formatStatus = (status: string) => {
             </div>
         </div>
 
-        <!-- Overview Grid -->
         <div class="grid grid-cols-1 gap-6 md:grid-cols-4">
             <div
                 class="space-y-2 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900"
             >
-                <div class="text-xs font-semibold text-gray-500 uppercase">
+                <div class="text-xs font-semibold uppercase text-gray-500">
                     Service Category
                 </div>
                 <div class="font-medium text-gray-900 dark:text-white">
@@ -111,7 +117,7 @@ const formatStatus = (status: string) => {
             <div
                 class="space-y-2 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900"
             >
-                <div class="text-xs font-semibold text-gray-500 uppercase">
+                <div class="text-xs font-semibold uppercase text-gray-500">
                     Status
                 </div>
                 <div class="font-semibold text-indigo-600 dark:text-indigo-400">
@@ -122,7 +128,7 @@ const formatStatus = (status: string) => {
             <div
                 class="space-y-2 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900"
             >
-                <div class="text-xs font-semibold text-gray-500 uppercase">
+                <div class="text-xs font-semibold uppercase text-gray-500">
                     Start Date
                 </div>
                 <div class="font-medium text-gray-900 dark:text-white">
@@ -133,7 +139,7 @@ const formatStatus = (status: string) => {
             <div
                 class="space-y-2 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900"
             >
-                <div class="text-xs font-semibold text-gray-500 uppercase">
+                <div class="text-xs font-semibold uppercase text-gray-500">
                     Deadline
                 </div>
                 <div class="font-medium text-gray-900 dark:text-white">
@@ -142,7 +148,6 @@ const formatStatus = (status: string) => {
             </div>
         </div>
 
-        <!-- Progress Bar Card -->
         <div
             class="space-y-3 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900"
         >
@@ -151,7 +156,7 @@ const formatStatus = (status: string) => {
                     Overall Completion Progress
                 </h2>
                 <span
-                    class="text-xl font-extrabold text-indigo-600 dark:text-indigo-400"
+                    class="text-2xl font-extrabold text-indigo-600 dark:text-indigo-400"
                     >{{ project.progress }}%</span
                 >
             </div>
@@ -165,7 +170,47 @@ const formatStatus = (status: string) => {
             </div>
         </div>
 
-        <!-- Description -->
+        <div
+            class="space-y-3 rounded-xl border border-purple-200 bg-purple-50/50 p-6 dark:border-purple-900/50 dark:bg-purple-950/20"
+        >
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <span class="text-lg">🤖</span>
+                    <h2
+                        class="text-md font-bold text-purple-950 dark:text-purple-200"
+                    >
+                        AI Executive Health Summary
+                    </h2>
+                </div>
+                <button
+                    @click="generateSummary"
+                    :disabled="generatingSummary"
+                    class="rounded-lg bg-purple-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-purple-700 disabled:opacity-50"
+                >
+                    {{
+                        generatingSummary
+                            ? 'Generating Summary...'
+                            : project.ai_status_summary
+                              ? 'Regenerate'
+                              : 'Generate AI Summary'
+                    }}
+                </button>
+            </div>
+            <div
+                v-if="project.ai_status_summary"
+                class="text-sm leading-relaxed text-purple-900 dark:text-purple-300"
+            >
+                {{ project.ai_status_summary }}
+            </div>
+            <div
+                v-else
+                class="text-xs text-purple-600/70 dark:text-purple-400/70"
+            >
+                Click "Generate AI Summary" to generate a quick executive status
+                summary for this project.
+            </div>
+        </div>
+
         <div
             v-if="project.description"
             class="space-y-2 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900"
@@ -174,7 +219,7 @@ const formatStatus = (status: string) => {
                 Description / Scope
             </h2>
             <p
-                class="text-sm whitespace-pre-line text-gray-700 dark:text-gray-300"
+                class="whitespace-pre-line text-sm text-gray-700 dark:text-gray-300"
             >
                 {{ project.description }}
             </p>

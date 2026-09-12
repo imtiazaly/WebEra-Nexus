@@ -1,24 +1,15 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
-import { h } from 'vue';
-import AppLayout from '@/layouts/AppLayout.vue';
-import { index, show, edit } from '@/routes/clients';
+import { Head, Link, router } from '@inertiajs/vue3';
+import { ref } from 'vue';
+import { index, edit, aiBrief } from '@/routes/clients';
 
 defineOptions({
-    layout: (page: any) =>
-        h(
-            AppLayout,
-            {
-                breadcrumbs: [
-                    { title: 'Clients & Leads', href: index.url() },
-                    {
-                        title: page.props.client.name,
-                        href: show.url(page.props.client.id),
-                    },
-                ],
-            },
-            () => page,
-        ),
+    layout: {
+        breadcrumbs: [
+            { title: 'Clients & Leads', href: index.url() },
+            { title: 'Client Details', href: '#' },
+        ],
+    },
 });
 
 interface Service {
@@ -45,6 +36,7 @@ interface Client {
     company_name: string | null;
     status: string;
     notes: string | null;
+    ai_brief: string | null;
     services: Service[];
     projects?: Project[];
     created_at: string;
@@ -53,6 +45,21 @@ interface Client {
 const props = defineProps<{
     client: Client;
 }>();
+
+const generatingBrief = ref(false);
+
+const generateBrief = () => {
+    generatingBrief.value = true;
+    router.post(
+        aiBrief.url(props.client.id),
+        {},
+        {
+            onFinish: () => {
+                generatingBrief.value = false;
+            },
+        },
+    );
+};
 
 const formatStatus = (status: string) => {
     return status.replace('_', ' ').replace(/\b\w/g, (l) => l.toUpperCase());
@@ -91,7 +98,7 @@ const formatStatus = (status: string) => {
             <div
                 class="space-y-2 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900"
             >
-                <div class="text-xs font-semibold text-gray-500 uppercase">
+                <div class="text-xs font-semibold uppercase text-gray-500">
                     Contact Email
                 </div>
                 <div class="font-medium text-gray-900 dark:text-white">
@@ -101,7 +108,7 @@ const formatStatus = (status: string) => {
             <div
                 class="space-y-2 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900"
             >
-                <div class="text-xs font-semibold text-gray-500 uppercase">
+                <div class="text-xs font-semibold uppercase text-gray-500">
                     Phone / WhatsApp
                 </div>
                 <div class="font-medium text-gray-900 dark:text-white">
@@ -111,12 +118,54 @@ const formatStatus = (status: string) => {
             <div
                 class="space-y-2 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900"
             >
-                <div class="text-xs font-semibold text-gray-500 uppercase">
+                <div class="text-xs font-semibold uppercase text-gray-500">
                     Current Status
                 </div>
                 <div class="font-semibold text-indigo-600 dark:text-indigo-400">
                     {{ formatStatus(client.status) }}
                 </div>
+            </div>
+        </div>
+
+        <!-- AI Strategic Lead Brief Card -->
+        <div
+            class="space-y-3 rounded-xl border border-purple-200 bg-purple-50/50 p-6 dark:border-purple-900/50 dark:bg-purple-950/20"
+        >
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <span class="text-lg">🤖</span>
+                    <h2
+                        class="text-md font-bold text-purple-950 dark:text-purple-200"
+                    >
+                        AI Strategic Lead Brief
+                    </h2>
+                </div>
+                <button
+                    @click="generateBrief"
+                    :disabled="generatingBrief"
+                    class="rounded-lg bg-purple-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-purple-700 disabled:opacity-50"
+                >
+                    {{
+                        generatingBrief
+                            ? 'Generating AI Brief...'
+                            : client.ai_brief
+                              ? 'Regenerate Brief'
+                              : 'Generate AI Brief'
+                    }}
+                </button>
+            </div>
+            <div
+                v-if="client.ai_brief"
+                class="text-sm leading-relaxed text-purple-900 dark:text-purple-300"
+            >
+                {{ client.ai_brief }}
+            </div>
+            <div
+                v-else
+                class="text-xs text-purple-600/70 dark:text-purple-400/70"
+            >
+                No AI brief generated yet. Click "Generate AI Brief" to create
+                a strategic executive summary for this lead.
             </div>
         </div>
 
@@ -176,7 +225,7 @@ const formatStatus = (status: string) => {
                 Communication Notes
             </h2>
             <p
-                class="text-sm whitespace-pre-line text-gray-700 dark:text-gray-300"
+                class="whitespace-pre-line text-sm text-gray-700 dark:text-gray-300"
             >
                 {{ client.notes }}
             </p>

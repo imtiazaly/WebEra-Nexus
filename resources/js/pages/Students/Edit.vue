@@ -1,24 +1,14 @@
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { h } from 'vue';
-import AppLayout from '@/layouts/AppLayout.vue';
-import { index, edit, update } from '@/routes/students';
+import { index, update } from '@/routes/students';
 
 defineOptions({
-    layout: (page: any) =>
-        h(
-            AppLayout,
-            {
-                breadcrumbs: [
-                    { title: 'Students Portal', href: index.url() },
-                    {
-                        title: `Edit ${page.props.student.name}`,
-                        href: edit.url(page.props.student.id),
-                    },
-                ],
-            },
-            () => page,
-        ),
+    layout: {
+        breadcrumbs: [
+            { title: 'Students Portal', href: index.url() },
+            { title: 'Edit Student', href: '#' },
+        ],
+    },
 });
 
 interface Internship {
@@ -29,12 +19,12 @@ interface Internship {
 
 interface Student {
     id: number;
-    internship_id: number;
     name: string;
     email: string;
     phone: string | null;
     status: string;
     overall_progress: number;
+    internship_id: number;
 }
 
 const props = defineProps<{
@@ -42,29 +32,17 @@ const props = defineProps<{
     internships: Internship[];
 }>();
 
-interface StudentForm {
-    internship_id: number;
-    name: string;
-    email: string;
-    phone: string;
-    status: string;
-    completion_progress: number;
-}
-
-const form = useForm<StudentForm>({
-    internship_id: props.student.internship_id,
+const form = useForm({
     name: props.student.name,
     email: props.student.email,
     phone: props.student.phone || '',
+    internship_id: props.student.internship_id,
     status: props.student.status,
-    completion_progress: props.student.overall_progress,
+    overall_progress: props.student.overall_progress,
 });
 
 const submit = () => {
-    form.transform((data) => ({
-        ...data,
-        overall_progress: data.completion_progress,
-    })).put(update.url(props.student.id));
+    form.put(update.url(props.student.id));
 };
 </script>
 
@@ -76,7 +54,7 @@ const submit = () => {
             <h1
                 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
             >
-                Edit Student Record
+                Edit Student / Intern Record
             </h1>
             <Link
                 :href="index.url()"
@@ -138,6 +116,7 @@ const submit = () => {
                         required
                         class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                     >
+                        <option value="" disabled>-- Select Batch --</option>
                         <option
                             v-for="batch in internships"
                             :key="batch.id"
@@ -169,19 +148,13 @@ const submit = () => {
                         class="block text-sm font-medium text-gray-700 dark:text-gray-300"
                         >Overall Progress (%)</label
                     >
-                    <div class="mt-2 flex items-center space-x-4">
-                        <input
-                            v-model="form.completion_progress"
-                            type="range"
-                            min="0"
-                            max="100"
-                            class="w-full accent-indigo-600"
-                        />
-                        <span
-                            class="w-12 text-right font-bold text-indigo-600 dark:text-indigo-400"
-                            >{{ form.completion_progress }}%</span
-                        >
-                    </div>
+                    <input
+                        v-model="form.overall_progress"
+                        type="number"
+                        min="0"
+                        max="100"
+                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                    />
                 </div>
             </div>
 
