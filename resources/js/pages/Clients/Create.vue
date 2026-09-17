@@ -1,6 +1,27 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { index, create, store } from '@/routes/clients';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import InputError from '@/components/InputError.vue';
+import {
+    ArrowLeft,
+    User,
+    Mail,
+    Phone,
+    Building2,
+    Briefcase,
+    DollarSign,
+    FileText,
+    CheckCircle2,
+    Loader2,
+    Sparkles,
+    UserPlus,
+} from '@lucide/vue';
 
 defineOptions({
     layout: {
@@ -10,7 +31,6 @@ defineOptions({
         ],
     },
 });
-import { ref } from 'vue';
 
 interface Service {
     id: number;
@@ -67,200 +87,264 @@ const submit = () => {
 </script>
 
 <template>
-    <Head title="Create Client / Lead" />
+    <Head title="Add New Client / Lead" />
 
-    <div class="mx-auto max-w-4xl space-y-6 p-6">
-        <div class="flex items-center justify-between">
-            <h1
-                class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
-            >
-                Add New Client / Lead
-            </h1>
-            <Link
-                :href="index.url()"
-                class="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-                >← Back to List</Link
-            >
-        </div>
-
-        <form
-            @submit.prevent="submit"
-            class="space-y-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900"
-        >
-            <!-- Basic Info -->
-            <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+    <div class="w-full space-y-6 p-4 sm:p-6">
+        <form @submit.prevent="submit" class="space-y-6">
+            <!-- Back Navigation & Header Action Bar -->
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200/80 pb-5 dark:border-slate-800">
                 <div>
-                    <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                        >Name *</label
-                    >
-                    <input
-                        v-model="form.name"
-                        type="text"
-                        required
-                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                    />
-                    <span
-                        v-if="form.errors.name"
-                        class="mt-1 block text-xs text-rose-500"
-                        >{{ form.errors.name }}</span
-                    >
-                </div>
-
-                <div>
-                    <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                        >Email Address *</label
-                    >
-                    <input
-                        v-model="form.email"
-                        type="email"
-                        required
-                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                    />
-                    <span
-                        v-if="form.errors.email"
-                        class="mt-1 block text-xs text-rose-500"
-                        >{{ form.errors.email }}</span
-                    >
-                </div>
-
-                <div>
-                    <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                        >Phone / WhatsApp</label
-                    >
-                    <input
-                        v-model="form.phone"
-                        type="text"
-                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                    />
-                </div>
-
-                <div>
-                    <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                        >Company Name</label
-                    >
-                    <input
-                        v-model="form.company_name"
-                        type="text"
-                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                    />
-                </div>
-
-                <div>
-                    <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                        >Initial Status *</label
-                    >
-                    <select
-                        v-model="form.status"
-                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                    >
-                        <option value="new_lead">New Lead</option>
-                        <option value="contacted">Contacted</option>
-                        <option value="converted">Converted Client</option>
-                        <option value="lost">Lost</option>
-                    </select>
-                </div>
-
-                <div class="md:col-span-2">
-                    <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                        >Notes / Communication History</label
-                    >
-                    <textarea
-                        v-model="form.notes"
-                        rows="3"
-                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                    ></textarea>
-                </div>
-            </div>
-
-            <!-- Services Requested -->
-            <div
-                class="space-y-4 border-t border-gray-200 pt-6 dark:border-gray-800"
-            >
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
-                    Services Requested
-                </h2>
-                <div class="grid grid-cols-1 gap-4">
-                    <div
-                        v-for="service in services"
-                        :key="service.id"
-                        class="space-y-3 rounded-lg border border-gray-200 bg-gray-50/50 p-4 dark:border-gray-800 dark:bg-gray-800/30"
-                    >
-                        <label
-                            class="flex cursor-pointer items-center space-x-3"
-                        >
-                            <input
-                                type="checkbox"
-                                :checked="isServiceSelected(service.id)"
-                                @change="toggleService(service.id)"
-                                class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:bg-gray-800"
-                            />
-                            <span
-                                class="font-medium text-gray-900 dark:text-white"
-                                >{{ service.name }}</span
-                            >
-                        </label>
-
-                        <div
-                            v-if="isServiceSelected(service.id)"
-                            class="grid grid-cols-1 gap-4 pt-2 pl-7 md:grid-cols-2"
-                        >
-                            <div>
-                                <label
-                                    class="block text-xs font-medium text-gray-600 dark:text-gray-400"
-                                    >Specific Requirements</label
-                                >
-                                <textarea
-                                    v-model="
-                                        getServiceSelection(service.id)!
-                                            .requirements
-                                    "
-                                    rows="2"
-                                    placeholder="Describe client requirements..."
-                                    class="mt-1 block w-full rounded-md border-gray-300 text-xs text-white dark:border-gray-700 dark:bg-gray-800"
-                                ></textarea>
-                            </div>
-                            <div>
-                                <label
-                                    class="block text-xs font-medium text-gray-600 dark:text-gray-400"
-                                    >Estimated Budget ($)</label
-                                >
-                                <input
-                                    v-model="
-                                        getServiceSelection(service.id)!
-                                            .estimated_budget
-                                    "
-                                    type="number"
-                                    step="0.01"
-                                    placeholder="e.g. 500"
-                                    class="mt-1 block w-full rounded-md border-gray-300 text-xs text-white dark:border-gray-700 dark:bg-gray-800"
-                                />
-                            </div>
-                        </div>
+                    <Button variant="ghost" size="sm" as-child class="-ml-2 mb-2 text-slate-500 hover:text-slate-900 dark:hover:text-slate-100">
+                        <Link :href="index.url()">
+                            <ArrowLeft class="mr-1.5 h-4 w-4" /> Back to Clients List
+                        </Link>
+                    </Button>
+                    <div class="flex items-center gap-2.5">
+                        <h1 class="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">
+                            Add New Client / Lead
+                        </h1>
+                        <Badge variant="outline" class="rounded-full border-indigo-200 bg-indigo-50/60 px-2.5 py-0.5 text-xs font-semibold text-indigo-700 dark:border-indigo-900 dark:bg-indigo-950/60 dark:text-indigo-300">
+                            <Sparkles class="mr-1 h-3 w-3 text-indigo-500" /> New Entry
+                        </Badge>
                     </div>
+                    <p class="mt-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                        Fill in client contact details, company profile, and allocate requested services.
+                    </p>
+                </div>
+
+                <!-- Single Primary Top Action Bar -->
+                <div class="flex items-center gap-3">
+                    <Button variant="outline" type="button" as-child class="h-10 text-xs">
+                        <Link :href="index.url()">Cancel</Link>
+                    </Button>
+                    <Button
+                        type="submit"
+                        :disabled="form.processing"
+                        class="h-10 bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm font-semibold px-6 text-xs"
+                    >
+                        <Loader2 v-if="form.processing" class="mr-2 h-4 w-4 animate-spin" />
+                        <span>{{ form.processing ? 'Saving Client...' : 'Save Client / Lead' }}</span>
+                    </Button>
                 </div>
             </div>
 
-            <div
-                class="flex justify-end space-x-3 border-t border-gray-200 pt-6 dark:border-gray-800"
-            >
-                <Link
-                    :href="index.url()"
-                    class="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300"
-                    >Cancel</Link
-                >
-                <button
-                    type="submit"
-                    :disabled="form.processing"
-                    class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                >
-                    Save Client
-                </button>
+            <!-- 2-Column Main Form Body -->
+            <div class="grid grid-cols-1 gap-6 lg:grid-cols-12">
+                <!-- Left Column (7 cols): Client Profile & Contact Info -->
+                <div class="lg:col-span-7">
+                    <Card class="h-full border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+                        <CardHeader class="border-b border-slate-200/80 pb-4 dark:border-slate-800">
+                            <div class="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
+                                <UserPlus class="h-5 w-5" />
+                                <CardTitle class="text-base font-bold text-slate-900 dark:text-slate-100">
+                                    Client Profile & Contact Information
+                                </CardTitle>
+                            </div>
+                            <CardDescription class="text-xs text-slate-500">
+                                Enter personal and company background details for record keeping.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent class="p-6 space-y-5">
+                            <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+                                <!-- Name Field -->
+                                <div class="space-y-1.5">
+                                    <Label for="client-name" class="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                        Full Name <span class="text-rose-500">*</span>
+                                    </Label>
+                                    <div class="relative">
+                                        <User class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                                        <Input
+                                            id="client-name"
+                                            v-model="form.name"
+                                            type="text"
+                                            placeholder="e.g. John Doe"
+                                            required
+                                            class="pl-9 h-10 text-xs border-slate-200 focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-950"
+                                        />
+                                    </div>
+                                    <InputError :message="form.errors.name" />
+                                </div>
+
+                                <!-- Email Field -->
+                                <div class="space-y-1.5">
+                                    <Label for="client-email" class="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                        Email Address <span class="text-rose-500">*</span>
+                                    </Label>
+                                    <div class="relative">
+                                        <Mail class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                                        <Input
+                                            id="client-email"
+                                            v-model="form.email"
+                                            type="email"
+                                            placeholder="e.g. john@example.com"
+                                            required
+                                            class="pl-9 h-10 text-xs border-slate-200 focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-950"
+                                        />
+                                    </div>
+                                    <InputError :message="form.errors.email" />
+                                </div>
+
+                                <!-- Phone Field -->
+                                <div class="space-y-1.5">
+                                    <Label for="client-phone" class="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                        Phone / WhatsApp Number
+                                    </Label>
+                                    <div class="relative">
+                                        <Phone class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                                        <Input
+                                            id="client-phone"
+                                            v-model="form.phone"
+                                            type="text"
+                                            placeholder="e.g. +92 300 1234567"
+                                            class="pl-9 h-10 text-xs border-slate-200 focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-950"
+                                        />
+                                    </div>
+                                    <InputError :message="form.errors.phone" />
+                                </div>
+
+                                <!-- Company Name Field -->
+                                <div class="space-y-1.5">
+                                    <Label for="client-company" class="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                        Company / Organization
+                                    </Label>
+                                    <div class="relative">
+                                        <Building2 class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                                        <Input
+                                            id="client-company"
+                                            v-model="form.company_name"
+                                            type="text"
+                                            placeholder="e.g. Acme Software Corp."
+                                            class="pl-9 h-10 text-xs border-slate-200 focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-950"
+                                        />
+                                    </div>
+                                    <InputError :message="form.errors.company_name" />
+                                </div>
+
+                                <!-- Initial Status Field -->
+                                <div class="space-y-1.5 md:col-span-2">
+                                    <Label for="client-status" class="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                        Initial Lead Status <span class="text-rose-500">*</span>
+                                    </Label>
+                                    <select
+                                        id="client-status"
+                                        v-model="form.status"
+                                        class="h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-xs text-slate-900 shadow-xs focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
+                                    >
+                                        <option value="new_lead">🔵 New Lead (Initial Inquiry)</option>
+                                        <option value="contacted">🟡 Contacted (In Discussion)</option>
+                                        <option value="converted">🟢 Converted Client (Active Project)</option>
+                                        <option value="lost">🔴 Lost (Closed / Inactive)</option>
+                                    </select>
+                                    <InputError :message="form.errors.status" />
+                                </div>
+
+                                <!-- Notes Field -->
+                                <div class="space-y-1.5 md:col-span-2">
+                                    <Label for="client-notes" class="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                        Notes & Communication History
+                                    </Label>
+                                    <textarea
+                                        id="client-notes"
+                                        v-model="form.notes"
+                                        rows="4"
+                                        placeholder="Add initial meeting notes, client expectations, or background context..."
+                                        class="w-full rounded-md border border-slate-200 p-3 text-xs text-slate-900 shadow-xs focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
+                                    ></textarea>
+                                    <InputError :message="form.errors.notes" />
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                <!-- Right Column (5 cols): Services Selection Card -->
+                <div class="lg:col-span-5">
+                    <Card class="h-full border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+                        <CardHeader class="border-b border-slate-200/80 pb-4 dark:border-slate-800">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
+                                    <Briefcase class="h-5 w-5" />
+                                    <CardTitle class="text-base font-bold text-slate-900 dark:text-slate-100">
+                                        Services Requested
+                                    </CardTitle>
+                                </div>
+                                <Badge variant="secondary" class="text-xs font-semibold">
+                                    {{ selectedServices.length }} Selected
+                                </Badge>
+                            </div>
+                            <CardDescription class="text-xs text-slate-500">
+                                Select services requested and define budget/requirements per track.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent class="p-6">
+                            <div v-if="!services || services.length === 0" class="py-12 text-center text-xs text-slate-400">
+                                No active services found in database.
+                            </div>
+                            <div v-else class="space-y-4">
+                                <div
+                                    v-for="service in services"
+                                    :key="service.id"
+                                    :class="[
+                                        'rounded-xl border transition-all duration-200 p-4 space-y-3',
+                                        isServiceSelected(service.id)
+                                            ? 'border-indigo-500 bg-indigo-50/30 dark:border-indigo-600 dark:bg-indigo-950/20 shadow-xs'
+                                            : 'border-slate-200/80 bg-slate-50/40 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-800/30 dark:hover:bg-slate-800/50'
+                                    ]"
+                                >
+                                    <label class="flex cursor-pointer items-center justify-between">
+                                        <div class="flex items-center gap-3">
+                                            <input
+                                                type="checkbox"
+                                                :checked="isServiceSelected(service.id)"
+                                                @change="toggleService(service.id)"
+                                                class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900"
+                                            />
+                                            <span class="text-sm font-bold text-slate-900 dark:text-slate-100">
+                                                {{ service.name }}
+                                            </span>
+                                        </div>
+                                        <Badge v-if="isServiceSelected(service.id)" variant="default" class="bg-indigo-600 text-[10px]">
+                                            <CheckCircle2 class="mr-1 h-3 w-3" /> Selected
+                                        </Badge>
+                                    </label>
+
+                                    <!-- Requirement & Budget Details (Shown when selected) -->
+                                    <div
+                                        v-if="isServiceSelected(service.id)"
+                                        class="space-y-3 pt-3 border-t border-indigo-200/60 dark:border-indigo-900/40"
+                                    >
+                                        <div class="space-y-1.5">
+                                            <Label class="text-[11px] font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1">
+                                                <FileText class="h-3.5 w-3.5 text-slate-400" /> Requirements
+                                            </Label>
+                                            <textarea
+                                                v-model="getServiceSelection(service.id)!.requirements"
+                                                rows="2"
+                                                placeholder="Detail client requirements..."
+                                                class="w-full rounded-md border border-slate-200 p-2 text-xs text-slate-900 shadow-xs focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
+                                            ></textarea>
+                                        </div>
+                                        <div class="space-y-1.5">
+                                            <Label class="text-[11px] font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1">
+                                                <DollarSign class="h-3.5 w-3.5 text-slate-400" /> Estimated Budget ($)
+                                            </Label>
+                                            <div class="relative">
+                                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">$</span>
+                                                <Input
+                                                    v-model="getServiceSelection(service.id)!.estimated_budget"
+                                                    type="number"
+                                                    step="0.01"
+                                                    placeholder="e.g. 1500.00"
+                                                    class="pl-7 h-9 text-xs border-slate-200 focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-950"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
         </form>
     </div>
