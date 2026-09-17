@@ -1,12 +1,44 @@
 <script setup lang="ts">
-import { Head, Link, router } from '@inertiajs/vue3';
-import { index, create, show, edit, destroy } from '@/routes/clients';
+import { ref, computed } from "vue";
+import { Head, Link, router } from "@inertiajs/vue3";
+import { index, create, show, edit, destroy } from "@/routes/clients";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+    Plus,
+    Eye,
+    Pencil,
+    Trash2,
+    Building2,
+    Mail,
+    Phone,
+    UserX,
+    Search,
+    MoreHorizontal,
+    Users,
+    UserPlus,
+    PhoneCall,
+    CheckCircle2,
+    ChevronLeft,
+    ChevronRight,
+} from "@lucide/vue";
 
 defineOptions({
     layout: {
         breadcrumbs: [
             {
-                title: 'Clients & Leads',
+                title: "Clients & Leads",
                 href: index.url(),
             },
         ],
@@ -34,172 +66,632 @@ interface PaginatedClients {
     links: any[];
     current_page: number;
     last_page: number;
+    total?: number;
+    from?: number;
+    to?: number;
 }
 
 const props = defineProps<{
     clients: PaginatedClients;
 }>();
 
-const getStatusBadge = (status: string) => {
+// Search & Filter State
+const searchQuery = ref("");
+const selectedStatus = ref<string>("all");
+
+// Helper for Initials
+const getInitials = (name: string) => {
+    if (!name) return "CL";
+    const parts = name.trim().split(" ");
+    if (parts.length >= 2) {
+        return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    }
+    return name.slice(0, 2).toUpperCase();
+};
+
+// Avatar background colors generator based on client name
+const getAvatarColor = (name: string) => {
+    const colors = [
+        "bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 border-indigo-200",
+        "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300 border-blue-200",
+        "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 border-emerald-200",
+        "bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300 border-purple-200",
+        "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300 border-amber-200",
+    ];
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+        hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return colors[Math.abs(hash) % colors.length];
+};
+
+// Metrics
+const totalClientsCount = computed(
+    () => props.clients.total || props.clients.data.length,
+);
+const newLeadsCount = computed(
+    () => props.clients.data.filter((c) => c.status === "new_lead").length,
+);
+const contactedCount = computed(
+    () => props.clients.data.filter((c) => c.status === "contacted").length,
+);
+const convertedCount = computed(
+    () => props.clients.data.filter((c) => c.status === "converted").length,
+);
+
+// Status Badge Config
+const getStatusConfig = (status: string) => {
     switch (status) {
-        case 'new_lead':
-            return 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 border-blue-200';
-        case 'contacted':
-            return 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 border-amber-200';
-        case 'converted':
-            return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 border-emerald-200';
-        case 'lost':
-            return 'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300 border-rose-200';
+        case "new_lead":
+            return {
+                label: "New Lead",
+                badgeClass:
+                    "bg-blue-50 text-blue-700 border-blue-200/80 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800/60",
+                dotClass: "bg-blue-500",
+            };
+        case "contacted":
+            return {
+                label: "Contacted",
+                badgeClass:
+                    "bg-amber-50 text-amber-700 border-amber-200/80 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/60",
+                dotClass: "bg-amber-500",
+            };
+        case "converted":
+            return {
+                label: "Converted",
+                badgeClass:
+                    "bg-emerald-50 text-emerald-700 border-emerald-200/80 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/60",
+                dotClass: "bg-emerald-500",
+            };
+        case "lost":
+            return {
+                label: "Lost Lead",
+                badgeClass:
+                    "bg-rose-50 text-rose-700 border-rose-200/80 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800/60",
+                dotClass: "bg-rose-500",
+            };
         default:
-            return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300 border-gray-200';
+            return {
+                label: status,
+                badgeClass:
+                    "bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-900 dark:text-slate-300 dark:border-slate-800",
+                dotClass: "bg-slate-400",
+            };
     }
 };
 
-const formatStatus = (status: string) => {
-    return status.replace('_', ' ').replace(/\b\w/g, (l) => l.toUpperCase());
-};
+// Filtered Clients List
+const filteredClients = computed(() => {
+    return props.clients.data.filter((client) => {
+        const matchesStatus =
+            selectedStatus.value === "all" ||
+            client.status === selectedStatus.value;
+        const query = searchQuery.value.toLowerCase().trim();
+        const matchesSearch =
+            !query ||
+            client.name.toLowerCase().includes(query) ||
+            client.email.toLowerCase().includes(query) ||
+            (client.company_name &&
+                client.company_name.toLowerCase().includes(query)) ||
+            (client.phone && client.phone.toLowerCase().includes(query));
+
+        return matchesStatus && matchesSearch;
+    });
+});
 
 const deleteClient = (id: number) => {
-    if (confirm('Are you sure you want to delete this client/lead?')) {
+    if (confirm("Are you sure you want to delete this client/lead?")) {
         router.delete(destroy.url(id));
     }
 };
 </script>
 
 <template>
-    <Head title="Clients & Leads" />
+    <Head title="Clients & Leads Portal" />
 
-    <div class="space-y-6 p-6">
-        <!-- Header -->
+    <div class="mx-auto max-w-7xl space-y-6 p-6">
+        <!-- Page Header -->
         <div
-            class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+            class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200/80 pb-5 dark:border-slate-800"
         >
             <div>
-                <h1
-                    class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
-                >
-                    Clients & Leads Portal
-                </h1>
-                <p class="text-sm text-gray-500 dark:text-gray-400">
-                    Manage potential leads, client conversions, and service requests.
+                <div class="flex items-center gap-2.5">
+                    <h1
+                        class="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50"
+                    >
+                        Clients & Leads Portal
+                    </h1>
+                    <Badge
+                        variant="outline"
+                        class="rounded-full px-2.5 py-0.5 text-xs font-semibold border-indigo-200 bg-indigo-50/50 text-indigo-700 dark:border-indigo-900 dark:bg-indigo-950/50 dark:text-indigo-300"
+                    >
+                        {{ totalClientsCount }} Total
+                    </Badge>
+                </div>
+                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                    Manage prospective clients, track lead statuses, and review
+                    service allocations.
                 </p>
             </div>
-            <div>
-                <Link
-                    :href="create.url()"
-                    class="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none"
+            <div class="flex items-center gap-3">
+                <Button
+                    as-child
+                    size="default"
+                    class="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm font-medium transition-all duration-150"
                 >
-                    + Add New Client / Lead
-                </Link>
+                    <Link :href="create.url()">
+                        <Plus class="mr-1.5 h-4 w-4" /> Add New Client
+                    </Link>
+                </Button>
             </div>
         </div>
 
-        <!-- Table Card -->
-        <div
-            class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900"
-        >
-            <div class="overflow-x-auto">
-                <table class="w-full border-collapse text-left">
-                    <thead>
-                        <tr
-                            class="border-b border-gray-200 bg-gray-50/50 text-xs font-semibold tracking-wider text-gray-500 uppercase dark:border-gray-800 dark:bg-gray-800/50 dark:text-gray-400"
-                        >
-                            <th class="px-4 py-3.5">Client Name</th>
-                            <th class="px-4 py-3.5">Contact</th>
-                            <th class="px-4 py-3.5">Company</th>
-                            <th class="px-4 py-3.5">Services Requested</th>
-                            <th class="px-4 py-3.5">Status</th>
-                            <th class="px-4 py-3.5 text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody
-                        class="divide-y divide-gray-200 text-sm text-gray-700 dark:divide-gray-800 dark:text-gray-300"
+        <!-- Metric Stat Cards -->
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div
+                class="flex items-center justify-between rounded-xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900"
+            >
+                <div class="space-y-0.5">
+                    <p
+                        class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400"
                     >
-                        <tr v-if="clients.data.length === 0">
-                            <td
-                                colspan="6"
-                                class="py-8 text-center text-gray-500 dark:text-gray-400"
-                            >
-                                No clients or leads found. Click "+ Add New Client" to get started.
-                            </td>
-                        </tr>
-                        <tr
-                            v-for="client in clients.data"
-                            :key="client.id"
-                            class="transition-colors hover:bg-gray-50/60 dark:hover:bg-gray-800/40"
-                        >
-                            <td
-                                class="px-4 py-4 font-medium text-gray-900 dark:text-white"
-                            >
-                                <Link
-                                    :href="show.url(client.id)"
-                                    class="text-indigo-600 hover:underline dark:text-indigo-400"
-                                >
-                                    {{ client.name }}
-                                </Link>
-                            </td>
-                            <td class="px-4 py-4">
-                                <div class="text-xs font-medium text-gray-900 dark:text-white">
-                                    {{ client.email }}
-                                </div>
-                                <div
-                                    v-if="client.phone"
-                                    class="text-xs text-gray-400"
-                                >
-                                    {{ client.phone }}
-                                </div>
-                            </td>
-                            <td class="px-4 py-4 text-xs text-gray-600 dark:text-gray-300">
-                                {{ client.company_name || 'Individual' }}
-                            </td>
-                            <td class="px-4 py-4">
-                                <div class="flex flex-wrap gap-1">
-                                    <span
-                                        v-for="service in client.services"
-                                        :key="service.id"
-                                        class="rounded bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-300"
-                                    >
-                                        {{ service.name }}
-                                    </span>
-                                    <span
-                                        v-if="!client.services || client.services.length === 0"
-                                        class="text-xs text-gray-400"
-                                        >-</span
-                                    >
-                                </div>
-                            </td>
-                            <td class="px-4 py-4">
-                                <span
-                                    :class="[
-                                        'rounded-full border px-2.5 py-1 text-xs font-semibold',
-                                        getStatusBadge(client.status),
-                                    ]"
-                                >
-                                    {{ formatStatus(client.status) }}
-                                </span>
-                            </td>
-                            <td class="space-x-2 px-4 py-4 text-right">
-                                <Link
-                                    :href="show.url(client.id)"
-                                    class="font-medium text-gray-600 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400"
-                                    >View</Link
-                                >
-                                <Link
-                                    :href="edit.url(client.id)"
-                                    class="font-medium text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300"
-                                    >Edit</Link
-                                >
-                                <button
-                                    @click="deleteClient(client.id)"
-                                    class="font-medium text-rose-600 hover:text-rose-900 dark:text-rose-400 dark:hover:text-rose-300"
-                                >
-                                    Delete
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                        Total Clients
+                    </p>
+                    <p
+                        class="text-2xl font-extrabold text-slate-900 dark:text-slate-50"
+                    >
+                        {{ totalClientsCount }}
+                    </p>
+                </div>
+                <div
+                    class="rounded-lg bg-slate-100 p-2.5 text-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                >
+                    <Users class="h-5 w-5" />
+                </div>
+            </div>
+
+            <div
+                class="flex items-center justify-between rounded-xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900"
+            >
+                <div class="space-y-0.5">
+                    <p
+                        class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400"
+                    >
+                        New Leads
+                    </p>
+                    <p
+                        class="text-2xl font-extrabold text-blue-600 dark:text-blue-400"
+                    >
+                        {{ newLeadsCount }}
+                    </p>
+                </div>
+                <div
+                    class="rounded-lg bg-blue-50 p-2.5 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400"
+                >
+                    <UserPlus class="h-5 w-5" />
+                </div>
+            </div>
+
+            <div
+                class="flex items-center justify-between rounded-xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900"
+            >
+                <div class="space-y-0.5">
+                    <p
+                        class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400"
+                    >
+                        Contacted
+                    </p>
+                    <p
+                        class="text-2xl font-extrabold text-amber-600 dark:text-amber-400"
+                    >
+                        {{ contactedCount }}
+                    </p>
+                </div>
+                <div
+                    class="rounded-lg bg-amber-50 p-2.5 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400"
+                >
+                    <PhoneCall class="h-5 w-5" />
+                </div>
+            </div>
+
+            <div
+                class="flex items-center justify-between rounded-xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900"
+            >
+                <div class="space-y-0.5">
+                    <p
+                        class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400"
+                    >
+                        Converted
+                    </p>
+                    <p
+                        class="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400"
+                    >
+                        {{ convertedCount }}
+                    </p>
+                </div>
+                <div
+                    class="rounded-lg bg-emerald-50 p-2.5 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400"
+                >
+                    <CheckCircle2 class="h-5 w-5" />
+                </div>
             </div>
         </div>
+
+        <!-- Filter & Search Bar + Table Card -->
+        <Card
+            class="overflow-hidden border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900"
+        >
+            <!-- Toolbar -->
+            <div
+                class="flex flex-col gap-3 border-b border-slate-200/80 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800"
+            >
+                <!-- Search Input -->
+                <div class="relative w-full sm:w-80">
+                    <Search
+                        class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+                    />
+                    <Input
+                        v-model="searchQuery"
+                        type="text"
+                        placeholder="Search by name, email, company..."
+                        class="pl-9 h-9 text-xs border-slate-200 bg-slate-50/50 focus:bg-white dark:border-slate-800 dark:bg-slate-800/40 dark:focus:bg-slate-900"
+                    />
+                </div>
+
+                <!-- Status Filter Tabs -->
+                <div
+                    class="flex flex-wrap items-center gap-1.5 rounded-lg bg-slate-100 p-1 dark:bg-slate-800/70 text-xs font-medium"
+                >
+                    <button
+                        @click="selectedStatus = 'all'"
+                        :class="[
+                            'rounded-md px-3 py-1.5 transition-all',
+                            selectedStatus === 'all'
+                                ? 'bg-white text-slate-900 shadow-xs font-semibold dark:bg-slate-900 dark:text-white'
+                                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
+                        ]"
+                    >
+                        All ({{ props.clients.data.length }})
+                    </button>
+                    <button
+                        @click="selectedStatus = 'new_lead'"
+                        :class="[
+                            'rounded-md px-3 py-1.5 transition-all',
+                            selectedStatus === 'new_lead'
+                                ? 'bg-white text-slate-900 shadow-xs font-semibold dark:bg-slate-900 dark:text-white'
+                                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
+                        ]"
+                    >
+                        New Leads
+                    </button>
+                    <button
+                        @click="selectedStatus = 'contacted'"
+                        :class="[
+                            'rounded-md px-3 py-1.5 transition-all',
+                            selectedStatus === 'contacted'
+                                ? 'bg-white text-slate-900 shadow-xs font-semibold dark:bg-slate-900 dark:text-white'
+                                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
+                        ]"
+                    >
+                        Contacted
+                    </button>
+                    <button
+                        @click="selectedStatus = 'converted'"
+                        :class="[
+                            'rounded-md px-3 py-1.5 transition-all',
+                            selectedStatus === 'converted'
+                                ? 'bg-white text-slate-900 shadow-xs font-semibold dark:bg-slate-900 dark:text-white'
+                                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
+                        ]"
+                    >
+                        Converted
+                    </button>
+                    <button
+                        @click="selectedStatus = 'lost'"
+                        :class="[
+                            'rounded-md px-3 py-1.5 transition-all',
+                            selectedStatus === 'lost'
+                                ? 'bg-white text-slate-900 shadow-xs font-semibold dark:bg-slate-900 dark:text-white'
+                                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
+                        ]"
+                    >
+                        Lost
+                    </button>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <CardContent class="p-0">
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse text-left">
+                        <thead>
+                            <tr
+                                class="border-b border-slate-200/80 bg-slate-50/70 text-[11px] font-bold tracking-wider text-slate-500 uppercase dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-400"
+                            >
+                                <th class="px-5 py-3.5">Client Information</th>
+                                <th class="px-5 py-3.5">Contact Details</th>
+                                <th class="px-5 py-3.5">
+                                    Company / Organization
+                                </th>
+                                <th class="px-5 py-3.5">Services Requested</th>
+                                <th class="px-5 py-3.5">Status</th>
+                                <th class="px-5 py-3.5 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody
+                            class="divide-y divide-slate-200/80 text-xs text-slate-700 dark:divide-slate-800 dark:text-slate-300"
+                        >
+                            <!-- Empty State -->
+                            <tr v-if="filteredClients.length === 0">
+                                <td colspan="6" class="py-16 text-center">
+                                    <div
+                                        class="mx-auto flex max-w-xs flex-col items-center justify-center space-y-3"
+                                    >
+                                        <div
+                                            class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400"
+                                        >
+                                            <UserX class="h-6 w-6" />
+                                        </div>
+                                        <div>
+                                            <p
+                                                class="text-sm font-bold text-slate-900 dark:text-slate-100"
+                                            >
+                                                No clients found
+                                            </p>
+                                            <p
+                                                class="text-xs text-slate-500 dark:text-slate-400 mt-0.5"
+                                            >
+                                                {{
+                                                    searchQuery
+                                                        ? "Try adjusting your search query or filter."
+                                                        : "Get started by adding your first client or lead."
+                                                }}
+                                            </p>
+                                        </div>
+                                        <Button
+                                            v-if="!searchQuery"
+                                            as-child
+                                            size="sm"
+                                            class="mt-2 bg-indigo-600 hover:bg-indigo-700 text-white"
+                                        >
+                                            <Link :href="create.url()">
+                                                <Plus
+                                                    class="mr-1 h-3.5 w-3.5"
+                                                />
+                                                Add New Client
+                                            </Link>
+                                        </Button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- Data Rows -->
+                            <tr
+                                v-for="client in filteredClients"
+                                :key="client.id"
+                                class="group transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/40"
+                            >
+                                <!-- Client Info -->
+                                <td class="px-5 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <Avatar
+                                            class="h-9 w-9 border border-slate-200 shadow-xs dark:border-slate-700"
+                                        >
+                                            <AvatarFallback
+                                                :class="[
+                                                    'text-xs font-bold',
+                                                    getAvatarColor(client.name),
+                                                ]"
+                                            >
+                                                {{ getInitials(client.name) }}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <div>
+                                            <Link
+                                                :href="show.url(client.id)"
+                                                class="font-semibold text-slate-900 hover:text-indigo-600 dark:text-slate-100 dark:hover:text-indigo-400 transition-colors"
+                                            >
+                                                {{ client.name }}
+                                            </Link>
+                                            <p
+                                                class="text-[11px] text-slate-400 font-mono"
+                                            >
+                                                ID: #CLN-{{ client.id }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Contact -->
+                                <td class="px-5 py-4">
+                                    <div class="space-y-1">
+                                        <div
+                                            class="flex items-center gap-1.5 font-medium text-slate-800 dark:text-slate-200"
+                                        >
+                                            <Mail
+                                                class="h-3.5 w-3.5 text-slate-400"
+                                            />
+                                            <span>{{ client.email }}</span>
+                                        </div>
+                                        <div
+                                            v-if="client.phone"
+                                            class="flex items-center gap-1.5 text-slate-500 dark:text-slate-400"
+                                        >
+                                            <Phone
+                                                class="h-3.5 w-3.5 text-slate-400"
+                                            />
+                                            <span>{{ client.phone }}</span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Company -->
+                                <td class="px-5 py-4">
+                                    <div
+                                        class="inline-flex items-center gap-1.5 rounded-md border border-slate-200/80 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-700 dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-300"
+                                    >
+                                        <Building2
+                                            class="h-3.5 w-3.5 text-slate-400"
+                                        />
+                                        <span>{{
+                                            client.company_name ||
+                                            "Individual / Freelance"
+                                        }}</span>
+                                    </div>
+                                </td>
+
+                                <!-- Services -->
+                                <td class="px-5 py-4">
+                                    <div class="flex flex-wrap gap-1">
+                                        <Badge
+                                            v-for="service in client.services"
+                                            :key="service.id"
+                                            variant="secondary"
+                                            class="rounded-md border border-slate-200/60 bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-700 dark:border-slate-700/60 dark:bg-slate-800 dark:text-slate-300"
+                                        >
+                                            {{ service.name }}
+                                        </Badge>
+                                        <span
+                                            v-if="
+                                                !client.services ||
+                                                client.services.length === 0
+                                            "
+                                            class="text-slate-400 text-xs italic"
+                                        >
+                                            No services attached
+                                        </span>
+                                    </div>
+                                </td>
+
+                                <!-- Status -->
+                                <td class="px-5 py-4">
+                                    <span
+                                        :class="[
+                                            'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-all',
+                                            getStatusConfig(client.status)
+                                                .badgeClass,
+                                        ]"
+                                    >
+                                        <span
+                                            :class="[
+                                                'h-1.5 w-1.5 rounded-full',
+                                                getStatusConfig(client.status)
+                                                    .dotClass,
+                                            ]"
+                                        ></span>
+                                        {{
+                                            getStatusConfig(client.status).label
+                                        }}
+                                    </span>
+                                </td>
+
+                                <!-- Actions Dropdown -->
+                                <td class="px-5 py-4 text-right">
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger as-child>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon-sm"
+                                                class="h-8 w-8 text-slate-500 hover:text-slate-900 dark:hover:text-slate-100"
+                                            >
+                                                <MoreHorizontal
+                                                    class="h-4 w-4"
+                                                />
+                                                <span class="sr-only"
+                                                    >Open menu</span
+                                                >
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent
+                                            align="end"
+                                            class="w-44"
+                                        >
+                                            <DropdownMenuLabel
+                                                class="text-xs font-semibold text-slate-500"
+                                                >Actions</DropdownMenuLabel
+                                            >
+                                            <DropdownMenuSeparator />
+                                            <DropdownMenuItem as-child>
+                                                <Link
+                                                    :href="show.url(client.id)"
+                                                    class="flex items-center gap-2 cursor-pointer"
+                                                >
+                                                    <Eye
+                                                        class="h-4 w-4 text-slate-500"
+                                                    />
+                                                    <span>View Details</span>
+                                                </Link>
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem as-child>
+                                                <Link
+                                                    :href="edit.url(client.id)"
+                                                    class="flex items-center gap-2 cursor-pointer"
+                                                >
+                                                    <Pencil
+                                                        class="h-4 w-4 text-slate-500"
+                                                    />
+                                                    <span>Edit Client</span>
+                                                </Link>
+                                            </DropdownMenuItem>
+                                            <DropdownMenuSeparator />
+                                            <DropdownMenuItem
+                                                @click="deleteClient(client.id)"
+                                                class="flex items-center gap-2 text-rose-600 focus:text-rose-600 cursor-pointer"
+                                            >
+                                                <Trash2 class="h-4 w-4" />
+                                                <span>Delete Client</span>
+                                            </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Footer Pagination Bar -->
+                <div
+                    v-if="filteredClients.length > 0"
+                    class="flex items-center justify-between border-t border-slate-200/80 px-5 py-3 dark:border-slate-800"
+                >
+                    <p class="text-xs text-slate-500 dark:text-slate-400">
+                        Showing
+                        <span
+                            class="font-semibold text-slate-700 dark:text-slate-300"
+                            >1</span
+                        >
+                        to
+                        <span
+                            class="font-semibold text-slate-700 dark:text-slate-300"
+                            >{{ filteredClients.length }}</span
+                        >
+                        of
+                        <span
+                            class="font-semibold text-slate-700 dark:text-slate-300"
+                            >{{ totalClientsCount }}</span
+                        >
+                        clients
+                    </p>
+                    <div class="flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            class="h-8 text-xs gap-1"
+                            disabled
+                        >
+                            <ChevronLeft class="h-3.5 w-3.5" /> Previous
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            class="h-8 text-xs gap-1"
+                            disabled
+                        >
+                            Next <ChevronRight class="h-3.5 w-3.5" />
+                        </Button>
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
     </div>
 </template>
