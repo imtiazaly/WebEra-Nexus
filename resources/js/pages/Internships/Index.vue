@@ -87,7 +87,7 @@ const props = defineProps<{
 
 // State
 const searchQuery = ref('');
-const selectedStatus = ref<string>('all');
+const selectedStatus = ref<string>('active');
 const selectedTrack = ref<string>('all');
 const viewMode = ref<'grid' | 'timeline'>('grid');
 const copiedBatchId = ref<number | null>(null);
@@ -501,7 +501,7 @@ const deleteInternship = (id: number) => {
                                 : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
                         ]"
                     >
-                        Active
+                        Active ({{activeBatches.length}})
                     </button>
                     <button
                         @click="selectedStatus = 'upcoming'"
