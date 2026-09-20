@@ -14,7 +14,10 @@ class InternshipController extends Controller
 {
     public function index(): Response
     {
-        $internships = Internship::with('service:id,name')
+        $internships = Internship::with([
+            'service:id,name',
+            'students:id,internship_id,name,email,phone,status,overall_progress',
+        ])
             ->withCount(['students as total_students_count'])
             ->latest()
             ->paginate(15);
@@ -43,7 +46,12 @@ class InternshipController extends Controller
 
     public function show(Internship $internship): Response
     {
-        $internship->load(['service', 'students']);
+        $internship->load([
+            'service',
+            'students' => function ($query) {
+                $query->withCount('weeklyReports');
+            },
+        ]);
 
         return Inertia::render('Internships/Show', [
             'internship' => $internship,

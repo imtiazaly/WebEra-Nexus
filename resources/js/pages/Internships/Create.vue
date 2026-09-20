@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { index, create, store } from '@/routes/internships';
+import { index, store } from '@/routes/internships';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
+import { ArrowLeft, Sparkles, Plus, Calendar, Layers, Tag, ShieldCheck } from '@lucide/vue';
 
 defineOptions({
     layout: {
         breadcrumbs: [
-            { title: 'Internships Portal', href: index.url() },
-            { title: 'Create Batch', href: create.url() },
+            { title: 'Internship Academy Portal', href: index.url() },
+            { title: 'Create Batch', href: '#' },
         ],
     },
 });
@@ -46,149 +50,147 @@ const submit = () => {
 <template>
     <Head title="Create Internship Batch" />
 
-    <div class="mx-auto max-w-3xl space-y-6 p-6">
+    <div class="mx-auto max-w-3xl space-y-6 p-4 sm:p-6 lg:p-8">
+        <!-- Top Title Bar -->
         <div class="flex items-center justify-between">
-            <h1
-                class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
-            >
-                Create Internship Batch
-            </h1>
-            <Link
-                :href="index.url()"
-                class="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-                >← Back to List</Link
-            >
+            <div class="space-y-1">
+                <div class="inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3 py-0.5 text-xs font-semibold text-indigo-600 dark:text-indigo-400">
+                    <Sparkles class="h-3.5 w-3.5 text-indigo-500" />
+                    <span>Academy Batch Builder</span>
+                </div>
+                <h1 class="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl dark:text-white">
+                    Create New Internship Batch
+                </h1>
+            </div>
+
+            <Button as-child variant="ghost" size="sm" class="rounded-xl font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
+                <Link :href="index.url()">
+                    <ArrowLeft class="mr-1.5 h-4 w-4" /> Back to Hub
+                </Link>
+            </Button>
         </div>
 
-        <form
-            @submit.prevent="submit"
-            class="space-y-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900"
-        >
-            <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-                <div class="md:col-span-2">
-                    <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                        >Internship Batch Title *</label
-                    >
-                    <input
-                        v-model="form.name"
-                        type="text"
-                        required
-                        placeholder="e.g. Front-End Development Bootcamp"
-                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                    />
-                    <span
-                        v-if="form.errors.name"
-                        class="mt-1 block text-xs text-rose-500"
-                        >{{ form.errors.name }}</span
-                    >
-                </div>
+        <!-- Form Card -->
+        <Card class="overflow-hidden rounded-3xl border border-slate-200/80 shadow-lg dark:border-slate-800 dark:bg-slate-900">
+            <CardContent class="p-6 sm:p-8">
+                <form @submit.prevent="submit" class="space-y-6">
+                    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        <!-- Batch Title -->
+                        <div class="md:col-span-2 space-y-2">
+                            <label class="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                                <Sparkles class="h-3.5 w-3.5 text-indigo-500" />
+                                Internship Batch Title *
+                            </label>
+                            <Input
+                                v-model="form.name"
+                                type="text"
+                                required
+                                placeholder="e.g. Full-Stack Web Development Bootcamp"
+                                class="h-11 rounded-xl border-slate-200 text-sm focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-800/50"
+                            />
+                            <p v-if="form.errors.name" class="text-xs font-semibold text-rose-500">
+                                {{ form.errors.name }}
+                            </p>
+                        </div>
 
-                <div>
-                    <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                        >Batch Number (Free Text) *</label
-                    >
-                    <input
-                        v-model="form.batch_no"
-                        type="text"
-                        required
-                        placeholder="e.g. BATCH-04 or WEB-2026-A"
-                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                    />
-                    <span
-                        v-if="form.errors.batch_no"
-                        class="mt-1 block text-xs text-rose-500"
-                        >{{ form.errors.batch_no }}</span
-                    >
-                </div>
+                        <!-- Batch Code -->
+                        <div class="space-y-2">
+                            <label class="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                                <Tag class="h-3.5 w-3.5 text-indigo-500" />
+                                Batch Code / Number *
+                            </label>
+                            <Input
+                                v-model="form.batch_no"
+                                type="text"
+                                required
+                                placeholder="e.g. BATCH-04 or FS-2026-A"
+                                class="h-11 font-mono rounded-xl border-slate-200 text-sm focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-800/50"
+                            />
+                            <p v-if="form.errors.batch_no" class="text-xs font-semibold text-rose-500">
+                                {{ form.errors.batch_no }}
+                            </p>
+                        </div>
 
-                <div>
-                    <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                        >Service Track *</label
-                    >
-                    <select
-                        v-model="form.service_id"
-                        required
-                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                    >
-                        <option value="" disabled>
-                            -- Select Internship Track --
-                        </option>
-                        <option
-                            v-for="service in services"
-                            :key="service.id"
-                            :value="service.id"
+                        <!-- Service Track -->
+                        <div class="space-y-2">
+                            <label class="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                                <Layers class="h-3.5 w-3.5 text-indigo-500" />
+                                Learning Track / Category *
+                            </label>
+                            <select
+                                v-model="form.service_id"
+                                required
+                                class="h-11 w-full rounded-xl border border-slate-200 bg-slate-50/70 px-3 text-sm font-medium focus:border-indigo-500 focus:bg-white dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-200"
+                            >
+                                <option value="" disabled>-- Select Track Category --</option>
+                                <option v-for="service in services" :key="service.id" :value="service.id">
+                                    {{ service.name }}
+                                </option>
+                            </select>
+                            <p v-if="form.errors.service_id" class="text-xs font-semibold text-rose-500">
+                                {{ form.errors.service_id }}
+                            </p>
+                        </div>
+
+                        <!-- Start Date -->
+                        <div class="space-y-2">
+                            <label class="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                                <Calendar class="h-3.5 w-3.5 text-indigo-500" />
+                                Start Date *
+                            </label>
+                            <Input
+                                v-model="form.start_date"
+                                type="date"
+                                required
+                                class="h-11 rounded-xl border-slate-200 text-sm focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-800/50"
+                            />
+                        </div>
+
+                        <!-- End Date -->
+                        <div class="space-y-2">
+                            <label class="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                                <Calendar class="h-3.5 w-3.5 text-indigo-500" />
+                                Target Completion Date *
+                            </label>
+                            <Input
+                                v-model="form.end_date"
+                                type="date"
+                                required
+                                class="h-11 rounded-xl border-slate-200 text-sm focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-800/50"
+                            />
+                        </div>
+
+                        <!-- Initial Status -->
+                        <div class="md:col-span-2 space-y-2">
+                            <label class="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                                <ShieldCheck class="h-3.5 w-3.5 text-indigo-500" />
+                                Initial Batch Status *
+                            </label>
+                            <select
+                                v-model="form.status"
+                                class="h-11 w-full rounded-xl border border-slate-200 bg-slate-50/70 px-3 text-sm font-medium focus:border-indigo-500 focus:bg-white dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-200"
+                            >
+                                <option value="upcoming">Upcoming Batch</option>
+                                <option value="active">Active (Ongoing Now)</option>
+                                <option value="completed">Completed / Graduated</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-3 border-t border-slate-200/80 pt-6 dark:border-slate-800">
+                        <Button as-child variant="outline" class="rounded-xl font-semibold">
+                            <Link :href="index.url()">Cancel</Link>
+                        </Button>
+                        <Button
+                            type="submit"
+                            :disabled="form.processing"
+                            class="rounded-xl bg-indigo-600 font-bold text-white shadow-lg hover:bg-indigo-500"
                         >
-                            {{ service.name }}
-                        </option>
-                    </select>
-                    <span
-                        v-if="form.errors.service_id"
-                        class="mt-1 block text-xs text-rose-500"
-                        >{{ form.errors.service_id }}</span
-                    >
-                </div>
-
-                <div>
-                    <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                        >Start Date *</label
-                    >
-                    <input
-                        v-model="form.start_date"
-                        type="date"
-                        required
-                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                    />
-                </div>
-
-                <div>
-                    <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                        >End Date (~6 weeks) *</label
-                    >
-                    <input
-                        v-model="form.end_date"
-                        type="date"
-                        required
-                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                    />
-                </div>
-
-                <div class="md:col-span-2">
-                    <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                        >Batch Status *</label
-                    >
-                    <select
-                        v-model="form.status"
-                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                    >
-                        <option value="upcoming">Upcoming</option>
-                        <option value="active">Active (Ongoing)</option>
-                        <option value="completed">Completed</option>
-                    </select>
-                </div>
-            </div>
-
-            <div
-                class="flex justify-end space-x-3 border-t border-gray-200 pt-6 dark:border-gray-800"
-            >
-                <Link
-                    :href="index.url()"
-                    class="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300"
-                    >Cancel</Link
-                >
-                <button
-                    type="submit"
-                    :disabled="form.processing"
-                    class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                >
-                    Save Batch
-                </button>
-            </div>
-        </form>
+                            <Plus class="mr-1.5 h-4 w-4" /> Save & Launch Batch
+                        </Button>
+                    </div>
+                </form>
+            </CardContent>
+        </Card>
     </div>
 </template>
