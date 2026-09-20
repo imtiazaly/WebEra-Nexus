@@ -328,9 +328,7 @@ const formatStatus = (status: string) => {
                             >
                                 <button
                                     @click="generateReportAi(report.id)"
-                                    :disabled="
-                                        generatingReportAi === report.id
-                                    "
+                                    :disabled="generatingReportAi === report.id"
                                     class="text-xs font-semibold text-purple-600 hover:text-purple-800 disabled:opacity-50 dark:text-purple-400"
                                 >
                                     {{
@@ -353,15 +351,13 @@ const formatStatus = (status: string) => {
 
                             <form
                                 v-if="editingReportId === report.id"
-                                @submit.prevent="
-                                    submitReportReview(report.id)
-                                "
+                                @submit.prevent="submitReportReview(report.id)"
                                 class="w-full space-y-2 border-t border-gray-200 pt-3 dark:border-gray-800"
                             >
                                 <div class="grid grid-cols-2 gap-2">
                                     <div>
                                         <label
-                                            class="block text-[10px] font-bold uppercase text-gray-500"
+                                            class="block text-[10px] font-bold text-gray-500 uppercase"
                                             >Status</label
                                         >
                                         <select
@@ -384,7 +380,7 @@ const formatStatus = (status: string) => {
                                     </div>
                                     <div>
                                         <label
-                                            class="block text-[10px] font-bold uppercase text-gray-500"
+                                            class="block text-[10px] font-bold text-gray-500 uppercase"
                                             >Admin Feedback</label
                                         >
                                         <input

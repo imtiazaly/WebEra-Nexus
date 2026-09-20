@@ -12,8 +12,12 @@ const name = usePage().props.name;
         <AppLogoIcon class="size-5 fill-current text-white dark:text-black" />
     </div>
     <div class="ml-0.5 grid flex-1 text-left text-xl">
-        <span class="truncate leading-tight font-semibold  text-black dark:text-white">WebEra 
-            <Span class="font-semibold text-xl text-purple-800 ms-0.8">Nexus</Span>
+        <span
+            class="truncate leading-tight font-semibold text-black dark:text-white"
+            >WebEra
+            <Span class="ms-0.8 text-xl font-semibold text-purple-800"
+                >Nexus</Span
+            >
         </span>
     </div>
 </template>

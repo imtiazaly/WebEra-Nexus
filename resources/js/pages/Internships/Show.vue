@@ -55,7 +55,9 @@ const formatStatus = (status: string) => {
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
                     {{ internship.name }}
                 </h1>
-                <p class="text-sm font-medium text-indigo-600 dark:text-indigo-400">
+                <p
+                    class="text-sm font-medium text-indigo-600 dark:text-indigo-400"
+                >
                     🏷️ Batch Code: {{ internship.batch_no }}
                 </p>
             </div>
@@ -77,7 +79,7 @@ const formatStatus = (status: string) => {
             <div
                 class="space-y-2 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900"
             >
-                <div class="text-xs font-semibold uppercase text-gray-500">
+                <div class="text-xs font-semibold text-gray-500 uppercase">
                     Track / Service
                 </div>
                 <div class="font-medium text-gray-900 dark:text-white">
@@ -87,7 +89,7 @@ const formatStatus = (status: string) => {
             <div
                 class="space-y-2 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900"
             >
-                <div class="text-xs font-semibold uppercase text-gray-500">
+                <div class="text-xs font-semibold text-gray-500 uppercase">
                     Status
                 </div>
                 <div class="font-semibold text-indigo-600 dark:text-indigo-400">
@@ -97,7 +99,7 @@ const formatStatus = (status: string) => {
             <div
                 class="space-y-2 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900"
             >
-                <div class="text-xs font-semibold uppercase text-gray-500">
+                <div class="text-xs font-semibold text-gray-500 uppercase">
                     Start Date
                 </div>
                 <div class="font-medium text-gray-900 dark:text-white">
@@ -107,7 +109,7 @@ const formatStatus = (status: string) => {
             <div
                 class="space-y-2 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900"
             >
-                <div class="text-xs font-semibold uppercase text-gray-500">
+                <div class="text-xs font-semibold text-gray-500 uppercase">
                     End Date
                 </div>
                 <div class="font-medium text-gray-900 dark:text-white">
@@ -132,18 +134,25 @@ const formatStatus = (status: string) => {
                     class="flex items-center justify-between py-3"
                 >
                     <div>
-                        <div class="font-semibold text-gray-900 dark:text-white">
+                        <div
+                            class="font-semibold text-gray-900 dark:text-white"
+                        >
                             {{ student.name }}
                         </div>
                         <div class="text-xs text-gray-500 dark:text-gray-400">
-                            {{ student.email }} • {{ student.phone || 'No phone' }}
+                            {{ student.email }} •
+                            {{ student.phone || 'No phone' }}
                         </div>
                     </div>
                     <div class="flex items-center space-x-4">
-                        <span class="text-xs font-semibold text-indigo-600 dark:text-indigo-400">
+                        <span
+                            class="text-xs font-semibold text-indigo-600 dark:text-indigo-400"
+                        >
                             Progress: {{ student.overall_progress }}%
                         </span>
-                        <span class="rounded bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                        <span
+                            class="rounded bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                        >
                             {{ formatStatus(student.status) }}
                         </span>
                     </div>
