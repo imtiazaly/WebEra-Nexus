@@ -54,7 +54,7 @@ class GeminiAiService implements AiServiceInterface
             return null;
         }
 
-        $studentName = $report->student?->name ?? 'Student';
+        $studentName = $report->student->name ?? 'Student';
         $prompt = "You are an internship mentor supervisor. Summarize this weekly report submitted by {$studentName} for Week {$report->week_number} in 2 clear bullet-style sentences.\n"
           ."Tasks Completed: {$report->tasks_completed}\n"
           ."Learnings: {$report->learnings}\n"
@@ -70,7 +70,7 @@ class GeminiAiService implements AiServiceInterface
             return null;
         }
 
-        $clientName = $project->client?->name ?? 'Internal Project';
+        $clientName = $project->client->name ?? 'Internal Project';
         $prompt = "You are a senior project manager. Provide a single concise executive status sentence for project '{$project->title}'.\n"
           ."Client: {$clientName}\n"
           ."Status: {$project->status}\n"
