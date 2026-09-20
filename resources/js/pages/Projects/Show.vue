@@ -4,7 +4,13 @@ import { Head, Link, router } from '@inertiajs/vue3';
 import { index, edit, aiSummary } from '@/routes/projects';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+    CardDescription,
+} from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
     ArrowLeft,
@@ -99,7 +105,8 @@ const formatDate = (dateStr: string | null) => {
 
 // Check if overdue
 const isOverdue = computed(() => {
-    if (!props.project.deadline || props.project.status === 'completed') return false;
+    if (!props.project.deadline || props.project.status === 'completed')
+        return false;
     const today = new Date().toISOString().split('T')[0];
     return props.project.deadline < today;
 });
@@ -121,43 +128,50 @@ const getStatusConfig = (status: string) => {
         case 'planning':
             return {
                 label: 'Planning',
-                badgeClass: 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/50 dark:text-blue-300 dark:border-blue-800',
+                badgeClass:
+                    'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/50 dark:text-blue-300 dark:border-blue-800',
                 dotClass: 'bg-blue-500',
             };
         case 'in_progress':
             return {
                 label: 'In Progress',
-                badgeClass: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800',
+                badgeClass:
+                    'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800',
                 dotClass: 'bg-amber-500',
             };
         case 'under_review':
             return {
                 label: 'Under Review',
-                badgeClass: 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/50 dark:text-purple-300 dark:border-purple-800',
+                badgeClass:
+                    'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/50 dark:text-purple-300 dark:border-purple-800',
                 dotClass: 'bg-purple-500',
             };
         case 'completed':
             return {
                 label: 'Completed',
-                badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800',
+                badgeClass:
+                    'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800',
                 dotClass: 'bg-emerald-500',
             };
         case 'on_hold':
             return {
                 label: 'On Hold',
-                badgeClass: 'bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-900 dark:text-slate-300 dark:border-slate-800',
+                badgeClass:
+                    'bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-900 dark:text-slate-300 dark:border-slate-800',
                 dotClass: 'bg-slate-400',
             };
         case 'cancelled':
             return {
                 label: 'Cancelled',
-                badgeClass: 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-800',
+                badgeClass:
+                    'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-800',
                 dotClass: 'bg-rose-500',
             };
         default:
             return {
                 label: status,
-                badgeClass: 'bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-900 dark:text-slate-300 dark:border-slate-800',
+                badgeClass:
+                    'bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-900 dark:text-slate-300 dark:border-slate-800',
                 dotClass: 'bg-slate-400',
             };
     }
@@ -170,12 +184,21 @@ const getStatusConfig = (status: string) => {
     <div class="w-full space-y-6 p-4 sm:p-6">
         <!-- Top Navigation Bar -->
         <div class="flex items-center justify-between">
-            <Button variant="ghost" size="sm" as-child class="-ml-2 text-slate-500 hover:text-slate-900 dark:hover:text-slate-100">
+            <Button
+                variant="ghost"
+                size="sm"
+                as-child
+                class="-ml-2 text-slate-500 hover:text-slate-900 dark:hover:text-slate-100"
+            >
                 <Link :href="index.url()">
                     <ArrowLeft class="mr-1.5 h-4 w-4" /> Back to Projects Portal
                 </Link>
             </Button>
-            <Button as-child size="sm" class="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm gap-1.5 text-sm">
+            <Button
+                as-child
+                size="sm"
+                class="gap-1.5 bg-indigo-600 text-sm text-white shadow-sm hover:bg-indigo-700"
+            >
                 <Link :href="edit.url(project.id)">
                     <Pencil class="h-4 w-4" /> Edit Project
                 </Link>
@@ -183,45 +206,75 @@ const getStatusConfig = (status: string) => {
         </div>
 
         <!-- 🌟 Executive Hero Header Card -->
-        <Card class="overflow-hidden border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+        <Card
+            class="overflow-hidden border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900"
+        >
             <CardContent class="p-6">
-                <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+                <div
+                    class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between"
+                >
                     <div class="flex items-start gap-4">
-                        <Avatar class="h-16 w-16 border-2 border-indigo-200 shadow-sm dark:border-indigo-900 shrink-0">
-                            <AvatarFallback class="bg-gradient-to-br from-indigo-600 to-purple-700 text-white text-lg font-extrabold">
+                        <Avatar
+                            class="h-16 w-16 shrink-0 border-2 border-indigo-200 shadow-sm dark:border-indigo-900"
+                        >
+                            <AvatarFallback
+                                class="bg-gradient-to-br from-indigo-600 to-purple-700 text-lg font-extrabold text-white"
+                            >
                                 {{ getInitials(project.title) }}
                             </AvatarFallback>
                         </Avatar>
-                        <div class="space-y-2 min-w-0">
+                        <div class="min-w-0 space-y-2">
                             <div class="flex flex-wrap items-center gap-3">
-                                <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">
+                                <h1
+                                    class="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-50"
+                                >
                                     {{ project.title }}
                                 </h1>
                                 <span
                                     :class="[
                                         'inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm font-semibold',
-                                        getStatusConfig(project.status).badgeClass
+                                        getStatusConfig(project.status)
+                                            .badgeClass,
                                     ]"
                                 >
-                                    <span :class="['h-2 w-2 rounded-full', getStatusConfig(project.status).dotClass]"></span>
+                                    <span
+                                        :class="[
+                                            'h-2 w-2 rounded-full',
+                                            getStatusConfig(project.status)
+                                                .dotClass,
+                                        ]"
+                                    ></span>
                                     {{ getStatusConfig(project.status).label }}
                                 </span>
                             </div>
 
-                            <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-500 dark:text-slate-400">
+                            <div
+                                class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-500 dark:text-slate-400"
+                            >
                                 <!-- Client Info -->
-                                <span v-if="project.client" class="flex items-center gap-1.5 font-semibold text-slate-800 dark:text-slate-200">
+                                <span
+                                    v-if="project.client"
+                                    class="flex items-center gap-1.5 font-semibold text-slate-800 dark:text-slate-200"
+                                >
                                     <Building2 class="h-4 w-4 text-slate-400" />
                                     Client: {{ project.client.name }}
                                 </span>
-                                <span v-else class="inline-flex items-center gap-1.5 font-semibold text-indigo-600 dark:text-indigo-400">
-                                    <Wrench class="h-4 w-4" /> Internal Practice Task
+                                <span
+                                    v-else
+                                    class="inline-flex items-center gap-1.5 font-semibold text-indigo-600 dark:text-indigo-400"
+                                >
+                                    <Wrench class="h-4 w-4" /> Internal Practice
+                                    Task
                                 </span>
 
                                 <span>•</span>
-                                <span class="font-mono text-slate-500">ID: #PRJ-{{ project.id }}</span>
+                                <span class="font-mono text-slate-500"
+                                    >ID: #PRJ-{{ project.id }}</span
+                                >
                                 <span>•</span>
-                                <span class="flex items-center gap-1.5 text-slate-500">
+                                <span
+                                    class="flex items-center gap-1.5 text-slate-500"
+                                >
                                     <Calendar class="h-4 w-4 text-slate-400" />
                                     Created {{ formatDate(project.created_at) }}
                                 </span>
@@ -235,85 +288,147 @@ const getStatusConfig = (status: string) => {
         <!-- 4 Stat Glass Matrix Cards -->
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <!-- Service Category -->
-            <div class="flex items-center justify-between rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-                <div class="space-y-1 min-w-0 pr-2">
-                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Service Category</p>
-                    <p class="text-base font-bold text-slate-900 dark:text-slate-100 truncate">
+            <div
+                class="flex items-center justify-between rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900"
+            >
+                <div class="min-w-0 space-y-1 pr-2">
+                    <p
+                        class="text-xs font-semibold tracking-wider text-slate-400 uppercase"
+                    >
+                        Service Category
+                    </p>
+                    <p
+                        class="truncate text-base font-bold text-slate-900 dark:text-slate-100"
+                    >
                         {{ project.service?.name || 'General Project' }}
                     </p>
                 </div>
-                <div class="rounded-lg bg-indigo-50 p-3 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-400 shrink-0">
+                <div
+                    class="shrink-0 rounded-lg bg-indigo-50 p-3 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-400"
+                >
                     <Briefcase class="h-6 w-6" />
                 </div>
             </div>
 
             <!-- Start Date -->
-            <div class="flex items-center justify-between rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+            <div
+                class="flex items-center justify-between rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900"
+            >
                 <div class="space-y-1">
-                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Start Date</p>
-                    <p class="text-sm font-bold text-slate-900 dark:text-slate-100 font-mono">
+                    <p
+                        class="text-xs font-semibold tracking-wider text-slate-400 uppercase"
+                    >
+                        Start Date
+                    </p>
+                    <p
+                        class="font-mono text-sm font-bold text-slate-900 dark:text-slate-100"
+                    >
                         {{ formatDate(project.start_date) }}
                     </p>
                 </div>
-                <div class="rounded-lg bg-blue-50 p-3 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400 shrink-0">
+                <div
+                    class="shrink-0 rounded-lg bg-blue-50 p-3 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400"
+                >
                     <Calendar class="h-6 w-6" />
                 </div>
             </div>
 
             <!-- Target Deadline -->
-            <div class="flex items-center justify-between rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+            <div
+                class="flex items-center justify-between rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900"
+            >
                 <div class="space-y-1">
-                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Target Deadline</p>
+                    <p
+                        class="text-xs font-semibold tracking-wider text-slate-400 uppercase"
+                    >
+                        Target Deadline
+                    </p>
                     <div class="flex items-center gap-1.5">
-                        <p class="text-sm font-bold text-slate-900 dark:text-slate-100 font-mono">
+                        <p
+                            class="font-mono text-sm font-bold text-slate-900 dark:text-slate-100"
+                        >
                             {{ formatDate(project.deadline) }}
                         </p>
-                        <Badge v-if="isOverdue" variant="destructive" class="text-xs py-0.5 px-2">Overdue</Badge>
+                        <Badge
+                            v-if="isOverdue"
+                            variant="destructive"
+                            class="px-2 py-0.5 text-xs"
+                            >Overdue</Badge
+                        >
                     </div>
                 </div>
-                <div :class="['rounded-lg p-3 shrink-0', isOverdue ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/60' : 'bg-amber-50 text-amber-600 dark:bg-amber-950/60']">
+                <div
+                    :class="[
+                        'shrink-0 rounded-lg p-3',
+                        isOverdue
+                            ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/60'
+                            : 'bg-amber-50 text-amber-600 dark:bg-amber-950/60',
+                    ]"
+                >
                     <Clock class="h-6 w-6" />
                 </div>
             </div>
 
             <!-- Milestone Status -->
-            <div class="flex items-center justify-between rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+            <div
+                class="flex items-center justify-between rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900"
+            >
                 <div class="space-y-1">
-                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Current Milestone</p>
-                    <p class="text-sm font-extrabold text-indigo-600 dark:text-indigo-400">
+                    <p
+                        class="text-xs font-semibold tracking-wider text-slate-400 uppercase"
+                    >
+                        Current Milestone
+                    </p>
+                    <p
+                        class="text-sm font-extrabold text-indigo-600 dark:text-indigo-400"
+                    >
                         {{ milestoneLabel }}
                     </p>
                 </div>
-                <div class="rounded-lg bg-emerald-50 p-3 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400 shrink-0">
+                <div
+                    class="shrink-0 rounded-lg bg-emerald-50 p-3 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400"
+                >
                     <Target class="h-6 w-6" />
                 </div>
             </div>
         </div>
 
         <!-- 📈 Interactive Progress Hero Tracker Card -->
-        <Card class="border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-            <CardContent class="p-6 space-y-4">
+        <Card
+            class="border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900"
+        >
+            <CardContent class="space-y-4 p-6">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2">
-                        <TrendingUp class="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-                        <h2 class="text-lg font-bold text-slate-900 dark:text-slate-100">
+                        <TrendingUp
+                            class="h-5 w-5 text-indigo-600 dark:text-indigo-400"
+                        />
+                        <h2
+                            class="text-lg font-bold text-slate-900 dark:text-slate-100"
+                        >
                             Execution Progress & Completion Status
                         </h2>
                     </div>
-                    <span class="text-4xl font-black text-indigo-600 dark:text-indigo-400 font-mono">
+                    <span
+                        class="font-mono text-4xl font-black text-indigo-600 dark:text-indigo-400"
+                    >
                         {{ project.progress }}%
                     </span>
                 </div>
 
                 <!-- Gradient Animated Progress Bar -->
                 <div class="space-y-2">
-                    <div class="h-4 w-full overflow-hidden rounded-full bg-slate-100 p-0.5 shadow-inner dark:bg-slate-800">
+                    <div
+                        class="h-4 w-full overflow-hidden rounded-full bg-slate-100 p-0.5 shadow-inner dark:bg-slate-800"
+                    >
                         <div
-                            class="h-3 rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500 transition-all duration-700 shadow-sm"
+                            class="h-3 rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500 shadow-sm transition-all duration-700"
                             :style="{ width: `${project.progress}%` }"
                         ></div>
                     </div>
-                    <div class="flex justify-between text-xs font-mono text-slate-500">
+                    <div
+                        class="flex justify-between font-mono text-xs text-slate-500"
+                    >
                         <span>0% Initial Launch</span>
                         <span>50% Mid-Execution</span>
                         <span>100% Final Deliverable</span>
@@ -323,20 +438,37 @@ const getStatusConfig = (status: string) => {
         </Card>
 
         <!-- 🪄 MAGICAL AI Executive Status Summary Card -->
-        <Card class="overflow-hidden border-purple-200/80 bg-gradient-to-br from-purple-50/40 via-white to-indigo-50/20 shadow-xs dark:border-purple-900/50 dark:from-purple-950/20 dark:via-slate-900 dark:to-indigo-950/10">
-            <CardHeader class="border-b border-purple-100 pb-4 dark:border-purple-900/40">
-                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <Card
+            class="overflow-hidden border-purple-200/80 bg-gradient-to-br from-purple-50/40 via-white to-indigo-50/20 shadow-xs dark:border-purple-900/50 dark:from-purple-950/20 dark:via-slate-900 dark:to-indigo-950/10"
+        >
+            <CardHeader
+                class="border-b border-purple-100 pb-4 dark:border-purple-900/40"
+            >
+                <div
+                    class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+                >
                     <div class="flex items-center gap-3">
-                        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-tr from-purple-600 to-indigo-600 text-white shadow-xs">
-                            <Wand2 class="h-5 w-5 text-purple-200 animate-pulse" />
+                        <div
+                            class="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-tr from-purple-600 to-indigo-600 text-white shadow-xs"
+                        >
+                            <Wand2
+                                class="h-5 w-5 animate-pulse text-purple-200"
+                            />
                         </div>
                         <div>
-                            <CardTitle class="text-lg font-extrabold text-purple-950 dark:text-purple-200 flex items-center gap-2">
+                            <CardTitle
+                                class="flex items-center gap-2 text-lg font-extrabold text-purple-950 dark:text-purple-200"
+                            >
                                 AI Project Status Summary
-                                <Sparkles class="h-4 w-4 text-purple-500 animate-spin" />
+                                <Sparkles
+                                    class="h-4 w-4 animate-spin text-purple-500"
+                                />
                             </CardTitle>
-                            <CardDescription class="text-xs sm:text-sm text-purple-700/70 dark:text-purple-400/80">
-                                AI-synthesized health report, milestone status, and risk evaluation.
+                            <CardDescription
+                                class="text-xs text-purple-700/70 sm:text-sm dark:text-purple-400/80"
+                            >
+                                AI-synthesized health report, milestone status,
+                                and risk evaluation.
                             </CardDescription>
                         </div>
                     </div>
@@ -344,38 +476,75 @@ const getStatusConfig = (status: string) => {
                         @click="generateSummary"
                         :disabled="generatingSummary"
                         size="sm"
-                        class="bg-purple-600 hover:bg-purple-700 text-white font-medium shadow-sm text-sm gap-1.5"
+                        class="gap-1.5 bg-purple-600 text-sm font-medium text-white shadow-sm hover:bg-purple-700"
                     >
-                        <Loader2 v-if="generatingSummary" class="h-4 w-4 animate-spin" />
+                        <Loader2
+                            v-if="generatingSummary"
+                            class="h-4 w-4 animate-spin"
+                        />
                         <Wand2 v-else class="h-4 w-4" />
-                        <span>{{ generatingSummary ? 'Generating AI Summary...' : project.ai_status_summary ? 'Regenerate AI Summary' : 'Generate AI Summary' }}</span>
+                        <span>{{
+                            generatingSummary
+                                ? 'Generating AI Summary...'
+                                : project.ai_status_summary
+                                  ? 'Regenerate AI Summary'
+                                  : 'Generate AI Summary'
+                        }}</span>
                     </Button>
                 </div>
             </CardHeader>
             <CardContent class="p-6">
-                <div v-if="project.ai_status_summary" class="relative rounded-lg border border-purple-200/60 bg-white/80 p-5 text-sm sm:text-base leading-relaxed text-purple-950 shadow-2xs dark:border-purple-900/40 dark:bg-purple-950/40 dark:text-purple-200 whitespace-pre-line">
+                <div
+                    v-if="project.ai_status_summary"
+                    class="relative rounded-lg border border-purple-200/60 bg-white/80 p-5 text-sm leading-relaxed whitespace-pre-line text-purple-950 shadow-2xs sm:text-base dark:border-purple-900/40 dark:bg-purple-950/40 dark:text-purple-200"
+                >
                     {{ project.ai_status_summary }}
                 </div>
-                <div v-else class="flex flex-col items-center justify-center py-6 text-center">
-                    <Wand2 class="h-8 w-8 text-purple-300 dark:text-purple-800 mb-2" />
-                    <p class="text-sm font-semibold text-purple-900 dark:text-purple-300">No AI Executive Summary generated yet.</p>
-                    <p class="text-xs text-purple-600/70 dark:text-purple-400/70 mt-0.5">Click "Generate AI Summary" to create a magical status overview for this project.</p>
+                <div
+                    v-else
+                    class="flex flex-col items-center justify-center py-6 text-center"
+                >
+                    <Wand2
+                        class="mb-2 h-8 w-8 text-purple-300 dark:text-purple-800"
+                    />
+                    <p
+                        class="text-sm font-semibold text-purple-900 dark:text-purple-300"
+                    >
+                        No AI Executive Summary generated yet.
+                    </p>
+                    <p
+                        class="mt-0.5 text-xs text-purple-600/70 dark:text-purple-400/70"
+                    >
+                        Click "Generate AI Summary" to create a magical status
+                        overview for this project.
+                    </p>
                 </div>
             </CardContent>
         </Card>
 
         <!-- 📜 Description & Guidelines Blueprint Room Card -->
-        <Card v-if="project.description" class="border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-            <CardHeader class="border-b border-slate-200/80 pb-4 dark:border-slate-800">
-                <div class="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
+        <Card
+            v-if="project.description"
+            class="border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900"
+        >
+            <CardHeader
+                class="border-b border-slate-200/80 pb-4 dark:border-slate-800"
+            >
+                <div
+                    class="flex items-center gap-2 text-indigo-600 dark:text-indigo-400"
+                >
                     <FileText class="h-5 w-5" />
-                    <CardTitle class="text-lg font-bold text-slate-900 dark:text-slate-100">
+                    <CardTitle
+                        class="text-lg font-bold text-slate-900 dark:text-slate-100"
+                    >
                         Project Scope & Operational Guidelines
                     </CardTitle>
                 </div>
             </CardHeader>
             <CardContent class="p-6">
-                <div class="rounded-xl border border-slate-200/80 bg-slate-50/50 p-5 text-sm sm:text-base leading-relaxed text-slate-800 whitespace-pre-line dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-200 font-sans">
+                <div
+                    class="rounded-xl border border-slate-200/80 bg-slate-50/50 p-5 font-sans text-sm leading-relaxed whitespace-pre-line text-slate-800 sm:text-base dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-200"
+                >
                     {{ project.description }}
                 </div>
             </CardContent>

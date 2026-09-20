@@ -7,10 +7,10 @@ use App\Http\Requests\UpdateStudentRequest;
 use App\Models\Internship;
 use App\Models\Project;
 use App\Models\Student;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Http\RedirectResponse;
 
 class StudentController extends Controller
 {

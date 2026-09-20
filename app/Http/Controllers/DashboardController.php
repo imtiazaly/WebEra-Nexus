@@ -7,9 +7,9 @@ use App\Models\Internship;
 use App\Models\Project;
 use App\Models\Student;
 use App\Models\WeeklyReport;
+use Illuminate\Support\Carbon;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Support\Carbon;
 
 class DashboardController extends Controller
 {

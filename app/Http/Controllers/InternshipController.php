@@ -6,9 +6,9 @@ use App\Http\Requests\StoreInternshipRequest;
 use App\Http\Requests\UpdateInternshipRequest;
 use App\Models\Internship;
 use App\Models\Service;
+use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Http\RedirectResponse;
 
 class InternshipController extends Controller
 {
