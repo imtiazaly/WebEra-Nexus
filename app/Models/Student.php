@@ -8,9 +8,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Database\Factories\StudentFactory;
 
 class Student extends Model
 {
+    /** @use HasFactory<StudentFactory> */
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
