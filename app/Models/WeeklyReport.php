@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use Database\Factories\WeeklyReportFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class WeeklyReport extends Model
 {
+    /** @use HasFactory<WeeklyReportFactory> */
     use HasFactory;
 
     protected $fillable = [
@@ -27,6 +29,7 @@ class WeeklyReport extends Model
         'submitted_at' => 'datetime',
     ];
 
+    /** @return BelongsTo<Student, $this> */
     public function student(): BelongsTo
     {
         return $this->belongsTo(Student::class);
