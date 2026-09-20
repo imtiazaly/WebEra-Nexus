@@ -452,7 +452,7 @@ const deleteClient = (id: number) => {
                 <!-- 1️⃣ DESKTOP TABLE VIEW (Visible on md & larger screens) -->
                 <div v-else class="hidden w-full overflow-x-auto md:block">
                     <table
-                        class="w-full min-w-[850px] table-fixed border-collapse text-left"
+                        class="w-full min-w-212.5 table-fixed border-collapse text-left"
                     >
                         <thead>
                             <tr
