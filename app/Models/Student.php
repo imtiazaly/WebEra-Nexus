@@ -28,16 +28,19 @@ class Student extends Model
         'overall_progress' => 'integer',
     ];
 
+    /** @return BelongsTo<Internship, $this> */
     public function internship(): BelongsTo
     {
         return $this->belongsTo(Internship::class);
     }
 
+    /** @return HasMany<WeeklyReport, $this> */
     public function weeklyReports(): HasMany
     {
         return $this->hasMany(WeeklyReport::class)->latest('week_number');
     }
 
+    /** @return BelongsToMany<Project, $this> */
     public function projects(): BelongsToMany
     {
         return $this->belongsToMany(Project::class, 'project_student')

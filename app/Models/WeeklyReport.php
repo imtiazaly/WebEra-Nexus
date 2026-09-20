@@ -29,6 +29,7 @@ class WeeklyReport extends Model
         'submitted_at' => 'datetime',
     ];
 
+    /** @return BelongsTo<Student, $this> */
     public function student(): BelongsTo
     {
         return $this->belongsTo(Student::class);

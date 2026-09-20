@@ -27,11 +27,13 @@ class Internship extends Model
         'end_date' => 'date:Y-m-d',
     ];
 
+    /** @return BelongsTo<Service, $this> */
     public function service(): BelongsTo
     {
         return $this->belongsTo(Service::class);
     }
 
+    /** @return HasMany<Student, $this> */
     public function students(): HasMany
     {
         return $this->hasMany(Student::class);

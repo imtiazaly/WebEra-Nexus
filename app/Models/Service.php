@@ -24,6 +24,7 @@ class Service extends Model
         'is_active' => 'boolean',
     ];
 
+    /** @return BelongsToMany<Client, $this> */
     public function clients(): BelongsToMany
     {
         return $this->belongsToMany(Client::class, 'client_services')
@@ -31,11 +32,13 @@ class Service extends Model
             ->withTimestamps();
     }
 
+    /** @return HasMany<Project, $this> */
     public function projects(): HasMany
     {
         return $this->hasMany(Project::class);
     }
 
+    /** @return HasMany<Internship, $this> */
     public function internships(): HasMany
     {
         return $this->hasMany(Internship::class);

@@ -24,6 +24,7 @@ class Client extends Model
         'ai_brief',
     ];
 
+    /** @return BelongsToMany<Service, $this> */
     public function services(): BelongsToMany
     {
         return $this->belongsToMany(Service::class, 'client_services')
@@ -31,6 +32,7 @@ class Client extends Model
             ->withTimestamps();
     }
 
+    /** @return HasMany<Project, $this> */
     public function projects(): HasMany
     {
         return $this->hasMany(Project::class);
