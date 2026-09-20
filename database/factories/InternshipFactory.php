@@ -26,7 +26,7 @@ class InternshipFactory extends Factory
         $batchNumber = fake()->numberBetween(1, 10);
 
         return [
-            'service_id' => fn () => Service::inRandomOrder()->first()?->id ?? Service::factory(),
+            'service_id' => fn() => Service::inRandomOrder()->first()->id ?? Service::factory(),
             'name' => fake()->randomElement([
                 'Front-End Development Bootcamp',
                 'Full-Stack Web Development Program',
