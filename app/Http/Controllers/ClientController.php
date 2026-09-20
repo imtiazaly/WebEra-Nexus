@@ -6,9 +6,9 @@ use App\Http\Requests\StoreClientRequest;
 use App\Http\Requests\UpdateClientRequest;
 use App\Models\Client;
 use App\Models\Service;
+use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Http\RedirectResponse;
 
 class ClientController extends Controller
 {
@@ -45,7 +45,7 @@ class ClientController extends Controller
             'notes' => $validated['notes'] ?? null,
         ]);
 
-        if (!empty($validated['services'])) {
+        if (! empty($validated['services'])) {
             $attachData = [];
             foreach ($validated['services'] as $service) {
                 $attachData[$service['id']] = [
