@@ -256,16 +256,16 @@ const deleteInternship = (id: number) => {
     <Head title="Internship Academy Portal" />
 
     <div class="w-full space-y-8 p-4 sm:p-6 lg:p-8">
-        <!-- 🚀 MAGICAL HERO COMMAND CONSOLE -->
+        <!-- 🚀 MAGICAL HERO COMMAND CONSOLE (Light & Dark Responsive) -->
         <div
-            class="relative overflow-hidden rounded-3xl border border-indigo-500/20 bg-gradient-to-br from-indigo-950/90 via-slate-900 to-purple-950/90 p-6 sm:p-8 text-white shadow-2xl backdrop-blur-xl"
+            class="relative overflow-hidden rounded-3xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50/90 via-purple-50/60 to-slate-50/90 p-6 sm:p-8 text-slate-900 shadow-xl backdrop-blur-xl dark:border-indigo-500/20 dark:from-indigo-950/90 dark:via-slate-900 dark:to-purple-950/90 dark:text-white"
         >
             <!-- Background Glow Effects -->
             <div
-                class="pointer-events-none absolute -top-24 -right-24 h-96 w-96 rounded-full bg-indigo-500/20 blur-3xl"
+                class="pointer-events-none absolute -top-24 -right-24 h-96 w-96 rounded-full bg-indigo-500/15 blur-3xl dark:bg-indigo-500/20"
             ></div>
             <div
-                class="pointer-events-none absolute -bottom-24 -left-24 h-96 w-96 rounded-full bg-purple-500/20 blur-3xl"
+                class="pointer-events-none absolute -bottom-24 -left-24 h-96 w-96 rounded-full bg-purple-500/15 blur-3xl dark:bg-purple-500/20"
             ></div>
             <div
                 class="pointer-events-none absolute top-1/2 left-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-500/10 blur-3xl"
@@ -275,14 +275,14 @@ const deleteInternship = (id: number) => {
                 <!-- Top Title Row -->
                 <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div class="space-y-2">
-                        <div class="inline-flex items-center gap-2 rounded-full border border-indigo-400/30 bg-indigo-500/10 px-3.5 py-1 text-xs font-semibold tracking-wide text-indigo-300 backdrop-blur-md">
-                            <Sparkles class="h-3.5 w-3.5 animate-spin text-indigo-400" />
+                        <div class="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-3.5 py-1 text-xs font-semibold tracking-wide text-indigo-700 backdrop-blur-md dark:border-indigo-400/30 dark:bg-indigo-500/10 dark:text-indigo-300">
+                            <Sparkles class="h-3.5 w-3.5 animate-spin text-indigo-600 dark:text-indigo-400" />
                             <span>WebEra Academy & Internship Portal</span>
                         </div>
-                        <h1 class="text-2xl font-black tracking-tight text-white sm:text-3xl lg:text-4xl">
+                        <h1 class="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl lg:text-4xl dark:text-white">
                             Internship Command Hub
                         </h1>
-                        <p class="max-w-2xl text-xs font-medium text-slate-300 sm:text-sm">
+                        <p class="max-w-2xl text-xs font-medium text-slate-600 sm:text-sm dark:text-slate-300">
                             Real-time batch telemetry, trainee progress metrics, track allocations, and cohort velocity summaries at a glance.
                         </p>
                     </div>
@@ -292,7 +292,7 @@ const deleteInternship = (id: number) => {
                         <Button
                             as-child
                             size="lg"
-                            class="group relative overflow-hidden rounded-xl border border-indigo-400/40 bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 px-5 py-2.5 font-bold text-white shadow-lg transition-all duration-300 hover:scale-[1.02] hover:shadow-indigo-500/25"
+                            class="group relative overflow-hidden rounded-xl border border-indigo-500/30 bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 px-5 py-2.5 font-bold text-white shadow-lg transition-all duration-300 hover:scale-[1.02] hover:shadow-indigo-500/25"
                         >
                             <Link :href="create.url()">
                                 <Plus class="mr-2 h-5 w-5 transition-transform duration-300 group-hover:rotate-90" />
@@ -306,78 +306,78 @@ const deleteInternship = (id: number) => {
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 pt-2">
                     <!-- Widget 1: Active Cohorts Radar -->
                     <div
-                        class="group relative overflow-hidden rounded-2xl border border-emerald-500/30 bg-slate-900/60 p-4 transition-all duration-300 hover:border-emerald-500/60 hover:bg-slate-900/80"
+                        class="group relative overflow-hidden rounded-2xl border border-emerald-500/30 bg-white/90 p-4 shadow-sm transition-all duration-300 hover:border-emerald-500/60 hover:bg-white dark:bg-slate-900/60 dark:hover:bg-slate-900/80"
                     >
                         <div class="flex items-center justify-between">
-                            <span class="text-xs font-semibold tracking-wider text-emerald-400 uppercase">
+                            <span class="text-xs font-bold tracking-wider text-emerald-600 dark:text-emerald-400 uppercase">
                                 Active Cohorts
                             </span>
-                            <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                            <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
                                 <Zap class="h-4 w-4 animate-pulse" />
                             </div>
                         </div>
                         <div class="mt-3 flex items-baseline gap-2">
-                            <span class="text-3xl font-black text-white">
+                            <span class="text-3xl font-black text-slate-900 dark:text-white">
                                 {{ activeBatches.length }}
                             </span>
-                            <span class="text-xs font-semibold text-emerald-400">
+                            <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">
                                 / {{ totalBatches }} Batches
                             </span>
                         </div>
                         <!-- Micro Progress Pill -->
-                        <div class="mt-3 flex items-center justify-between text-[11px] text-slate-400">
-                            <span>Upcoming: <strong class="text-indigo-300">{{ upcomingBatches.length }}</strong></span>
-                            <span>Completed: <strong class="text-purple-300">{{ completedBatches.length }}</strong></span>
+                        <div class="mt-3 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                            <span>Upcoming: <strong class="text-indigo-600 dark:text-indigo-300">{{ upcomingBatches.length }}</strong></span>
+                            <span>Completed: <strong class="text-purple-600 dark:text-purple-300">{{ completedBatches.length }}</strong></span>
                         </div>
                     </div>
 
                     <!-- Widget 2: Enrolled Trainees -->
                     <div
-                        class="group relative overflow-hidden rounded-2xl border border-indigo-500/30 bg-slate-900/60 p-4 transition-all duration-300 hover:border-indigo-500/60 hover:bg-slate-900/80"
+                        class="group relative overflow-hidden rounded-2xl border border-indigo-500/30 bg-white/90 p-4 shadow-sm transition-all duration-300 hover:border-indigo-500/60 hover:bg-white dark:bg-slate-900/60 dark:hover:bg-slate-900/80"
                     >
                         <div class="flex items-center justify-between">
-                            <span class="text-xs font-semibold tracking-wider text-indigo-300 uppercase">
+                            <span class="text-xs font-bold tracking-wider text-indigo-600 dark:text-indigo-300 uppercase">
                                 Total Enrolled Interns
                             </span>
-                            <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
+                            <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-500/30">
                                 <GraduationCap class="h-4 w-4" />
                             </div>
                         </div>
                         <div class="mt-3 flex items-baseline gap-2">
-                            <span class="text-3xl font-black text-white">
+                            <span class="text-3xl font-black text-slate-900 dark:text-white">
                                 {{ totalInternsEnrolled }}
                             </span>
-                            <span class="text-xs font-medium text-slate-300">
+                            <span class="text-xs font-bold text-slate-600 dark:text-slate-300">
                                 Active Trainees
                             </span>
                         </div>
-                        <div class="mt-3 flex items-center gap-1 text-[11px] text-indigo-300 font-medium">
-                            <Users class="h-3.5 w-3.5 text-indigo-400" />
+                        <div class="mt-3 flex items-center gap-1 text-[11px] text-indigo-600 dark:text-indigo-300 font-semibold">
+                            <Users class="h-3.5 w-3.5 text-indigo-500 dark:text-indigo-400" />
                             <span>Distributed across {{ totalBatches }} batches</span>
                         </div>
                     </div>
 
                     <!-- Widget 3: Global Cohort Progress -->
                     <div
-                        class="group relative overflow-hidden rounded-2xl border border-cyan-500/30 bg-slate-900/60 p-4 transition-all duration-300 hover:border-cyan-500/60 hover:bg-slate-900/80"
+                        class="group relative overflow-hidden rounded-2xl border border-cyan-500/30 bg-white/90 p-4 shadow-sm transition-all duration-300 hover:border-cyan-500/60 hover:bg-white dark:bg-slate-900/60 dark:hover:bg-slate-900/80"
                     >
                         <div class="flex items-center justify-between">
-                            <span class="text-xs font-semibold tracking-wider text-cyan-300 uppercase">
+                            <span class="text-xs font-bold tracking-wider text-cyan-600 dark:text-cyan-300 uppercase">
                                 Avg Cohort Velocity
                             </span>
-                            <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+                            <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30">
                                 <TrendingUp class="h-4 w-4" />
                             </div>
                         </div>
                         <div class="mt-3 flex items-baseline gap-2">
-                            <span class="text-3xl font-black text-white">
+                            <span class="text-3xl font-black text-slate-900 dark:text-white">
                                 {{ globalAverageProgress }}%
                             </span>
-                            <span class="text-xs font-semibold text-cyan-300">
+                            <span class="text-xs font-bold text-cyan-600 dark:text-cyan-300">
                                 Overall Completion
                             </span>
                         </div>
-                        <div class="mt-3 w-full bg-slate-800 rounded-full h-1.5 overflow-hidden border border-slate-700">
+                        <div class="mt-3 w-full bg-slate-200 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden border border-slate-300/50 dark:border-slate-700">
                             <div
                                 class="bg-gradient-to-r from-cyan-500 to-indigo-500 h-full rounded-full transition-all duration-500"
                                 :style="{ width: `${globalAverageProgress}%` }"
@@ -387,21 +387,21 @@ const deleteInternship = (id: number) => {
 
                     <!-- Widget 4: Active Tracks Breakdown -->
                     <div
-                        class="group relative overflow-hidden rounded-2xl border border-purple-500/30 bg-slate-900/60 p-4 transition-all duration-300 hover:border-purple-500/60 hover:bg-slate-900/80"
+                        class="group relative overflow-hidden rounded-2xl border border-purple-500/30 bg-white/90 p-4 shadow-sm transition-all duration-300 hover:border-purple-500/60 hover:bg-white dark:bg-slate-900/60 dark:hover:bg-slate-900/80"
                     >
                         <div class="flex items-center justify-between">
-                            <span class="text-xs font-semibold tracking-wider text-purple-300 uppercase">
+                            <span class="text-xs font-bold tracking-wider text-purple-600 dark:text-purple-300 uppercase">
                                 Learning Tracks
                             </span>
-                            <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                            <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-500/20 text-purple-600 dark:text-purple-400 border border-purple-500/30">
                                 <Layers class="h-4 w-4" />
                             </div>
                         </div>
                         <div class="mt-3 flex items-baseline gap-2">
-                            <span class="text-3xl font-black text-white">
+                            <span class="text-3xl font-black text-slate-900 dark:text-white">
                                 {{ uniqueTracks.length }}
                             </span>
-                            <span class="text-xs font-medium text-purple-300">
+                            <span class="text-xs font-bold text-purple-600 dark:text-purple-300">
                                 Specialized Tracks
                             </span>
                         </div>
@@ -409,11 +409,11 @@ const deleteInternship = (id: number) => {
                             <span
                                 v-for="track in uniqueTracks.slice(0, 3)"
                                 :key="track"
-                                class="inline-block rounded-md bg-purple-500/20 px-2 py-0.5 text-[10px] font-semibold text-purple-200 border border-purple-500/30"
+                                class="inline-block rounded-md bg-purple-100 text-purple-700 border border-purple-200 dark:bg-purple-500/20 dark:text-purple-200 dark:border-purple-500/30 px-2 py-0.5 text-[10px] font-bold"
                             >
                                 {{ track }}
                             </span>
-                            <span v-if="uniqueTracks.length > 3" class="text-[10px] text-slate-400">
+                            <span v-if="uniqueTracks.length > 3" class="text-[10px] text-slate-500 dark:text-slate-400 font-semibold">
                                 +{{ uniqueTracks.length - 3 }} more
                             </span>
                         </div>
@@ -422,16 +422,16 @@ const deleteInternship = (id: number) => {
 
                 <!-- Lifecycle Progress Bar (Visual Summary of Batch States) -->
                 <div class="space-y-1.5 pt-2">
-                    <div class="flex items-center justify-between text-xs font-semibold text-slate-300">
+                    <div class="flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-300">
                         <span class="flex items-center gap-1.5">
-                            <Award class="h-3.5 w-3.5 text-indigo-400" />
+                            <Award class="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
                             Batch Lifecycle Allocation Status
                         </span>
-                        <span class="text-slate-400">
+                        <span class="text-slate-500 dark:text-slate-400">
                             {{ activeBatches.length }} Active • {{ upcomingBatches.length }} Upcoming • {{ completedBatches.length }} Graduated
                         </span>
                     </div>
-                    <div class="flex h-2.5 w-full overflow-hidden rounded-full bg-slate-800 p-0.5 border border-slate-700">
+                    <div class="flex h-2.5 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800 p-0.5 border border-slate-300/60 dark:border-slate-700">
                         <div
                             class="bg-emerald-500 rounded-l-full transition-all duration-500"
                             :style="{ width: `${totalBatches ? (activeBatches.length / totalBatches) * 100 : 0}%` }"

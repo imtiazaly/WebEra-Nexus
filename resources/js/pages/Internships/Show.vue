@@ -214,12 +214,12 @@ const filteredStudents = computed(() => {
     <Head :title="`${internship.name} • Cohort Hub`" />
 
     <div class="w-full space-y-8 p-4 sm:p-6 lg:p-8">
-        <!-- ⚡ HERO CYBER BANNER -->
+        <!-- ⚡ HERO CYBER BANNER (Light & Dark Responsive) -->
         <div
-            class="relative overflow-hidden rounded-3xl border border-indigo-500/20 bg-gradient-to-br from-indigo-950 via-slate-900 to-purple-950 p-6 sm:p-8 text-white shadow-2xl backdrop-blur-xl"
+            class="relative overflow-hidden rounded-3xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50/90 via-purple-50/60 to-slate-50/90 p-6 sm:p-8 text-slate-900 shadow-xl backdrop-blur-xl dark:border-indigo-500/20 dark:from-indigo-950 dark:via-slate-900 dark:to-purple-950 dark:text-white"
         >
-            <div class="pointer-events-none absolute -top-20 -right-20 h-80 w-80 rounded-full bg-indigo-500/20 blur-3xl"></div>
-            <div class="pointer-events-none absolute -bottom-20 -left-20 h-80 w-80 rounded-full bg-purple-500/20 blur-3xl"></div>
+            <div class="pointer-events-none absolute -top-20 -right-20 h-80 w-80 rounded-full bg-indigo-500/15 blur-3xl dark:bg-indigo-500/20"></div>
+            <div class="pointer-events-none absolute -bottom-20 -left-20 h-80 w-80 rounded-full bg-purple-500/15 blur-3xl dark:bg-purple-500/20"></div>
 
             <div class="relative z-10 space-y-6">
                 <!-- Top Navigation & Action Controls -->
@@ -228,7 +228,7 @@ const filteredStudents = computed(() => {
                         as-child
                         variant="outline"
                         size="sm"
-                        class="rounded-xl border-indigo-400/30 bg-slate-900/60 text-indigo-300 hover:bg-slate-800 hover:text-white"
+                        class="rounded-xl border-indigo-200/80 bg-white/80 text-indigo-700 hover:bg-white dark:border-indigo-400/30 dark:bg-slate-900/60 dark:text-indigo-300 dark:hover:bg-slate-800 dark:hover:text-white"
                     >
                         <Link :href="index.url()">
                             <ArrowLeft class="mr-1.5 h-4 w-4" /> Back to Internship Hub
@@ -240,10 +240,10 @@ const filteredStudents = computed(() => {
                             as-child
                             variant="outline"
                             size="sm"
-                            class="rounded-xl border-slate-700 bg-slate-900/60 font-semibold text-slate-200 hover:bg-slate-800 hover:text-white"
+                            class="rounded-xl border-slate-300/80 bg-white/80 font-semibold text-slate-700 hover:bg-white dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-white"
                         >
                             <Link :href="edit.url(internship.id)">
-                                <Pencil class="mr-1.5 h-3.5 w-3.5 text-indigo-400" /> Edit Batch
+                                <Pencil class="mr-1.5 h-3.5 w-3.5 text-indigo-500 dark:text-indigo-400" /> Edit Batch
                             </Link>
                         </Button>
 
@@ -265,12 +265,12 @@ const filteredStudents = computed(() => {
                         <!-- Hologram Code Box -->
                         <button
                             @click="copyCode"
-                            class="inline-flex items-center gap-1.5 rounded-lg border border-indigo-400/30 bg-indigo-500/10 px-3 py-1 font-mono text-xs font-bold text-indigo-300 backdrop-blur-md transition-all hover:bg-indigo-500/20"
+                            class="inline-flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-1 font-mono text-xs font-bold text-indigo-700 backdrop-blur-md transition-all hover:bg-indigo-100 dark:border-indigo-400/30 dark:bg-indigo-500/10 dark:text-indigo-300 dark:hover:bg-indigo-500/20"
                             title="Copy Batch Code"
                         >
                             <span>🏷️ {{ internship.batch_no }}</span>
-                            <Check v-if="copiedBatchCode" class="h-3.5 w-3.5 text-emerald-400" />
-                            <Copy v-else class="h-3.5 w-3.5 text-indigo-400" />
+                            <Check v-if="copiedBatchCode" class="h-3.5 w-3.5 text-emerald-500 dark:text-emerald-400" />
+                            <Copy v-else class="h-3.5 w-3.5 text-indigo-500 dark:text-indigo-400" />
                         </button>
 
                         <!-- Status Badge -->
@@ -287,35 +287,35 @@ const filteredStudents = computed(() => {
                         <!-- Track Tag -->
                         <Badge
                             variant="secondary"
-                            class="rounded-lg border border-purple-400/30 bg-purple-500/10 px-3 py-1 text-xs font-semibold text-purple-300"
+                            class="rounded-lg border border-purple-200 bg-purple-50 px-3 py-1 text-xs font-semibold text-purple-700 dark:border-purple-400/30 dark:bg-purple-500/10 dark:text-purple-300"
                         >
                             Track: {{ internship.service?.name || 'General Training' }}
                         </Badge>
                     </div>
 
-                    <h1 class="text-2xl font-black tracking-tight text-white sm:text-4xl">
+                    <h1 class="text-2xl font-black tracking-tight text-slate-900 sm:text-4xl dark:text-white">
                         {{ internship.name }}
                     </h1>
                 </div>
 
                 <!-- Timeline Bar inside Hero -->
-                <div class="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 space-y-2">
+                <div class="rounded-2xl border border-slate-200/80 bg-white/80 p-4 space-y-2 dark:border-slate-800 dark:bg-slate-900/60">
                     <div class="flex items-center justify-between text-xs font-semibold">
-                        <span class="flex items-center gap-2 text-slate-300">
-                            <Clock class="h-4 w-4 text-indigo-400" />
+                        <span class="flex items-center gap-2 text-slate-700 dark:text-slate-300">
+                            <Clock class="h-4 w-4 text-indigo-500 dark:text-indigo-400" />
                             <span>Batch Duration Progress</span>
                         </span>
-                        <span class="font-mono text-indigo-400 font-bold">
+                        <span class="font-mono text-indigo-600 dark:text-indigo-400 font-bold">
                             {{ getTimelineProgress(internship.start_date, internship.end_date, internship.status) }}% Duration Elapsed
                         </span>
                     </div>
-                    <div class="h-2.5 w-full bg-slate-800 rounded-full overflow-hidden border border-slate-700">
+                    <div class="h-2.5 w-full bg-slate-200 rounded-full overflow-hidden border border-slate-300/50 dark:bg-slate-800 dark:border-slate-700">
                         <div
                             class="h-full bg-gradient-to-r from-indigo-500 via-cyan-500 to-emerald-500 rounded-full transition-all duration-500"
                             :style="{ width: `${getTimelineProgress(internship.start_date, internship.end_date, internship.status)}%` }"
                         ></div>
                     </div>
-                    <div class="flex items-center justify-between text-xs text-slate-400 font-medium">
+                    <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 font-medium">
                         <span>Started: <strong>{{ formatDate(internship.start_date) }}</strong></span>
                         <span>Target Completion: <strong>{{ formatDate(internship.end_date) }}</strong></span>
                     </div>
