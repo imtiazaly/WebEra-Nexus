@@ -25,7 +25,7 @@ class ProjectFactory extends Factory
 
         return [
             'client_id' => fake()->boolean(80) ? Client::factory() : null,
-            'service_id' => fn() => Service::inRandomOrder()->first()->id ?? Service::factory(),
+            'service_id' => fn () => Service::inRandomOrder()->first()->id ?? Service::factory(),
             'title' => fake()->randomElement([
                 'E-Commerce Website Redesign',
                 'Corporate Portfolio Website',

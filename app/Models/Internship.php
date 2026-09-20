@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
+use Database\Factories\InternshipFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Database\Factories\InternshipFactory;
 
 class Internship extends Model
 {

@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use Database\Factories\WeeklyReportFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Database\Factories\WeeklyReportFactory;
 
 class WeeklyReport extends Model
 {
