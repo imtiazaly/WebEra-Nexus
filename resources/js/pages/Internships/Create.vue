@@ -21,6 +21,7 @@ import {
     CheckCircle2,
     Eye,
 } from '@lucide/vue';
+import TrackManagerDrawer from '@/components/TrackManagerDrawer.vue';
 
 defineOptions({
     layout: {
@@ -48,6 +49,8 @@ interface InternshipForm {
     end_date: string;
     status: string;
 }
+
+const isTrackDrawerOpen = ref(false);
 
 const form = useForm<InternshipForm>({
     service_id: '',
@@ -176,17 +179,26 @@ const submit = () => {
 
                                     <!-- Service Track -->
                                     <div class="space-y-2">
-                                        <label class="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                                            <Layers class="h-3.5 w-3.5 text-indigo-500" />
-                                            Learning Track *
-                                        </label>
+                                        <div class="flex items-center justify-between">
+                                            <label class="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                                                <Layers class="h-3.5 w-3.5 text-indigo-500" />
+                                                Learning Track *
+                                            </label>
+                                            <button
+                                                type="button"
+                                                @click="isTrackDrawerOpen = true"
+                                                class="text-[11px] font-bold text-indigo-600 hover:underline dark:text-indigo-400"
+                                            >
+                                                + Manage Tracks
+                                            </button>
+                                        </div>
                                         <select
                                             v-model="form.service_id"
                                             required
-                                            class="h-11 w-full rounded-xl border border-slate-200 bg-slate-50/70 px-3 text-sm font-semibold text-slate-800 focus:border-indigo-500 focus:bg-white dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-200"
+                                            class="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-900 shadow-xs focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                                         >
-                                            <option value="" disabled>-- Select Learning Track --</option>
-                                            <option v-for="service in services" :key="service.id" :value="service.id">
+                                            <option value="" disabled class="bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100">-- Select Learning Track --</option>
+                                            <option v-for="service in services" :key="service.id" :value="service.id" class="bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100">
                                                 {{ service.name }}
                                             </option>
                                         </select>
@@ -405,5 +417,11 @@ const submit = () => {
                 </div>
             </div>
         </div>
+
+        <TrackManagerDrawer
+            :is-open="isTrackDrawerOpen"
+            :tracks="services || []"
+            @close="isTrackDrawerOpen = false"
+        />
     </div>
 </template>

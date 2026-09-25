@@ -40,6 +40,8 @@ import {
     Check,
 } from '@lucide/vue';
 
+import TrackManagerDrawer from '@/components/TrackManagerDrawer.vue';
+
 defineOptions({
     layout: {
         breadcrumbs: [{ title: 'Internship Academy Portal', href: index.url() }],
@@ -83,10 +85,12 @@ interface PaginatedInternships {
 
 const props = defineProps<{
     internships: PaginatedInternships;
+    all_tracks?: any[];
 }>();
 
 // State
 const searchQuery = ref('');
+const isTrackDrawerOpen = ref(false);
 const selectedStatus = ref<string>('active');
 const selectedTrack = ref<string>('all');
 const viewMode = ref<'grid' | 'timeline'>('grid');
@@ -287,8 +291,18 @@ const deleteInternship = (id: number) => {
                         </p>
                     </div>
 
-                    <!-- Create Batch Action -->
-                    <div class="flex items-center gap-3">
+                    <!-- Create Batch & Manage Tracks Actions -->
+                    <div class="flex flex-wrap items-center gap-3">
+                        <Button
+                            variant="outline"
+                            size="lg"
+                            @click="isTrackDrawerOpen = true"
+                            class="rounded-xl border-indigo-200/80 bg-white/80 font-bold text-indigo-700 hover:bg-white dark:border-indigo-400/30 dark:bg-slate-900/60 dark:text-indigo-300 dark:hover:bg-slate-800 dark:hover:text-white"
+                        >
+                            <Layers class="mr-2 h-4 w-4 text-indigo-500" />
+                            <span>Manage Tracks ⚙️</span>
+                        </Button>
+
                         <Button
                             as-child
                             size="lg"
@@ -841,5 +855,12 @@ const deleteInternship = (id: number) => {
                 </div>
             </div>
         </div>
+
+        <!-- In-Context Track Manager Drawer -->
+        <TrackManagerDrawer
+            :is-open="isTrackDrawerOpen"
+            :tracks="all_tracks || []"
+            @close="isTrackDrawerOpen = false"
+        />
     </div>
 </template>

@@ -22,14 +22,20 @@ class InternshipController extends Controller
             ->latest()
             ->paginate(15);
 
+        $allTracks = Service::forInternships()
+            ->withCount('internships')
+            ->latest()
+            ->get();
+
         return Inertia::render('Internships/Index', [
             'internships' => $internships,
+            'all_tracks' => $allTracks,
         ]);
     }
 
     public function create(): Response
     {
-        $services = Service::where('is_active', true)->get(['id', 'name']);
+        $services = Service::where('is_active', true)->forInternships()->get(['id', 'name']);
 
         return Inertia::render('Internships/Create', [
             'services' => $services,
@@ -60,7 +66,7 @@ class InternshipController extends Controller
 
     public function edit(Internship $internship): Response
     {
-        $services = Service::where('is_active', true)->get(['id', 'name']);
+        $services = Service::where('is_active', true)->forInternships()->get(['id', 'name']);
 
         return Inertia::render('Internships/Edit', [
             'internship' => $internship,

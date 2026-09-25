@@ -5,6 +5,7 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InternshipController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\WeeklyReportController;
 use Illuminate\Support\Facades\Route;
@@ -17,6 +18,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('clients', ClientController::class);
     Route::resource('projects', ProjectController::class);
     Route::resource('internships', InternshipController::class);
+
+    // In-context Service and Internship Track Management Routes
+    Route::post('services', [ServiceController::class, 'store'])->name('services.store');
+    Route::put('services/{service}', [ServiceController::class, 'update'])->name('services.update');
+    Route::delete('services/{service}', [ServiceController::class, 'destroy'])->name('services.destroy');
+    Route::post('services/{service}/toggle', [ServiceController::class, 'toggle'])->name('services.toggle');
 
     // Resource routes for students and weekly reports with additional custom routes
     Route::resource('students', StudentController::class);

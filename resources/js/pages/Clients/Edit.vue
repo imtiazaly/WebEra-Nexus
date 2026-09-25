@@ -60,10 +60,14 @@ interface Client {
     created_at: string;
 }
 
+import ServiceManagerDrawer from '@/components/ServiceManagerDrawer.vue';
+
 const props = defineProps<{
     client: Client;
     services: Service[];
 }>();
+
+const isServiceDrawerOpen = ref(false);
 
 // Helper for Initials
 const getInitials = (name: string) => {
@@ -418,12 +422,21 @@ const submit = () => {
                                         Services Requested
                                     </CardTitle>
                                 </div>
-                                <Badge
-                                    variant="secondary"
-                                    class="text-xs font-semibold"
-                                >
-                                    {{ selectedServices.length }} Selected
-                                </Badge>
+                                <div class="flex items-center gap-2">
+                                    <button
+                                        type="button"
+                                        @click="isServiceDrawerOpen = true"
+                                        class="text-xs font-bold text-indigo-600 hover:underline dark:text-indigo-400"
+                                    >
+                                        + Manage Services
+                                    </button>
+                                    <Badge
+                                        variant="secondary"
+                                        class="text-xs font-semibold"
+                                    >
+                                        {{ selectedServices.length }} Selected
+                                    </Badge>
+                                </div>
                             </div>
                             <CardDescription class="text-xs text-slate-500">
                                 Select or adjust services requested and update
@@ -541,6 +554,11 @@ const submit = () => {
                     </Card>
                 </div>
             </div>
-        </form>
+        <!-- In-Context Service Manager Drawer -->
+        <ServiceManagerDrawer
+            :is-open="isServiceDrawerOpen"
+            :services="services || []"
+            @close="isServiceDrawerOpen = false"
+        />
     </div>
 </template>

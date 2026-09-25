@@ -18,14 +18,20 @@ class ClientController extends Controller
             ->latest()
             ->paginate(15);
 
+        $allClientServices = Service::forClients()
+            ->withCount('clients')
+            ->latest()
+            ->get();
+
         return Inertia::render('Clients/Index', [
             'clients' => $clients,
+            'all_client_services' => $allClientServices,
         ]);
     }
 
     public function create(): Response
     {
-        $services = Service::where('is_active', true)->get(['id', 'name']);
+        $services = Service::where('is_active', true)->forClients()->get(['id', 'name']);
 
         return Inertia::render('Clients/Create', [
             'services' => $services,
@@ -72,7 +78,7 @@ class ClientController extends Controller
     public function edit(Client $client): Response
     {
         $client->load('services');
-        $services = Service::where('is_active', true)->get(['id', 'name']);
+        $services = Service::where('is_active', true)->forClients()->get(['id', 'name']);
 
         return Inertia::render('Clients/Edit', [
             'client' => $client,
