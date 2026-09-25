@@ -5,13 +5,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
-    X,
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+} from "@/components/ui/dialog";
+import {
     Plus,
     Pencil,
     Trash2,
     Layers,
-    Sparkles,
-    Check,
     Search,
     ToggleLeft,
     ToggleRight,
@@ -33,7 +37,15 @@ const props = defineProps<{
     tracks: ServiceTrack[];
 }>();
 
-const emit = defineEmits(["close"]);
+const emit = defineEmits<{
+    (e: "close"): void;
+}>();
+
+const handleOpenChange = (open: boolean) => {
+    if (!open) {
+        emit("close");
+    }
+};
 
 const searchQuery = ref("");
 const editingTrackId = ref<number | null>(null);
@@ -108,46 +120,38 @@ const filteredTracks = computed(() => {
 </script>
 
 <template>
-    <!-- Drawer Overlay Backdrop -->
-    <div
-        v-if="isOpen"
-        class="fixed inset-0 z-50 flex justify-end bg-slate-950/60 backdrop-blur-xs transition-all duration-300"
-        @click.self="emit('close')"
-    >
-        <!-- Drawer Panel -->
-        <div
-            class="relative flex h-full w-full max-w-xl flex-col border-l border-slate-200 bg-white p-6 shadow-2xl transition-all dark:border-slate-800 dark:bg-slate-900"
+    <Dialog :open="isOpen" @update:open="handleOpenChange">
+        <DialogContent
+            class="max-w-2xl sm:max-w-2xl max-h-[85vh] flex flex-col p-6 gap-0"
         >
             <!-- Header -->
-            <div
-                class="flex items-center justify-between border-b border-slate-200/80 pb-4 dark:border-slate-800"
+            <DialogHeader
+                class="pb-4 border-b border-slate-200/80 dark:border-slate-800"
             >
-                <div class="space-y-1">
+                <div class="space-y-1 text-left">
                     <div
                         class="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-0.5 text-xs font-semibold text-indigo-700 dark:border-indigo-400/30 dark:bg-indigo-500/10 dark:text-indigo-300"
                     >
                         <Layers class="h-3.5 w-3.5 text-indigo-500" />
                         <span>Academy Track Manager</span>
                     </div>
-                    <h2
+                    <DialogTitle
                         class="text-xl font-black tracking-tight text-slate-900 dark:text-white"
                     >
                         Internship Learning Tracks
-                    </h2>
+                    </DialogTitle>
+                    <DialogDescription
+                        class="text-xs text-slate-500 dark:text-slate-400"
+                    >
+                        Manage learning tracks and syllabi for internships.
+                    </DialogDescription>
                 </div>
-
-                <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    @click="emit('close')"
-                    class="rounded-xl text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                >
-                    <X class="h-5 w-5" />
-                </Button>
-            </div>
+            </DialogHeader>
 
             <!-- Scrollable Body -->
-            <div class="flex-1 overflow-y-auto space-y-6 py-6 pr-1">
+            <div
+                class="flex-1 overflow-y-auto scrollbar-hide space-y-6 pt-4 pr-1"
+            >
                 <!-- 1. ADD NEW TRACK INLINE FORM -->
                 <div
                     class="rounded-2xl border border-indigo-500/30 bg-indigo-50/50 p-4 space-y-4 dark:border-indigo-500/20 dark:bg-indigo-950/30"
@@ -238,16 +242,17 @@ const filteredTracks = computed(() => {
                                     <Button
                                         type="button"
                                         variant="ghost"
-                                        size="xs"
+                                        size="sm"
                                         @click="cancelEdit"
                                         >Cancel</Button
                                     >
                                     <Button
                                         type="submit"
-                                        size="xs"
-                                        class="bg-indigo-600 text-white"
-                                        >Save Changes</Button
+                                        size="sm"
+                                        class="bg-indigo-600 text-white hover:bg-indigo-700"
                                     >
+                                        Save Changes
+                                    </Button>
                                 </div>
                             </form>
 
@@ -293,9 +298,7 @@ const filteredTracks = computed(() => {
                                             <GraduationCap
                                                 class="h-3.5 w-3.5"
                                             />
-                                            {{
-                                                track.internships_count || 0
-                                            }}
+                                            {{ track.internships_count || 0 }}
                                             Batches Linked
                                         </span>
                                     </div>
@@ -305,7 +308,7 @@ const filteredTracks = computed(() => {
                                 <div class="flex items-center gap-1">
                                     <Button
                                         variant="ghost"
-                                        size="icon-xs"
+                                        size="icon-lg"
                                         @click="toggleTrackStatus(track.id)"
                                         :title="
                                             track.is_active
@@ -326,7 +329,7 @@ const filteredTracks = computed(() => {
 
                                     <Button
                                         variant="ghost"
-                                        size="icon-xs"
+                                        size="icon-lg"
                                         @click="startEdit(track)"
                                         title="Edit Track"
                                         class="text-slate-400 hover:text-slate-900 dark:hover:text-white"
@@ -336,7 +339,7 @@ const filteredTracks = computed(() => {
 
                                     <Button
                                         variant="ghost"
-                                        size="icon-xs"
+                                        size="icon-lg"
                                         @click="deleteTrack(track)"
                                         title="Delete or Archive Track"
                                         class="text-slate-400 hover:text-rose-600"
@@ -349,6 +352,17 @@ const filteredTracks = computed(() => {
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
+        </DialogContent>
+    </Dialog>
 </template>
+
+<style scoped>
+.scrollbar-hide {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+</style>

@@ -34,7 +34,7 @@ import {
     ChevronRight,
 } from '@lucide/vue';
 
-import ServiceManagerDrawer from '@/components/ServiceManagerDrawer.vue';
+import ServiceManagerModal from '@/components/ServiceManagerModal.vue';
 import { Briefcase } from '@lucide/vue';
 
 defineOptions({
@@ -82,7 +82,7 @@ const props = defineProps<{
 // Search & Filter State
 const searchQuery = ref('');
 const selectedStatus = ref<string>('all');
-const isServiceDrawerOpen = ref(false);
+const isServiceModalOpen = ref(false);
 
 // Helper for Initials
 const getInitials = (name: string) => {
@@ -224,7 +224,7 @@ const deleteClient = (id: number) => {
                 <Button
                     variant="outline"
                     size="default"
-                    @click="isServiceDrawerOpen = true"
+                    @click="isServiceModalOpen = true"
                     class="rounded-xl border-slate-200 bg-white font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
                 >
                     <Briefcase class="mr-1.5 h-4 w-4 text-indigo-500" />
@@ -875,11 +875,11 @@ const deleteClient = (id: number) => {
             </CardContent>
         </Card>
 
-        <!-- In-Context Service Manager Drawer -->
-        <ServiceManagerDrawer
-            :is-open="isServiceDrawerOpen"
+        <!-- In-Context Service Manager Modal -->
+        <ServiceManagerModal
+            :is-open="isServiceModalOpen"
             :services="all_client_services || []"
-            @close="isServiceDrawerOpen = false"
+            @close="isServiceModalOpen = false"
         />
     </div>
 </template>

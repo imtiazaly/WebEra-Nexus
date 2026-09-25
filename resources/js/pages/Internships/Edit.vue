@@ -21,7 +21,7 @@ import {
     Eye,
     Save,
 } from '@lucide/vue';
-import TrackManagerDrawer from '@/components/TrackManagerDrawer.vue';
+import TrackManagerModal from '@/components/TrackManagerModal.vue';
 
 defineOptions({
     layout: {
@@ -53,7 +53,7 @@ const props = defineProps<{
     services: Service[];
 }>();
 
-const isTrackDrawerOpen = ref(false);
+const isTrackModalOpen = ref(false);
 
 const form = useForm({
     name: props.internship.name,
@@ -187,7 +187,7 @@ const submit = () => {
                                             </label>
                                             <button
                                                 type="button"
-                                                @click="isTrackDrawerOpen = true"
+                                                @click="isTrackModalOpen = true"
                                                 class="text-[11px] font-bold text-indigo-600 hover:underline dark:text-indigo-400"
                                             >
                                                 + Manage Tracks
@@ -421,10 +421,10 @@ const submit = () => {
             </div>
         </div>
 
-        <TrackManagerDrawer
-            :is-open="isTrackDrawerOpen"
+        <TrackManagerModal
+            :is-open="isTrackModalOpen"
             :tracks="services || []"
-            @close="isTrackDrawerOpen = false"
+            @close="isTrackModalOpen = false"
         />
     </div>
 </template>

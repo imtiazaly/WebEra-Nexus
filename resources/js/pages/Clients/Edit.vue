@@ -60,14 +60,14 @@ interface Client {
     created_at: string;
 }
 
-import ServiceManagerDrawer from '@/components/ServiceManagerDrawer.vue';
+import ServiceManagerModal from '@/components/ServiceManagerModal.vue';
 
 const props = defineProps<{
     client: Client;
     services: Service[];
 }>();
 
-const isServiceDrawerOpen = ref(false);
+const isServiceModalOpen = ref(false);
 
 // Helper for Initials
 const getInitials = (name: string) => {
@@ -425,7 +425,7 @@ const submit = () => {
                                 <div class="flex items-center gap-2">
                                     <button
                                         type="button"
-                                        @click="isServiceDrawerOpen = true"
+                                        @click="isServiceModalOpen = true"
                                         class="text-xs font-bold text-indigo-600 hover:underline dark:text-indigo-400"
                                     >
                                         + Manage Services
@@ -554,11 +554,11 @@ const submit = () => {
                     </Card>
                 </div>
             </div>
-        <!-- In-Context Service Manager Drawer -->
-        <ServiceManagerDrawer
-            :is-open="isServiceDrawerOpen"
+        <!-- In-Context Service Manager Modal -->
+        <ServiceManagerModal
+            :is-open="isServiceModalOpen"
             :services="services || []"
-            @close="isServiceDrawerOpen = false"
+            @close="isServiceModalOpen = false"
         />
     </div>
 </template>

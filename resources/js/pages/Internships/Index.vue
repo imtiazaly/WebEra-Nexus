@@ -40,7 +40,7 @@ import {
     Check,
 } from '@lucide/vue';
 
-import TrackManagerDrawer from '@/components/TrackManagerDrawer.vue';
+import TrackManagerModal from '@/components/TrackManagerModal.vue';
 
 defineOptions({
     layout: {
@@ -90,7 +90,7 @@ const props = defineProps<{
 
 // State
 const searchQuery = ref('');
-const isTrackDrawerOpen = ref(false);
+const isTrackModalOpen = ref(false);
 const selectedStatus = ref<string>('active');
 const selectedTrack = ref<string>('all');
 const viewMode = ref<'grid' | 'timeline'>('grid');
@@ -296,7 +296,7 @@ const deleteInternship = (id: number) => {
                         <Button
                             variant="outline"
                             size="lg"
-                            @click="isTrackDrawerOpen = true"
+                            @click="isTrackModalOpen = true"
                             class="rounded-xl border-indigo-200/80 bg-white/80 font-bold text-indigo-700 hover:bg-white dark:border-indigo-400/30 dark:bg-slate-900/60 dark:text-indigo-300 dark:hover:bg-slate-800 dark:hover:text-white"
                         >
                             <Layers class="mr-2 h-4 w-4 text-indigo-500" />
@@ -856,11 +856,11 @@ const deleteInternship = (id: number) => {
             </div>
         </div>
 
-        <!-- In-Context Track Manager Drawer -->
-        <TrackManagerDrawer
-            :is-open="isTrackDrawerOpen"
+        <!-- In-Context Track Manager Modal -->
+        <TrackManagerModal
+            :is-open="isTrackModalOpen"
             :tracks="all_tracks || []"
-            @close="isTrackDrawerOpen = false"
+            @close="isTrackModalOpen = false"
         />
     </div>
 </template>

@@ -21,7 +21,7 @@ import {
     CheckCircle2,
     Eye,
 } from '@lucide/vue';
-import TrackManagerDrawer from '@/components/TrackManagerDrawer.vue';
+import TrackManagerModal from '@/components/TrackManagerModal.vue';
 
 defineOptions({
     layout: {
@@ -35,6 +35,11 @@ defineOptions({
 interface Service {
     id: number;
     name: string;
+    slug: string;
+    type: string;
+    description: string | null;
+    is_active: boolean;
+    internships_count?: number;
 }
 
 const props = defineProps<{
@@ -50,7 +55,7 @@ interface InternshipForm {
     status: string;
 }
 
-const isTrackDrawerOpen = ref(false);
+const isTrackModalOpen = ref(false);
 
 const form = useForm<InternshipForm>({
     service_id: '',
@@ -94,7 +99,7 @@ const submit = () => {
     <div class="w-full space-y-8 p-4 sm:p-6 lg:p-8">
         <!-- 🌟 HERO HEADER BANNER -->
         <div
-            class="relative overflow-hidden rounded-3xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50/90 via-purple-50/60 to-slate-50/90 p-6 sm:p-8 text-slate-900 shadow-xl backdrop-blur-xl dark:border-indigo-500/20 dark:from-indigo-950 dark:via-slate-900 dark:to-purple-950 dark:text-white"
+            class="relative overflow-hidden rounded-3xl border border-indigo-200/80 bg-linear-to-br from-indigo-50/90 via-purple-50/60 to-slate-50/90 p-6 sm:p-8 text-slate-900 shadow-xl backdrop-blur-xl dark:border-indigo-500/20 dark:from-indigo-950 dark:via-slate-900 dark:to-purple-950 dark:text-white"
         >
             <div class="pointer-events-none absolute -top-20 -right-20 h-80 w-80 rounded-full bg-indigo-500/15 blur-3xl dark:bg-indigo-500/20"></div>
             <div class="pointer-events-none absolute -bottom-20 -left-20 h-80 w-80 rounded-full bg-purple-500/15 blur-3xl dark:bg-purple-500/20"></div>
@@ -186,7 +191,7 @@ const submit = () => {
                                             </label>
                                             <button
                                                 type="button"
-                                                @click="isTrackDrawerOpen = true"
+                                                @click="isTrackModalOpen = true"
                                                 class="text-[11px] font-bold text-indigo-600 hover:underline dark:text-indigo-400"
                                             >
                                                 + Manage Tracks
@@ -359,7 +364,7 @@ const submit = () => {
 
                 <!-- Preview Hologram Card -->
                 <div class="relative overflow-hidden rounded-3xl border border-indigo-500/30 bg-white p-6 shadow-xl dark:bg-slate-900">
-                    <div class="pointer-events-none absolute -top-12 -right-12 h-36 w-36 rounded-full bg-gradient-to-br from-indigo-500/20 to-purple-500/10 blur-2xl"></div>
+                    <div class="pointer-events-none absolute -top-12 -right-12 h-36 w-36 rounded-full bg-linear-to-br from-indigo-500/20 to-purple-500/10 blur-2xl"></div>
 
                     <div class="relative z-10 space-y-5">
                         <!-- Top Row Code + Status -->
@@ -418,10 +423,10 @@ const submit = () => {
             </div>
         </div>
 
-        <TrackManagerDrawer
-            :is-open="isTrackDrawerOpen"
+        <TrackManagerModal
+            :is-open="isTrackModalOpen"
             :tracks="services || []"
-            @close="isTrackDrawerOpen = false"
+            @close="isTrackModalOpen = false"
         />
     </div>
 </template>
