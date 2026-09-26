@@ -31,7 +31,7 @@ class ClientController extends Controller
 
     public function create(): Response
     {
-        $services = Service::where('is_active', true)->forClients()->get(['id', 'name']);
+        $services = Service::where('is_active', true)->forClients()->get();
 
         return Inertia::render('Clients/Create', [
             'services' => $services,
@@ -78,7 +78,7 @@ class ClientController extends Controller
     public function edit(Client $client): Response
     {
         $client->load('services');
-        $services = Service::where('is_active', true)->forClients()->get(['id', 'name']);
+        $services = Service::where('is_active', true)->forClients()->get();
 
         return Inertia::render('Clients/Edit', [
             'client' => $client,

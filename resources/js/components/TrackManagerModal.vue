@@ -22,13 +22,13 @@ import {
     GraduationCap,
 } from "@lucide/vue";
 
-interface ServiceTrack {
+export interface ServiceTrack {
     id: number;
     name: string;
-    slug: string;
-    type: string;
-    description: string | null;
-    is_active: boolean;
+    slug?: string;
+    type?: string;
+    description?: string | null;
+    is_active?: boolean;
     internships_count?: number;
 }
 
@@ -80,7 +80,7 @@ const startEdit = (track: ServiceTrack) => {
     editTrackForm.name = track.name;
     editTrackForm.type = track.type || "internship";
     editTrackForm.description = track.description || "";
-    editTrackForm.is_active = track.is_active;
+    editTrackForm.is_active = track.is_active ?? true;
 };
 
 const cancelEdit = () => {
@@ -270,14 +270,14 @@ const filteredTracks = computed(() => {
                                         </h4>
                                         <Badge
                                             :variant="
-                                                track.is_active
+                                                track.is_active !== false
                                                     ? 'default'
                                                     : 'secondary'
                                             "
                                             class="rounded-full px-2 py-0.2 text-[10px] font-bold"
                                         >
                                             {{
-                                                track.is_active
+                                                track.is_active !== false
                                                     ? "Active"
                                                     : "Inactive"
                                             }}
@@ -311,14 +311,14 @@ const filteredTracks = computed(() => {
                                         size="icon-lg"
                                         @click="toggleTrackStatus(track.id)"
                                         :title="
-                                            track.is_active
+                                            track.is_active !== false
                                                 ? 'Deactivate Track'
                                                 : 'Activate Track'
                                         "
                                         class="text-slate-400 hover:text-indigo-600"
                                     >
                                         <ToggleRight
-                                            v-if="track.is_active"
+                                            v-if="track.is_active !== false"
                                             class="h-4 w-4 text-emerald-500"
                                         />
                                         <ToggleLeft

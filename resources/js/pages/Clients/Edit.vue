@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
-import { index, show, update } from '@/routes/clients';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { ref } from "vue";
+import { Head, Link, useForm } from "@inertiajs/vue3";
+import { index, show, update } from "@/routes/clients";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
     Card,
     CardContent,
     CardHeader,
     CardTitle,
     CardDescription,
-} from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import InputError from '@/components/InputError.vue';
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import InputError from "@/components/InputError.vue";
 import {
     ArrowLeft,
     User,
@@ -28,13 +28,13 @@ import {
     Loader2,
     Pencil,
     UserCheck,
-} from '@lucide/vue';
+} from "@lucide/vue";
 
 defineOptions({
     layout: {
         breadcrumbs: [
-            { title: 'Clients & Leads', href: index.url() },
-            { title: 'Edit Client', href: '#' },
+            { title: "Clients & Leads", href: index.url() },
+            { title: "Edit Client", href: "#" },
         ],
     },
 });
@@ -42,6 +42,10 @@ defineOptions({
 interface Service {
     id: number;
     name: string;
+    slug?: string;
+    type?: string;
+    description?: string | null;
+    is_active?: boolean;
     pivot?: {
         requirements: string | null;
         estimated_budget: number | null;
@@ -60,7 +64,7 @@ interface Client {
     created_at: string;
 }
 
-import ServiceManagerModal from '@/components/ServiceManagerModal.vue';
+import ServiceManagerModal from "@/components/ServiceManagerModal.vue";
 
 const props = defineProps<{
     client: Client;
@@ -71,8 +75,8 @@ const isServiceModalOpen = ref(false);
 
 // Helper for Initials
 const getInitials = (name: string) => {
-    if (!name) return 'CL';
-    const parts = name.trim().split(' ');
+    if (!name) return "CL";
+    const parts = name.trim().split(" ");
     if (parts.length >= 2) {
         return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
     }
@@ -86,24 +90,24 @@ const selectedServices = ref<
     props.client.services
         ? props.client.services.map((s) => ({
               id: s.id,
-              requirements: s.pivot?.requirements || '',
+              requirements: s.pivot?.requirements || "",
               estimated_budget:
                   s.pivot?.estimated_budget !== null &&
                   s.pivot?.estimated_budget !== undefined
                       ? String(s.pivot.estimated_budget)
-                      : '',
+                      : "",
           }))
         : [],
 );
 
 // Pre-populate Form Data
 const form = useForm({
-    name: props.client.name || '',
-    email: props.client.email || '',
-    phone: props.client.phone || '',
-    company_name: props.client.company_name || '',
-    status: props.client.status || 'new_lead',
-    notes: props.client.notes || '',
+    name: props.client.name || "",
+    email: props.client.email || "",
+    phone: props.client.phone || "",
+    company_name: props.client.company_name || "",
+    status: props.client.status || "new_lead",
+    notes: props.client.notes || "",
     services: [] as {
         id: number;
         requirements: string;
@@ -118,8 +122,8 @@ const toggleService = (serviceId: number) => {
     } else {
         selectedServices.value.push({
             id: serviceId,
-            requirements: '',
-            estimated_budget: '',
+            requirements: "",
+            estimated_budget: "",
         });
     }
 };
@@ -219,8 +223,8 @@ const submit = () => {
                         <Pencil v-else class="mr-1.5 h-3.5 w-3.5" />
                         <span>{{
                             form.processing
-                                ? 'Updating Profile...'
-                                : 'Update Client Profile'
+                                ? "Updating Profile..."
+                                : "Update Client Profile"
                         }}</span>
                     </Button>
                 </div>
@@ -554,6 +558,7 @@ const submit = () => {
                     </Card>
                 </div>
             </div>
+        </form>
         <!-- In-Context Service Manager Modal -->
         <ServiceManagerModal
             :is-open="isServiceModalOpen"

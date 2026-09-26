@@ -35,7 +35,7 @@ class InternshipController extends Controller
 
     public function create(): Response
     {
-        $services = Service::where('is_active', true)->forInternships()->get(['id', 'name']);
+        $services = Service::where('is_active', true)->forInternships()->get();
 
         return Inertia::render('Internships/Create', [
             'services' => $services,
@@ -66,7 +66,7 @@ class InternshipController extends Controller
 
     public function edit(Internship $internship): Response
     {
-        $services = Service::where('is_active', true)->forInternships()->get(['id', 'name']);
+        $services = Service::where('is_active', true)->forInternships()->get();
 
         return Inertia::render('Internships/Edit', [
             'internship' => $internship,

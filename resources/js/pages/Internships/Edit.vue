@@ -35,6 +35,10 @@ defineOptions({
 interface Service {
     id: number;
     name: string;
+    slug?: string;
+    type?: string;
+    description?: string | null;
+    is_active?: boolean;
 }
 
 interface Internship {

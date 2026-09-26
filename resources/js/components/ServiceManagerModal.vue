@@ -22,13 +22,13 @@ import {
     Users,
 } from "@lucide/vue";
 
-interface ClientService {
+export interface ClientService {
     id: number;
     name: string;
-    slug: string;
-    type: string;
-    description: string | null;
-    is_active: boolean;
+    slug?: string;
+    type?: string;
+    description?: string | null;
+    is_active?: boolean;
     clients_count?: number;
 }
 
@@ -80,7 +80,7 @@ const startEdit = (service: ClientService) => {
     editServiceForm.name = service.name;
     editServiceForm.type = service.type || "client";
     editServiceForm.description = service.description || "";
-    editServiceForm.is_active = service.is_active;
+    editServiceForm.is_active = service.is_active ?? true;
 };
 
 const cancelEdit = () => {
@@ -272,14 +272,14 @@ const filteredServices = computed(() => {
                                         </h4>
                                         <Badge
                                             :variant="
-                                                service.is_active
+                                                service.is_active !== false
                                                     ? 'default'
                                                     : 'secondary'
                                             "
                                             class="rounded-full px-2 py-0.2 text-[10px] font-bold"
                                         >
                                             {{
-                                                service.is_active
+                                                service.is_active !== false
                                                     ? "Active"
                                                     : "Inactive"
                                             }}
@@ -311,14 +311,14 @@ const filteredServices = computed(() => {
                                         size="icon-sm"
                                         @click="toggleServiceStatus(service.id)"
                                         :title="
-                                            service.is_active
+                                            service.is_active !== false
                                                 ? 'Deactivate Service'
                                                 : 'Activate Service'
                                         "
                                         class="text-slate-400 hover:text-indigo-600"
                                     >
                                         <ToggleRight
-                                            v-if="service.is_active"
+                                            v-if="service.is_active !== false"
                                             class="h-4 w-4 text-emerald-500"
                                         />
                                         <ToggleLeft
