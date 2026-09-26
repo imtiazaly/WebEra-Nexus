@@ -1,12 +1,39 @@
 <script setup lang="ts">
-import { Head, Link, useForm } from '@inertiajs/vue3';
-import { index, create, store } from '@/routes/students';
+import { computed } from "vue";
+import { Head, Link, useForm } from "@inertiajs/vue3";
+import { index, create, store } from "@/routes/students";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+    CardDescription,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import InputError from "@/components/InputError.vue";
+import {
+    ArrowLeft,
+    User,
+    Mail,
+    Phone,
+    GraduationCap,
+    Target,
+    Loader2,
+    Sparkles,
+    UserPlus,
+    CheckCircle2,
+    Briefcase,
+    ShieldCheck,
+} from "@lucide/vue";
 
 defineOptions({
     layout: {
         breadcrumbs: [
-            { title: 'Students Portal', href: index.url() },
-            { title: 'Add Student', href: create.url() },
+            { title: "Students Portal", href: index.url() },
+            { title: "Add Student", href: create.url() },
         ],
     },
 });
@@ -21,185 +48,289 @@ const props = defineProps<{
     internships: Internship[];
 }>();
 
-interface StudentForm {
-    internship_id: number | string;
-    name: string;
-    email: string;
-    phone: string;
-    status: string;
-    completion_progress: number;
-}
+const form = useForm({
+    internship_id: "" as number | string,
+    name: "",
+    email: "",
+    phone: "",
+    status: "enrolled",
+    overall_progress: 0,
+});
 
-const form = useForm<StudentForm>({
-    internship_id: '',
-    name: '',
-    email: '',
-    phone: '',
-    status: 'enrolled',
-    completion_progress: 0,
+const selectedBatch = computed(() => {
+    if (!form.internship_id) return null;
+    return props.internships.find((b) => b.id === Number(form.internship_id));
 });
 
 const submit = () => {
-    form.transform((data) => ({
-        ...data,
-        overall_progress: data.completion_progress,
-    })).post(store.url());
+    form.post(store.url());
 };
 </script>
 
 <template>
-    <Head title="Add New Student" />
+    <Head title="Register New Student / Intern" />
 
-    <div class="mx-auto max-w-3xl space-y-6 p-6">
-        <div class="flex items-center justify-between">
-            <h1
-                class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
+    <div class="w-full space-y-6 p-4 sm:p-6">
+        <form @submit.prevent="submit" class="space-y-6">
+            <!-- Back Navigation & Top Header Bar -->
+            <div
+                class="flex flex-col gap-4 border-b border-slate-200/80 pb-5 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800"
             >
-                Add New Student / Intern
-            </h1>
-            <Link
-                :href="index.url()"
-                class="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-                >← Back to List</Link
-            >
-        </div>
-
-        <form
-            @submit.prevent="submit"
-            class="space-y-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900"
-        >
-            <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <div>
-                    <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                        >Full Name *</label
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        as-child
+                        class="mb-2 -ml-2 text-slate-500 hover:text-slate-900 dark:hover:text-slate-100"
                     >
-                    <input
-                        v-model="form.name"
-                        type="text"
-                        required
-                        placeholder="e.g. Ali Raza"
-                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                    />
-                    <span
-                        v-if="form.errors.name"
-                        class="mt-1 block text-xs text-rose-500"
-                        >{{ form.errors.name }}</span
-                    >
-                </div>
-
-                <div>
-                    <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                        >Email Address *</label
-                    >
-                    <input
-                        v-model="form.email"
-                        type="email"
-                        required
-                        placeholder="ali@example.com"
-                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                    />
-                    <span
-                        v-if="form.errors.email"
-                        class="mt-1 block text-xs text-rose-500"
-                        >{{ form.errors.email }}</span
-                    >
-                </div>
-
-                <div>
-                    <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                        >Phone / WhatsApp</label
-                    >
-                    <input
-                        v-model="form.phone"
-                        type="text"
-                        placeholder="+92 300 1234567"
-                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                    />
-                </div>
-
-                <div>
-                    <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                        >Internship Batch *</label
-                    >
-                    <select
-                        v-model="form.internship_id"
-                        required
-                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                    >
-                        <option value="" disabled>
-                            -- Select Internship Batch --
-                        </option>
-                        <option
-                            v-for="batch in internships"
-                            :key="batch.id"
-                            :value="batch.id"
+                        <Link :href="index.url()">
+                            <ArrowLeft class="mr-1.5 h-4 w-4" /> Back to Students Portal
+                        </Link>
+                    </Button>
+                    <div class="flex items-center gap-2.5">
+                        <h1
+                            class="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50"
                         >
-                            {{ batch.name }} ({{ batch.batch_no }})
-                        </option>
-                    </select>
-                    <span
-                        v-if="form.errors.internship_id"
-                        class="mt-1 block text-xs text-rose-500"
-                        >{{ form.errors.internship_id }}</span
-                    >
-                </div>
-
-                <div>
-                    <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                        >Status *</label
-                    >
-                    <select
-                        v-model="form.status"
-                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                    >
-                        <option value="enrolled">Enrolled</option>
-                        <option value="active">Active</option>
-                        <option value="completed">Completed</option>
-                        <option value="dropped_out">Dropped Out</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                        >Overall Progress (%)</label
-                    >
-                    <div class="mt-2 flex items-center space-x-4">
-                        <input
-                            v-model="form.completion_progress"
-                            type="range"
-                            min="0"
-                            max="100"
-                            class="w-full accent-indigo-600"
-                        />
-                        <span
-                            class="w-12 text-right font-bold text-indigo-600 dark:text-indigo-400"
-                            >{{ form.completion_progress }}%</span
+                            Register New Student / Intern
+                        </h1>
+                        <Badge
+                            variant="outline"
+                            class="rounded-full border-indigo-200 bg-indigo-50/60 px-2.5 py-0.5 text-xs font-semibold text-indigo-700 dark:border-indigo-900 dark:bg-indigo-950/60 dark:text-indigo-300"
                         >
+                            <Sparkles class="mr-1 h-3 w-3 text-indigo-500" />
+                            New Enrollment
+                        </Badge>
                     </div>
+                    <p class="mt-1 text-xs text-slate-500 sm:text-sm dark:text-slate-400">
+                        Enter candidate personal details, assign to an internship batch, and configure initial progress.
+                    </p>
+                </div>
+
+                <!-- Primary Top Action Bar -->
+                <div class="flex items-center gap-3">
+                    <Button
+                        variant="outline"
+                        type="button"
+                        as-child
+                        class="h-10 text-xs"
+                    >
+                        <Link :href="index.url()">Cancel</Link>
+                    </Button>
+                    <Button
+                        type="submit"
+                        :disabled="form.processing"
+                        class="h-10 bg-indigo-600 px-6 text-xs font-semibold text-white shadow-sm hover:bg-indigo-700"
+                    >
+                        <Loader2
+                            v-if="form.processing"
+                            class="mr-2 h-4 w-4 animate-spin"
+                        />
+                        <UserPlus v-else class="mr-1.5 h-3.5 w-3.5" />
+                        <span>{{
+                            form.processing
+                                ? "Registering Candidate..."
+                                : "Save Student Record"
+                        }}</span>
+                    </Button>
                 </div>
             </div>
 
-            <div
-                class="flex justify-end space-x-3 border-t border-gray-200 pt-6 dark:border-gray-800"
-            >
-                <Link
-                    :href="index.url()"
-                    class="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300"
-                    >Cancel</Link
-                >
-                <button
-                    type="submit"
-                    :disabled="form.processing"
-                    class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                >
-                    Save Student
-                </button>
+            <!-- 2-Column Main Form Body -->
+            <div class="grid grid-cols-1 gap-6 lg:grid-cols-12">
+                <!-- Left Column (7 cols): Candidate Personal & Contact Information -->
+                <div class="lg:col-span-7">
+                    <Card class="h-full border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+                        <CardHeader class="border-b border-slate-200/80 pb-4 dark:border-slate-800">
+                            <div class="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
+                                <User class="h-5 w-5" />
+                                <CardTitle class="text-base font-bold text-slate-900 dark:text-slate-100">
+                                    Candidate Identity & Contact Information
+                                </CardTitle>
+                            </div>
+                            <CardDescription class="text-xs text-slate-500">
+                                Provide essential contact information for candidate records.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent class="space-y-5 p-6">
+                            <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+                                <!-- Full Name -->
+                                <div class="space-y-1.5 md:col-span-2">
+                                    <Label for="student-name" class="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                        Full Name <span class="text-rose-500">*</span>
+                                    </Label>
+                                    <div class="relative">
+                                        <User class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                                        <Input
+                                            id="student-name"
+                                            v-model="form.name"
+                                            type="text"
+                                            placeholder="e.g. Ali Raza"
+                                            required
+                                            class="h-10 border-slate-200 pl-9 text-xs focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-950"
+                                        />
+                                    </div>
+                                    <InputError :message="form.errors.name" />
+                                </div>
+
+                                <!-- Email Address -->
+                                <div class="space-y-1.5">
+                                    <Label for="student-email" class="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                        Email Address <span class="text-rose-500">*</span>
+                                    </Label>
+                                    <div class="relative">
+                                        <Mail class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                                        <Input
+                                            id="student-email"
+                                            v-model="form.email"
+                                            type="email"
+                                            placeholder="e.g. ali@example.com"
+                                            required
+                                            class="h-10 border-slate-200 pl-9 text-xs focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-950"
+                                        />
+                                    </div>
+                                    <InputError :message="form.errors.email" />
+                                </div>
+
+                                <!-- Phone / WhatsApp Number -->
+                                <div class="space-y-1.5">
+                                    <Label for="student-phone" class="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                        Phone / WhatsApp Number
+                                    </Label>
+                                    <div class="relative">
+                                        <Phone class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                                        <Input
+                                            id="student-phone"
+                                            v-model="form.phone"
+                                            type="text"
+                                            placeholder="e.g. +92 300 1234567"
+                                            class="h-10 border-slate-200 pl-9 text-xs focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-950"
+                                        />
+                                    </div>
+                                    <InputError :message="form.errors.phone" />
+                                </div>
+
+                                <!-- Enrollment Status -->
+                                <div class="space-y-1.5 md:col-span-2">
+                                    <Label for="student-status" class="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                        Enrollment Lifecycle Status <span class="text-rose-500">*</span>
+                                    </Label>
+                                    <select
+                                        id="student-status"
+                                        v-model="form.status"
+                                        required
+                                        class="h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-xs text-slate-900 shadow-xs focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
+                                    >
+                                        <option value="enrolled">🔵 Enrolled (Registration Complete)</option>
+                                        <option value="active">🟢 Active (Currently In Training)</option>
+                                        <option value="completed">🟣 Completed (Graduated Candidate)</option>
+                                        <option value="dropped_out">🔴 Dropped Out (Inactive / Left Batch)</option>
+                                    </select>
+                                    <InputError :message="form.errors.status" />
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                <!-- Right Column (5 cols): Internship Batch Allocation & Progress Setup -->
+                <div class="lg:col-span-5 space-y-6">
+                    <!-- Batch Selection Card -->
+                    <Card class="border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+                        <CardHeader class="border-b border-slate-200/80 pb-4 dark:border-slate-800">
+                            <div class="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
+                                <GraduationCap class="h-5 w-5" />
+                                <CardTitle class="text-base font-bold text-slate-900 dark:text-slate-100">
+                                    Internship Batch Allocation
+                                </CardTitle>
+                            </div>
+                            <CardDescription class="text-xs text-slate-500">
+                                Assign candidate to an active training batch.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent class="space-y-5 p-6">
+                            <div class="space-y-1.5">
+                                <Label for="internship-id" class="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                    Select Active Internship Batch <span class="text-rose-500">*</span>
+                                </Label>
+                                <select
+                                    id="internship-id"
+                                    v-model="form.internship_id"
+                                    required
+                                    class="h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-xs text-slate-900 shadow-xs focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
+                                >
+                                    <option value="" disabled>-- Choose Active Training Batch --</option>
+                                    <option
+                                        v-for="batch in internships"
+                                        :key="batch.id"
+                                        :value="batch.id"
+                                    >
+                                        {{ batch.name }} (Batch {{ batch.batch_no }})
+                                    </option>
+                                </select>
+                                <InputError :message="form.errors.internship_id" />
+                            </div>
+
+                            <!-- Selected Batch Preview Card -->
+                            <div
+                                v-if="selectedBatch"
+                                class="rounded-xl border border-indigo-200 bg-indigo-50/40 p-4 dark:border-indigo-900/60 dark:bg-indigo-950/30 space-y-2"
+                            >
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-bold text-indigo-900 dark:text-indigo-200">
+                                        {{ selectedBatch.name }}
+                                    </span>
+                                    <Badge variant="default" class="bg-indigo-600 text-[10px]">
+                                        Batch {{ selectedBatch.batch_no }}
+                                    </Badge>
+                                </div>
+                                <p class="text-[11px] text-indigo-700 dark:text-indigo-300">
+                                    Candidate will be linked to this batch for weekly reports and project allocations.
+                                </p>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <!-- Initial Progress Setting Card -->
+                    <Card class="border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+                        <CardHeader class="border-b border-slate-200/80 pb-4 dark:border-slate-800">
+                            <div class="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
+                                <Target class="h-5 w-5" />
+                                <CardTitle class="text-base font-bold text-slate-900 dark:text-slate-100">
+                                    Initial Progress Setup
+                                </CardTitle>
+                            </div>
+                            <CardDescription class="text-xs text-slate-500">
+                                Set candidate starting completion percentage (0 - 100%).
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent class="space-y-4 p-6">
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <Label class="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                        Completion Rating
+                                    </Label>
+                                    <Badge variant="secondary" class="font-bold text-indigo-600 dark:text-indigo-400">
+                                        {{ form.overall_progress }}%
+                                    </Badge>
+                                </div>
+                                <input
+                                    v-model.number="form.overall_progress"
+                                    type="range"
+                                    min="0"
+                                    max="100"
+                                    class="h-2 w-full cursor-pointer rounded-lg bg-slate-200 accent-indigo-600 dark:bg-slate-700"
+                                />
+                                <div class="h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                                    <div
+                                        class="h-full rounded-full bg-indigo-600 transition-all duration-200"
+                                        :style="{ width: `${form.overall_progress}%` }"
+                                    ></div>
+                                </div>
+                            </div>
+                            <InputError :message="form.errors.overall_progress" />
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
         </form>
     </div>
