@@ -34,6 +34,14 @@ class Student extends Model
         return $this->belongsTo(Internship::class);
     }
 
+    /** @return BelongsToMany<Internship, $this> */
+    public function internships(): BelongsToMany
+    {
+        return $this->belongsToMany(Internship::class, 'internship_student')
+            ->withPivot('id', 'status', 'progress', 'joined_at', 'completed_at')
+            ->withTimestamps();
+    }
+
     /** @return HasMany<WeeklyReport, $this> */
     public function weeklyReports(): HasMany
     {

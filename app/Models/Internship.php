@@ -6,7 +6,7 @@ use Database\Factories\InternshipFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Internship extends Model
 {
@@ -33,9 +33,11 @@ class Internship extends Model
         return $this->belongsTo(Service::class);
     }
 
-    /** @return HasMany<Student, $this> */
-    public function students(): HasMany
+    /** @return BelongsToMany<Student, $this> */
+    public function students(): BelongsToMany
     {
-        return $this->hasMany(Student::class);
+        return $this->belongsToMany(Student::class, 'internship_student')
+            ->withPivot('id', 'status', 'progress', 'joined_at', 'completed_at')
+            ->withTimestamps();
     }
 }
