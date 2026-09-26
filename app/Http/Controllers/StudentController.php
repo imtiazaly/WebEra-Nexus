@@ -16,13 +16,21 @@ class StudentController extends Controller
 {
     public function index(): Response
     {
-        $students = Student::with('internship:id,name,batch_no')
+        $students = Student::with(['internship:id,name,batch_no', 'projects:id,title'])
             ->withCount('weeklyReports')
             ->latest()
             ->paginate(15);
 
+        $stats = [
+            'total_students' => Student::count(),
+            'active_students' => Student::whereIn('status', ['active', 'enrolled'])->count(),
+            'completed_students' => Student::where('status', 'completed')->count(),
+            'avg_progress' => (int) round((float) (Student::avg('overall_progress') ?? 0)),
+        ];
+
         return Inertia::render('Students/Index', [
             'students' => $students,
+            'stats' => $stats,
         ]);
     }
 
