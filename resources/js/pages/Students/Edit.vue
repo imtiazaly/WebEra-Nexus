@@ -52,6 +52,7 @@ interface Student {
     overall_progress: number;
     internship_id: number;
     created_at?: string;
+    internships?: Internship[];
 }
 
 const props = defineProps<{
@@ -68,11 +69,20 @@ const getInitials = (name: string) => {
     return name.slice(0, 2).toUpperCase();
 };
 
+const initialSelectedInternships = computed(() => {
+    const list = (props.student.internships || []).map((b) => b.id);
+    if (props.student.internship_id && !list.includes(props.student.internship_id)) {
+        list.push(props.student.internship_id);
+    }
+    return list;
+});
+
 const form = useForm({
     name: props.student.name || "",
     email: props.student.email || "",
     phone: props.student.phone || "",
     internship_id: props.student.internship_id || "",
+    selected_internships: [...initialSelectedInternships.value],
     status: props.student.status || "enrolled",
     overall_progress: props.student.overall_progress || 0,
 });
@@ -81,6 +91,21 @@ const selectedBatch = computed(() => {
     if (!form.internship_id) return null;
     return props.internships.find((b) => b.id === Number(form.internship_id));
 });
+
+const toggleBatchSelection = (batchId: number) => {
+    const idx = form.selected_internships.indexOf(batchId);
+    if (idx > -1) {
+        form.selected_internships.splice(idx, 1);
+    } else {
+        form.selected_internships.push(batchId);
+    }
+};
+
+const onPrimaryBatchChange = () => {
+    if (form.internship_id && !form.selected_internships.includes(Number(form.internship_id))) {
+        form.selected_internships.push(Number(form.internship_id));
+    }
+};
 
 const submit = () => {
     form.put(update.url(props.student.id));
@@ -283,15 +308,16 @@ const submit = () => {
                         <CardContent class="space-y-5 p-6">
                             <div class="space-y-1.5">
                                 <Label for="internship-id" class="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                                    Assigned Internship Batch <span class="text-rose-500">*</span>
+                                    Primary Active Internship Batch <span class="text-rose-500">*</span>
                                 </Label>
                                 <select
                                     id="internship-id"
                                     v-model="form.internship_id"
+                                    @change="onPrimaryBatchChange"
                                     required
                                     class="h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-xs text-slate-900 shadow-xs focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
                                 >
-                                    <option value="" disabled>-- Select Internship Batch --</option>
+                                    <option value="" disabled>-- Select Primary Internship Batch --</option>
                                     <option
                                         v-for="batch in internships"
                                         :key="batch.id"
@@ -317,8 +343,47 @@ const submit = () => {
                                     </Badge>
                                 </div>
                                 <p class="text-[11px] text-indigo-700 dark:text-indigo-300">
-                                    Student is actively linked to this batch schedule.
+                                    Primary active training batch currently set for candidate.
                                 </p>
+                            </div>
+
+                            <!-- Multi-Batch Enrollment Matrix -->
+                            <div class="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2.5">
+                                <Label class="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                                    <GraduationCap class="h-3.5 w-3.5 text-indigo-500" />
+                                    Multi-Batch Enrollment Matrix
+                                </Label>
+                                <p class="text-[11px] text-slate-500">
+                                    Check or uncheck batches to manage student enrolment history across multiple programs.
+                                </p>
+                                <div class="space-y-2 max-h-48 overflow-y-auto pr-1">
+                                    <label
+                                        v-for="b in internships"
+                                        :key="'edit-multi-' + b.id"
+                                        class="flex items-center justify-between rounded-lg border p-2.5 text-xs transition-colors cursor-pointer"
+                                        :class="[
+                                            form.selected_internships.includes(b.id)
+                                                ? 'border-indigo-300 bg-indigo-50/50 dark:border-indigo-800 dark:bg-indigo-950/40'
+                                                : 'border-slate-200 hover:border-slate-300 dark:border-slate-800 dark:hover:border-slate-700'
+                                        ]"
+                                    >
+                                        <div class="flex items-center gap-2.5">
+                                            <input
+                                                type="checkbox"
+                                                :checked="form.selected_internships.includes(b.id)"
+                                                @change="toggleBatchSelection(b.id)"
+                                                class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 dark:border-slate-700"
+                                            />
+                                            <span class="font-medium text-slate-800 dark:text-slate-200">
+                                                {{ b.name }}
+                                            </span>
+                                        </div>
+                                        <Badge variant="outline" class="text-[10px] font-mono">
+                                            Batch {{ b.batch_no }}
+                                        </Badge>
+                                    </label>
+                                </div>
+                                <InputError :message="form.errors.selected_internships" />
                             </div>
                         </CardContent>
                     </Card>

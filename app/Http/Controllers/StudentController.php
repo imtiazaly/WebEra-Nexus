@@ -58,16 +58,21 @@ class StudentController extends Controller
             'internship_id' => $validated['internship_id'] ?? null,
         ]);
 
-        if (! empty($validated['internship_id'])) {
-            $student->internships()->attach($validated['internship_id'], [
-                'status' => $validated['status'],
-                'progress' => $validated['overall_progress'],
+        $selectedIds = $validated['selected_internships'] ?? [];
+        if (! empty($validated['internship_id']) && ! in_array((int) $validated['internship_id'], array_map('intval', $selectedIds))) {
+            $selectedIds[] = (int) $validated['internship_id'];
+        }
+
+        foreach ($selectedIds as $batchId) {
+            $student->internships()->attach($batchId, [
+                'status' => $batchId == ($validated['internship_id'] ?? null) ? $validated['status'] : 'enrolled',
+                'progress' => $batchId == ($validated['internship_id'] ?? null) ? $validated['overall_progress'] : 0,
                 'joined_at' => now(),
             ]);
         }
 
         return redirect()->route('students.index')
-            ->with('success', 'Student record created and enrolled in batch successfully.');
+            ->with('success', 'Student record created and enrolled in batch(es) successfully.');
     }
 
     public function show(Student $student): Response
@@ -182,6 +187,7 @@ class StudentController extends Controller
 
     public function edit(Student $student): Response
     {
+        $student->load('internships:id,name,batch_no');
         $internships = Internship::get(['id', 'name', 'batch_no']);
 
         return Inertia::render('Students/Edit', [
@@ -192,7 +198,48 @@ class StudentController extends Controller
 
     public function update(UpdateStudentRequest $request, Student $student): RedirectResponse
     {
-        $student->update($request->validated());
+        $validated = $request->validated();
+
+        $student->update([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'phone' => $validated['phone'] ?? null,
+            'status' => $validated['status'],
+            'overall_progress' => $validated['overall_progress'],
+            'internship_id' => $validated['internship_id'] ?? null,
+        ]);
+
+        if (isset($validated['selected_internships'])) {
+            $selectedIds = array_map('intval', $validated['selected_internships']);
+            if (! empty($validated['internship_id']) && ! in_array((int) $validated['internship_id'], $selectedIds)) {
+                $selectedIds[] = (int) $validated['internship_id'];
+            }
+
+            $existingPivotIds = $student->internships()->pluck('internships.id')->toArray();
+
+            $syncData = [];
+            foreach ($selectedIds as $id) {
+                if (in_array($id, $existingPivotIds)) {
+                    // Keep existing pivot parameters without overwriting progress/status/certs unless primary active
+                    if ($id == ($validated['internship_id'] ?? null)) {
+                        $syncData[$id] = [
+                            'status' => $validated['status'],
+                            'progress' => $validated['overall_progress'],
+                        ];
+                    } else {
+                        $syncData[$id] = [];
+                    }
+                } else {
+                    $syncData[$id] = [
+                        'status' => $id == ($validated['internship_id'] ?? null) ? $validated['status'] : 'enrolled',
+                        'progress' => $id == ($validated['internship_id'] ?? null) ? $validated['overall_progress'] : 0,
+                        'joined_at' => now(),
+                    ];
+                }
+            }
+
+            $student->internships()->sync($syncData);
+        }
 
         return redirect()->route('students.index')
             ->with('success', 'Student record updated successfully.');

@@ -19,7 +19,9 @@ class StoreStudentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'internship_id' => ['required', 'exists:internships,id'],
+            'internship_id' => ['nullable', 'exists:internships,id'],
+            'selected_internships' => ['nullable', 'array'],
+            'selected_internships.*' => ['exists:internships,id'],
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:students,email'],
             'phone' => ['nullable', 'string', 'max:50'],
