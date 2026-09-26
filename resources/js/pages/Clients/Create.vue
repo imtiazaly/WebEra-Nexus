@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
-import { index, create, store } from '@/routes/clients';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { ref } from "vue";
+import { Head, Link, useForm } from "@inertiajs/vue3";
+import { index, create, store } from "@/routes/clients";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
     Card,
     CardContent,
     CardHeader,
     CardTitle,
     CardDescription,
-} from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import InputError from '@/components/InputError.vue';
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import InputError from "@/components/InputError.vue";
 import {
     ArrowLeft,
     User,
@@ -27,13 +27,15 @@ import {
     Loader2,
     Sparkles,
     UserPlus,
-} from '@lucide/vue';
+} from "@lucide/vue";
+
+import ServiceManagerModal from "@/components/ServiceManagerModal.vue";
 
 defineOptions({
     layout: {
         breadcrumbs: [
-            { title: 'Clients & Leads', href: index.url() },
-            { title: 'Create Client', href: create.url() },
+            { title: "Clients & Leads", href: index.url() },
+            { title: "Create Client", href: create.url() },
         ],
     },
 });
@@ -41,23 +43,30 @@ defineOptions({
 interface Service {
     id: number;
     name: string;
+    slug: string;
+    type: string;
+    description: string | null;
+    is_active: boolean;
+    internships_count?: number;
 }
 
 const props = defineProps<{
     services: Service[];
 }>();
 
+const isServiceModalOpen = ref(false);
+
 const selectedServices = ref<
     { id: number; requirements: string; estimated_budget: string }[]
 >([]);
 
 const form = useForm({
-    name: '',
-    email: '',
-    phone: '',
-    company_name: '',
-    status: 'new_lead',
-    notes: '',
+    name: "",
+    email: "",
+    phone: "",
+    company_name: "",
+    status: "new_lead",
+    notes: "",
     services: [] as {
         id: number;
         requirements: string;
@@ -72,8 +81,8 @@ const toggleService = (serviceId: number) => {
     } else {
         selectedServices.value.push({
             id: serviceId,
-            requirements: '',
-            estimated_budget: '',
+            requirements: "",
+            estimated_budget: "",
         });
     }
 };
@@ -156,8 +165,8 @@ const submit = () => {
                         />
                         <span>{{
                             form.processing
-                                ? 'Saving Client...'
-                                : 'Save Client / Lead'
+                                ? "Saving Client..."
+                                : "Save Client / Lead"
                         }}</span>
                     </Button>
                 </div>
@@ -359,12 +368,21 @@ const submit = () => {
                                         Services Requested
                                     </CardTitle>
                                 </div>
-                                <Badge
-                                    variant="secondary"
-                                    class="text-xs font-semibold"
-                                >
-                                    {{ selectedServices.length }} Selected
-                                </Badge>
+                                <div class="flex items-center gap-2">
+                                    <button
+                                        type="button"
+                                        @click="isServiceModalOpen = true"
+                                        class="text-xs font-bold text-indigo-600 hover:underline dark:text-indigo-400"
+                                    >
+                                        + Manage Services
+                                    </button>
+                                    <Badge
+                                        variant="secondary"
+                                        class="text-xs font-semibold"
+                                    >
+                                        {{ selectedServices.length }} Selected
+                                    </Badge>
+                                </div>
                             </div>
                             <CardDescription class="text-xs text-slate-500">
                                 Select services requested and define
@@ -483,5 +501,11 @@ const submit = () => {
                 </div>
             </div>
         </form>
+        <!-- In-Context Service Manager Modal -->
+        <ServiceManagerModal
+            :is-open="isServiceModalOpen"
+            :services="services || []"
+            @close="isServiceModalOpen = false"
+        />
     </div>
 </template>

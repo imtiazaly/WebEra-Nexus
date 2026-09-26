@@ -16,6 +16,7 @@ class Service extends Model
     protected $fillable = [
         'name',
         'slug',
+        'type',
         'description',
         'is_active',
     ];
@@ -23,6 +24,22 @@ class Service extends Model
     protected $casts = [
         'is_active' => 'boolean',
     ];
+
+    /**
+     * Scope query to only include client services.
+     */
+    public function scopeForClients($query)
+    {
+        return $query->whereIn('type', ['client', 'both']);
+    }
+
+    /**
+     * Scope query to only include internship track services.
+     */
+    public function scopeForInternships($query)
+    {
+        return $query->whereIn('type', ['internship', 'both']);
+    }
 
     /** @return BelongsToMany<Client, $this> */
     public function clients(): BelongsToMany

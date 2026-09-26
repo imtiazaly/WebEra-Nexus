@@ -14,19 +14,28 @@ class InternshipController extends Controller
 {
     public function index(): Response
     {
-        $internships = Internship::with('service:id,name')
+        $internships = Internship::with([
+            'service:id,name',
+            'students:id,internship_id,name,email,phone,status,overall_progress',
+        ])
             ->withCount(['students as total_students_count'])
             ->latest()
             ->paginate(15);
 
+        $allTracks = Service::forInternships()
+            ->withCount('internships')
+            ->latest()
+            ->get();
+
         return Inertia::render('Internships/Index', [
             'internships' => $internships,
+            'all_tracks' => $allTracks,
         ]);
     }
 
     public function create(): Response
     {
-        $services = Service::where('is_active', true)->get(['id', 'name']);
+        $services = Service::where('is_active', true)->forInternships()->get();
 
         return Inertia::render('Internships/Create', [
             'services' => $services,
@@ -43,7 +52,12 @@ class InternshipController extends Controller
 
     public function show(Internship $internship): Response
     {
-        $internship->load(['service', 'students']);
+        $internship->load([
+            'service',
+            'students' => function ($query) {
+                $query->withCount('weeklyReports');
+            },
+        ]);
 
         return Inertia::render('Internships/Show', [
             'internship' => $internship,
@@ -52,7 +66,7 @@ class InternshipController extends Controller
 
     public function edit(Internship $internship): Response
     {
-        $services = Service::where('is_active', true)->get(['id', 'name']);
+        $services = Service::where('is_active', true)->forInternships()->get();
 
         return Inertia::render('Internships/Edit', [
             'internship' => $internship,
