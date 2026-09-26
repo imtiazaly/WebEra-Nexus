@@ -38,7 +38,7 @@ class Student extends Model
     public function internships(): BelongsToMany
     {
         return $this->belongsToMany(Internship::class, 'internship_student')
-            ->withPivot('id', 'status', 'progress', 'joined_at', 'completed_at')
+            ->withPivot('id', 'status', 'progress', 'grade', 'certificate_code', 'joined_at', 'completed_at', 'notes')
             ->withTimestamps();
     }
 

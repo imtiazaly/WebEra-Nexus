@@ -31,6 +31,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('students/{student}/weekly-reports', [WeeklyReportController::class, 'store'])->name('weekly-reports.store');
     Route::put('weekly-reports/{weeklyReport}', [WeeklyReportController::class, 'update'])->name('weekly-reports.update');
     Route::post('/students/{student}/enroll-batch', [StudentController::class, 'enrollBatch'])->name('students.enroll-batch');
+    Route::post('/students/{student}/batches/{internship}/update', [StudentController::class, 'updateBatchEnrollment'])->name('students.batches.update');
+    Route::post('/students/{student}/batches/{internship}/set-active', [StudentController::class, 'setActiveBatch'])->name('students.batches.set-active');
+    Route::post('/students/{student}/batches/{internship}/graduate', [StudentController::class, 'graduateBatch'])->name('students.batches.graduate');
 
     // AI-related routes for generating briefs and summaries
     Route::post('/clients/{client}/ai-brief', [AiController::class, 'generateClientBrief'])->name('clients.ai-brief');

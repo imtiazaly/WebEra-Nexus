@@ -9,6 +9,7 @@ use App\Models\Project;
 use App\Models\Student;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -96,7 +97,7 @@ class StudentController extends Controller
             'progress' => ['required', 'integer', 'min:0', 'max:100'],
         ]);
 
-        $student->internship()->syncWithoutDetaching([
+        $student->internships()->syncWithoutDetaching([
             $validated['internship_id'] => [
                 'status' => $validated['status'],
                 'progress' => $validated['progress'],
@@ -112,6 +113,71 @@ class StudentController extends Controller
 
         return redirect()->route('students.show', $student->id)
             ->with('success', 'Student enrolled into new training batch successfully.');
+    }
+
+    public function updateBatchEnrollment(Request $request, Student $student, Internship $internship): RedirectResponse
+    {
+        $validated = $request->validate([
+            'status' => ['required', 'string', 'max:50'],
+            'progress' => ['required', 'integer', 'min:0', 'max:100'],
+            'grade' => ['nullable', 'string', 'max:20'],
+            'certificate_code' => ['nullable', 'string', 'max:100'],
+            'notes' => ['nullable', 'string'],
+        ]);
+
+        $student->internships()->updateExistingPivot($internship->id, [
+            'status' => $validated['status'],
+            'progress' => $validated['progress'],
+            'grade' => $validated['grade'] ?? null,
+            'certificate_code' => $validated['certificate_code'] ?? null,
+            'notes' => $validated['notes'] ?? null,
+            'completed_at' => $validated['status'] === 'completed' ? now() : null,
+        ]);
+
+        // If this is currently the active internship pointer, keep status in sync
+        if ($student->internship_id === $internship->id) {
+            $student->update([
+                'status' => $validated['status'],
+                'overall_progress' => $validated['progress'],
+            ]);
+        }
+
+        return redirect()->route('students.show', $student->id)
+            ->with('success', 'Batch enrollment progress and evaluation updated.');
+    }
+
+    public function setActiveBatch(Student $student, Internship $internship): RedirectResponse
+    {
+        $student->update([
+            'internship_id' => $internship->id,
+        ]);
+
+        return redirect()->route('students.show', $student->id)
+            ->with('success', "'{$internship->name}' is now set as the primary active batch.");
+    }
+
+    public function graduateBatch(Request $request, Student $student, Internship $internship): RedirectResponse
+    {
+        $grade = $request->input('grade', 'Distinction');
+        $certCode = 'CERT-'.strtoupper(Str::random(8));
+
+        $student->internships()->updateExistingPivot($internship->id, [
+            'status' => 'completed',
+            'progress' => 100,
+            'grade' => $grade,
+            'certificate_code' => $certCode,
+            'completed_at' => now(),
+        ]);
+
+        if ($student->internship_id === $internship->id) {
+            $student->update([
+                'status' => 'completed',
+                'overall_progress' => 100,
+            ]);
+        }
+
+        return redirect()->route('students.show', $student->id)
+            ->with('success', "Student graduated with certificate code {$certCode}!");
     }
 
     public function edit(Student $student): Response

@@ -44,6 +44,10 @@ import {
     MessageSquare,
     ExternalLink,
     Calendar,
+    Star,
+    ShieldCheck,
+    Check,
+    Copy,
 } from "@lucide/vue";
 
 defineOptions({
@@ -107,8 +111,11 @@ interface EnrolledBatch {
         id: number;
         status: string;
         progress: number;
+        grade: string | null;
+        certificate_code: string | null;
         joined_at: string | null;
         completed_at: string | null;
+        notes: string | null;
     };
 }
 
@@ -119,6 +126,7 @@ interface Student {
     phone: string | null;
     status: string;
     overall_progress: number;
+    internship_id: number | null;
     internship: Internship | null;
     internships?: EnrolledBatch[];
     weekly_reports?: WeeklyReport[];
@@ -144,7 +152,7 @@ const props = defineProps<{
 }>();
 
 // Active tab state
-const activeTab = ref<"projects" | "reports" | "batches" | "submit_report">("projects");
+const activeTab = ref<"projects" | "reports" | "batches" | "submit_report">("batches");
 
 // Initials Helper
 const getInitials = (name: string) => {
@@ -211,6 +219,55 @@ const submitEnrollment = () => {
                 isEnrollModalOpen.value = false;
             },
         });
+};
+
+// Edit Per-Batch Evaluation & Progress State
+const editingBatchId = ref<number | null>(null);
+const batchEditForm = useForm({
+    status: "active",
+    progress_val: 0,
+    grade: "",
+    certificate_code: "",
+    notes: "",
+});
+
+const openBatchEdit = (batch: EnrolledBatch) => {
+    editingBatchId.value = batch.id;
+    batchEditForm.status = batch.pivot.status;
+    batchEditForm.progress_val = batch.pivot.progress;
+    batchEditForm.grade = batch.pivot.grade || "";
+    batchEditForm.certificate_code = batch.pivot.certificate_code || "";
+    batchEditForm.notes = batch.pivot.notes || "";
+};
+
+const submitBatchEdit = (batchId: number) => {
+    batchEditForm
+        .transform((data) => ({
+            status: data.status,
+            progress: data.progress_val,
+            grade: data.grade,
+            certificate_code: data.certificate_code,
+            notes: data.notes,
+        }))
+        .post(`/students/${props.student.id}/batches/${batchId}/update`, {
+            onSuccess: () => {
+                editingBatchId.value = null;
+            },
+        });
+};
+
+// Switch Primary Active Batch
+const setActiveBatch = (batchId: number) => {
+    router.post(`/students/${props.student.id}/batches/${batchId}/set-active`);
+};
+
+// Graduate Candidate in Batch
+const graduateBatch = (batchId: number) => {
+    if (confirm("Are you sure you want to graduate this candidate and generate an official completion certificate?")) {
+        router.post(`/students/${props.student.id}/batches/${batchId}/graduate`, {
+            grade: "Distinction",
+        });
+    }
 };
 
 // Assign Project Form & State
@@ -302,6 +359,15 @@ const performanceTier = computed(() => {
     if (progress > 0) return { label: "In Progress", color: "text-amber-600 dark:text-amber-400", badge: "bg-amber-50 border-amber-200 text-amber-700" };
     return { label: "Just Enrolled", color: "text-slate-500", badge: "bg-slate-50 border-slate-200 text-slate-700" };
 });
+
+const copiedCode = ref<string | null>(null);
+const copyCertCode = (code: string) => {
+    navigator.clipboard.writeText(code);
+    copiedCode.value = code;
+    setTimeout(() => {
+        copiedCode.value = null;
+    }, 2000);
+};
 </script>
 
 <template>
@@ -422,7 +488,7 @@ const performanceTier = computed(() => {
                 <CardContent class="p-5">
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">
-                            Training Batches
+                            Training Programs
                         </span>
                         <div class="rounded-xl border border-emerald-200 bg-emerald-50/80 p-2 text-emerald-600 dark:border-emerald-900/60 dark:bg-emerald-950/60 dark:text-emerald-400">
                             <GraduationCap class="h-4 w-4" />
@@ -457,22 +523,21 @@ const performanceTier = computed(() => {
                 </CardContent>
             </Card>
 
-            <!-- 4. Weekly Log Reports -->
+            <!-- 4. Candidate Performance Rank -->
             <Card class="border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900">
                 <CardContent class="p-5">
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">
-                            Weekly Submissions
+                            Performance Status
                         </span>
                         <div class="rounded-xl border border-purple-200 bg-purple-50/80 p-2 text-purple-600 dark:border-purple-900/60 dark:bg-purple-950/60 dark:text-purple-400">
-                            <FileText class="h-4 w-4" />
+                            <Award class="h-4 w-4" />
                         </div>
                     </div>
-                    <div class="mt-2 flex items-baseline gap-2">
-                        <span class="text-2xl font-black text-slate-900 dark:text-white">
-                            {{ student.weekly_reports?.length || 0 }}
-                        </span>
-                        <span class="text-[11px] font-medium text-purple-600 dark:text-purple-400">Log Submissions</span>
+                    <div class="mt-2 flex items-center gap-2">
+                        <Badge variant="outline" :class="['font-bold text-xs px-2.5 py-1', performanceTier.badge]">
+                            {{ performanceTier.label }}
+                        </Badge>
                     </div>
                 </CardContent>
             </Card>
@@ -480,6 +545,20 @@ const performanceTier = computed(() => {
 
         <!-- Navigation Tabs Control Bar -->
         <div class="flex flex-wrap items-center gap-2 border-b border-slate-200/80 pb-3 dark:border-slate-800">
+            <button
+                type="button"
+                @click="activeTab = 'batches'"
+                :class="[
+                    'flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all',
+                    activeTab === 'batches'
+                        ? 'bg-indigo-600 text-white shadow-xs'
+                        : 'bg-slate-100/80 text-slate-600 hover:bg-slate-200/70 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:bg-slate-800',
+                ]"
+            >
+                <GraduationCap class="h-3.5 w-3.5" />
+                <span>Multi-Batch Enrollment Studio ({{ student.internships?.length || (student.internship ? 1 : 0) }})</span>
+            </button>
+
             <button
                 type="button"
                 @click="activeTab = 'projects'"
@@ -492,20 +571,6 @@ const performanceTier = computed(() => {
             >
                 <Briefcase class="h-3.5 w-3.5" />
                 <span>Assigned Projects & Tasks ({{ student.projects?.length || 0 }})</span>
-            </button>
-
-            <button
-                type="button"
-                @click="activeTab = 'batches'"
-                :class="[
-                    'flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all',
-                    activeTab === 'batches'
-                        ? 'bg-indigo-600 text-white shadow-xs'
-                        : 'bg-slate-100/80 text-slate-600 hover:bg-slate-200/70 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:bg-slate-800',
-                ]"
-            >
-                <GraduationCap class="h-3.5 w-3.5" />
-                <span>Batch Enrollment History ({{ student.internships?.length || (student.internship ? 1 : 0) }})</span>
             </button>
 
             <button
@@ -537,7 +602,364 @@ const performanceTier = computed(() => {
             </button>
         </div>
 
-        <!-- TAB 1: ASSIGNED PROJECTS & PRACTICE TASKS -->
+        <!-- TAB 1: BATCH ENROLLMENT HISTORY & MULTI-BATCH STUDIO -->
+        <div v-if="activeTab === 'batches'" class="space-y-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-base font-extrabold text-slate-900 dark:text-white">
+                        Multi-Batch Enrollment & Performance Studio
+                    </h2>
+                    <p class="text-xs text-slate-500">
+                        Manage all training programs {{ student.name }} has been enrolled in with per-batch evaluation, certificates, and grades.
+                    </p>
+                </div>
+                <Button
+                    @click="isEnrollModalOpen = !isEnrollModalOpen"
+                    size="sm"
+                    class="h-9 bg-indigo-600 px-3.5 text-xs font-bold text-white shadow-xs hover:bg-indigo-700"
+                >
+                    <Plus class="mr-1.5 h-3.5 w-3.5" />
+                    {{ isEnrollModalOpen ? "Close Panel" : "+ Enroll in Additional Batch" }}
+                </Button>
+            </div>
+
+            <!-- Inline Enroll in New Batch Card Form -->
+            <div
+                v-if="isEnrollModalOpen"
+                class="rounded-2xl border border-indigo-200 bg-indigo-50/40 p-5 dark:border-indigo-900/60 dark:bg-indigo-950/30 space-y-4"
+            >
+                <div class="flex items-center justify-between border-b border-indigo-200/60 pb-3 dark:border-indigo-900/40">
+                    <div class="flex items-center gap-2 font-extrabold text-xs text-indigo-900 dark:text-indigo-200 uppercase tracking-wider">
+                        <GraduationCap class="h-4 w-4 text-indigo-600" />
+                        <span>Enroll Candidate into Additional Training Batch</span>
+                    </div>
+                </div>
+
+                <form @submit.prevent="submitEnrollment" class="grid grid-cols-1 gap-4 md:grid-cols-3">
+                    <!-- Batch Selector -->
+                    <div class="space-y-1.5 md:col-span-2">
+                        <Label class="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                            Select Training Batch <span class="text-rose-500">*</span>
+                        </Label>
+                        <select
+                            v-model="enrollForm.internship_id"
+                            required
+                            class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-900 shadow-2xs focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
+                        >
+                            <option value="" disabled>-- Choose Training Batch --</option>
+                            <option
+                                v-for="batch in availableBatches"
+                                :key="batch.id"
+                                :value="batch.id"
+                            >
+                                {{ batch.name }} (Batch {{ batch.batch_no }})
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Initial Status -->
+                    <div class="space-y-1.5">
+                        <Label class="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                            Enrollment Status
+                        </Label>
+                        <select
+                            v-model="enrollForm.status"
+                            class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-900 shadow-2xs focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
+                        >
+                            <option value="enrolled">🔵 Enrolled</option>
+                            <option value="active">🟢 Active</option>
+                            <option value="completed">🟣 Completed</option>
+                        </select>
+                    </div>
+
+                    <div class="md:col-span-3 flex justify-end gap-2 pt-2">
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            @click="isEnrollModalOpen = false"
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            type="submit"
+                            size="sm"
+                            :disabled="enrollForm.processing"
+                            class="bg-indigo-600 font-bold text-white hover:bg-indigo-700"
+                        >
+                            <Loader2 v-if="enrollForm.processing" class="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                            Enroll Student
+                        </Button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Enrolled Batches Cards List -->
+            <div v-if="!student.internships || student.internships.length === 0" class="space-y-4">
+                <Card v-if="student.internship" class="border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+                    <CardHeader class="pb-3 border-b border-slate-200/60 dark:border-slate-800">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <GraduationCap class="h-4 w-4 text-indigo-600" />
+                                <CardTitle class="text-sm font-bold text-slate-900 dark:text-white">
+                                    {{ student.internship.name }}
+                                </CardTitle>
+                                <Badge variant="outline" class="font-mono text-[10px]">
+                                    Batch {{ student.internship.batch_no }}
+                                </Badge>
+                                <Badge variant="secondary" class="bg-indigo-100 text-indigo-800 font-bold text-[10px]">
+                                    ⭐ Primary Active Batch
+                                </Badge>
+                            </div>
+                            <Badge variant="outline" :class="['rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase', getStatusBadge(student.status)]">
+                                {{ formatStatus(student.status) }}
+                            </Badge>
+                        </div>
+                    </CardHeader>
+                    <CardContent class="p-4">
+                        <p class="text-xs text-slate-500">
+                            Primary training batch linked to candidate.
+                        </p>
+                    </CardContent>
+                </Card>
+            </div>
+
+            <div v-else class="space-y-5">
+                <Card
+                    v-for="batch in student.internships"
+                    :key="batch.id"
+                    :class="[
+                        'border shadow-xs dark:bg-slate-900 transition-all',
+                        student.internship_id === batch.id
+                            ? 'border-indigo-500/80 bg-indigo-50/20 dark:border-indigo-700/80 dark:bg-indigo-950/20 shadow-sm'
+                            : 'border-slate-200/80 dark:border-slate-800',
+                    ]"
+                >
+                    <CardHeader class="pb-3 border-b border-slate-200/60 dark:border-slate-800">
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+                            <div class="flex items-center gap-2">
+                                <GraduationCap class="h-4.5 w-4.5 text-indigo-600 dark:text-indigo-400" />
+                                <CardTitle class="text-base font-bold text-slate-900 dark:text-white">
+                                    {{ batch.name }}
+                                </CardTitle>
+                                <Badge variant="outline" class="font-mono text-xs">
+                                    Batch {{ batch.batch_no }}
+                                </Badge>
+                                <Badge
+                                    v-if="student.internship_id === batch.id"
+                                    class="bg-indigo-600 text-white font-bold text-[10px] uppercase tracking-wider"
+                                >
+                                    ⭐ Primary Active
+                                </Badge>
+                            </div>
+
+                            <div class="flex items-center gap-2">
+                                <Badge
+                                    v-if="batch.pivot.grade"
+                                    variant="secondary"
+                                    class="bg-amber-100 text-amber-900 border-amber-300 font-extrabold text-[10px] dark:bg-amber-950 dark:text-amber-200"
+                                >
+                                    Grade: {{ batch.pivot.grade }}
+                                </Badge>
+
+                                <Badge
+                                    variant="outline"
+                                    :class="['rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider', getStatusBadge(batch.pivot.status)]"
+                                >
+                                    {{ formatStatus(batch.pivot.status) }}
+                                </Badge>
+                            </div>
+                        </div>
+                    </CardHeader>
+                    <CardContent class="p-5 space-y-4">
+                        <!-- Per-Batch Progress Bar -->
+                        <div class="space-y-1.5">
+                            <div class="flex items-center justify-between text-xs font-bold">
+                                <span class="text-slate-700 dark:text-slate-300">Batch Progress</span>
+                                <span class="text-indigo-600 dark:text-indigo-400">{{ batch.pivot.progress }}%</span>
+                            </div>
+                            <div class="h-2.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                                <div
+                                    class="h-full rounded-full bg-indigo-600 transition-all duration-300"
+                                    :style="{ width: `${batch.pivot.progress}%` }"
+                                ></div>
+                            </div>
+                        </div>
+
+                        <!-- Certificate Verification Box (If Issued) -->
+                        <div
+                            v-if="batch.pivot.certificate_code"
+                            class="rounded-xl border border-purple-200 bg-purple-50/50 p-3.5 dark:border-purple-900/60 dark:bg-purple-950/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                        >
+                            <div class="flex items-center gap-3">
+                                <div class="rounded-lg bg-purple-600 p-2 text-white">
+                                    <ShieldCheck class="h-5 w-5" />
+                                </div>
+                                <div>
+                                    <div class="text-xs font-extrabold text-purple-950 dark:text-purple-100">
+                                        Verified Completion Certificate Issued
+                                    </div>
+                                    <div class="font-mono text-xs font-bold text-purple-700 dark:text-purple-300 flex items-center gap-1.5 mt-0.5">
+                                        <span>Code: {{ batch.pivot.certificate_code }}</span>
+                                        <button
+                                            @click="copyCertCode(batch.pivot.certificate_code)"
+                                            class="text-purple-500 hover:text-purple-700 dark:text-purple-400"
+                                            title="Copy Certificate Code"
+                                        >
+                                            <Check v-if="copiedCode === batch.pivot.certificate_code" class="h-3.5 w-3.5 text-emerald-600" />
+                                            <Copy v-else class="h-3.5 w-3.5" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <Badge variant="outline" class="border-purple-300 text-purple-800 dark:text-purple-200 self-start sm:self-center font-bold text-[10px]">
+                                Verified Credentials
+                            </Badge>
+                        </div>
+
+                        <!-- Dates & Mentor Evaluation Notes -->
+                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 text-xs">
+                            <div class="flex items-center gap-1.5 text-slate-500">
+                                <Calendar class="h-3.5 w-3.5 text-slate-400" />
+                                <span>Joined Date: <strong class="text-slate-800 dark:text-slate-200">{{ batch.pivot.joined_at || 'Registered' }}</strong></span>
+                            </div>
+                            <div v-if="batch.pivot.completed_at" class="flex items-center gap-1.5 text-slate-500">
+                                <CheckCircle2 class="h-3.5 w-3.5 text-emerald-500" />
+                                <span>Completed Date: <strong class="text-slate-800 dark:text-slate-200">{{ batch.pivot.completed_at }}</strong></span>
+                            </div>
+                        </div>
+
+                        <div v-if="batch.pivot.notes" class="text-xs text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/40 p-3 rounded-xl border border-slate-200/60 dark:border-slate-800">
+                            <strong>Mentor Notes:</strong> {{ batch.pivot.notes }}
+                        </div>
+
+                        <!-- Per-Batch Toolbar Actions -->
+                        <div class="flex flex-wrap items-center justify-between gap-2 border-t border-slate-200/80 pt-3 dark:border-slate-800">
+                            <div class="flex items-center gap-2">
+                                <Button
+                                    v-if="student.internship_id !== batch.id"
+                                    variant="outline"
+                                    size="sm"
+                                    @click="setActiveBatch(batch.id)"
+                                    class="h-8 text-xs font-semibold text-slate-700 dark:text-slate-300"
+                                >
+                                    <Star class="mr-1.5 h-3.5 w-3.5 text-amber-500" /> Set as Primary Active
+                                </Button>
+
+                                <Button
+                                    v-if="batch.pivot.status !== 'completed'"
+                                    variant="outline"
+                                    size="sm"
+                                    @click="graduateBatch(batch.id)"
+                                    class="h-8 border-purple-200 text-xs font-bold text-purple-700 hover:bg-purple-50 dark:border-purple-800 dark:text-purple-300"
+                                >
+                                    <Award class="mr-1.5 h-3.5 w-3.5 text-purple-600" /> Graduate & Issue Certificate
+                                </Button>
+                            </div>
+
+                            <Button
+                                v-if="editingBatchId !== batch.id"
+                                variant="ghost"
+                                size="sm"
+                                @click="openBatchEdit(batch)"
+                                class="h-8 text-xs font-bold text-indigo-600 hover:text-indigo-800 dark:text-indigo-400"
+                            >
+                                <Pencil class="mr-1.5 h-3.5 w-3.5" />
+                                Edit Batch Evaluation
+                            </Button>
+                        </div>
+
+                        <!-- Inline Edit Batch Evaluation Form -->
+                        <form
+                            v-if="editingBatchId === batch.id"
+                            @submit.prevent="submitBatchEdit(batch.id)"
+                            class="rounded-xl border border-indigo-200 bg-indigo-50/50 p-4 space-y-3 dark:border-indigo-900/60 dark:bg-indigo-950/30"
+                        >
+                            <div class="text-xs font-bold text-indigo-900 dark:text-indigo-200">
+                                Update Batch Evaluation for {{ batch.name }}
+                            </div>
+
+                            <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                                <div class="space-y-1">
+                                    <Label class="text-[11px] font-semibold text-slate-700 dark:text-slate-300">Status</Label>
+                                    <select
+                                        v-model="batchEditForm.status"
+                                        class="h-9 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs text-slate-900 shadow-2xs dark:border-slate-800 dark:bg-slate-900 dark:text-white"
+                                    >
+                                        <option value="enrolled">Enrolled</option>
+                                        <option value="active">Active</option>
+                                        <option value="completed">Completed</option>
+                                        <option value="dropped_out">Dropped Out</option>
+                                    </select>
+                                </div>
+
+                                <div class="space-y-1">
+                                    <Label class="text-[11px] font-semibold text-slate-700 dark:text-slate-300">Progress (%)</Label>
+                                    <Input
+                                        v-model.number="batchEditForm.progress_val"
+                                        type="number"
+                                        min="0"
+                                        max="100"
+                                        class="h-9 border-slate-200 text-xs bg-white dark:border-slate-800 dark:bg-slate-900"
+                                    />
+                                </div>
+
+                                <div class="space-y-1">
+                                    <Label class="text-[11px] font-semibold text-slate-700 dark:text-slate-300">Grade / Rating</Label>
+                                    <Input
+                                        v-model="batchEditForm.grade"
+                                        type="text"
+                                        placeholder="e.g. A+ / Distinction"
+                                        class="h-9 border-slate-200 text-xs bg-white dark:border-slate-800 dark:bg-slate-900"
+                                    />
+                                </div>
+                            </div>
+
+                            <div class="space-y-1">
+                                <Label class="text-[11px] font-semibold text-slate-700 dark:text-slate-300">Certificate Verification Code</Label>
+                                <Input
+                                    v-model="batchEditForm.certificate_code"
+                                    type="text"
+                                    placeholder="e.g. CERT-2026-MERN-8842"
+                                    class="h-9 border-slate-200 font-mono text-xs bg-white dark:border-slate-800 dark:bg-slate-900"
+                                />
+                            </div>
+
+                            <div class="space-y-1">
+                                <Label class="text-[11px] font-semibold text-slate-700 dark:text-slate-300">Mentor Notes / Evaluation</Label>
+                                <textarea
+                                    v-model="batchEditForm.notes"
+                                    rows="2"
+                                    placeholder="Evaluation notes for candidate performance in this batch..."
+                                    class="w-full rounded-lg border border-slate-200 p-2.5 text-xs text-slate-900 shadow-2xs dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
+                                ></textarea>
+                            </div>
+
+                            <div class="flex justify-end gap-2 pt-1">
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    @click="editingBatchId = null"
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    type="submit"
+                                    size="sm"
+                                    :disabled="batchEditForm.processing"
+                                    class="bg-indigo-600 font-bold text-white hover:bg-indigo-700"
+                                >
+                                    Save Batch Evaluation
+                                </Button>
+                            </div>
+                        </form>
+                    </CardContent>
+                </Card>
+            </div>
+        </div>
+
+        <!-- TAB 2: ASSIGNED PROJECTS & PRACTICE TASKS -->
         <div v-if="activeTab === 'projects'" class="space-y-6">
             <div class="flex items-center justify-between">
                 <div>
@@ -715,181 +1137,6 @@ const performanceTier = computed(() => {
                                 <div
                                     class="h-full rounded-full bg-indigo-600 transition-all duration-300"
                                     :style="{ width: `${proj.pivot.progress}%` }"
-                                ></div>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-        </div>
-
-        <!-- TAB 2: BATCH ENROLLMENT HISTORY & MULTI-BATCH STUDIO -->
-        <div v-if="activeTab === 'batches'" class="space-y-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h2 class="text-base font-extrabold text-slate-900 dark:text-white">
-                        Batch Enrollment History & Multi-Track Enrollment
-                    </h2>
-                    <p class="text-xs text-slate-500">
-                        View all training batches {{ student.name }} has been enrolled in across programs.
-                    </p>
-                </div>
-                <Button
-                    @click="isEnrollModalOpen = !isEnrollModalOpen"
-                    size="sm"
-                    class="h-9 bg-indigo-600 px-3.5 text-xs font-bold text-white shadow-xs hover:bg-indigo-700"
-                >
-                    <Plus class="mr-1.5 h-3.5 w-3.5" />
-                    {{ isEnrollModalOpen ? "Close Enrollment Panel" : "+ Enroll in New Training Batch" }}
-                </Button>
-            </div>
-
-            <!-- Inline Enroll in New Batch Card Form -->
-            <div
-                v-if="isEnrollModalOpen"
-                class="rounded-2xl border border-indigo-200 bg-indigo-50/40 p-5 dark:border-indigo-900/60 dark:bg-indigo-950/30 space-y-4"
-            >
-                <div class="flex items-center justify-between border-b border-indigo-200/60 pb-3 dark:border-indigo-900/40">
-                    <div class="flex items-center gap-2 font-extrabold text-xs text-indigo-900 dark:text-indigo-200 uppercase tracking-wider">
-                        <GraduationCap class="h-4 w-4 text-indigo-600" />
-                        <span>Enroll Candidate into Additional Training Batch</span>
-                    </div>
-                </div>
-
-                <form @submit.prevent="submitEnrollment" class="grid grid-cols-1 gap-4 md:grid-cols-3">
-                    <!-- Batch Selector -->
-                    <div class="space-y-1.5 md:col-span-2">
-                        <Label class="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                            Select Training Batch <span class="text-rose-500">*</span>
-                        </Label>
-                        <select
-                            v-model="enrollForm.internship_id"
-                            required
-                            class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-900 shadow-2xs focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
-                        >
-                            <option value="" disabled>-- Choose Training Batch --</option>
-                            <option
-                                v-for="batch in availableBatches"
-                                :key="batch.id"
-                                :value="batch.id"
-                            >
-                                {{ batch.name }} (Batch {{ batch.batch_no }})
-                            </option>
-                        </select>
-                    </div>
-
-                    <!-- Initial Status -->
-                    <div class="space-y-1.5">
-                        <Label class="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                            Enrollment Status
-                        </Label>
-                        <select
-                            v-model="enrollForm.status"
-                            class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-900 shadow-2xs focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
-                        >
-                            <option value="enrolled">🔵 Enrolled</option>
-                            <option value="active">🟢 Active</option>
-                            <option value="completed">🟣 Completed</option>
-                        </select>
-                    </div>
-
-                    <div class="md:col-span-3 flex justify-end gap-2 pt-2">
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            @click="isEnrollModalOpen = false"
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            type="submit"
-                            size="sm"
-                            :disabled="enrollForm.processing"
-                            class="bg-indigo-600 font-bold text-white hover:bg-indigo-700"
-                        >
-                            <Loader2 v-if="enrollForm.processing" class="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                            Enroll Student
-                        </Button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Enrolled Batches History Timeline List -->
-            <div v-if="!student.internships || student.internships.length === 0" class="space-y-4">
-                <Card v-if="student.internship" class="border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-                    <CardHeader class="pb-3 border-b border-slate-200/60 dark:border-slate-800">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-2">
-                                <GraduationCap class="h-4 w-4 text-indigo-600" />
-                                <CardTitle class="text-sm font-bold text-slate-900 dark:text-white">
-                                    {{ student.internship.name }}
-                                </CardTitle>
-                                <Badge variant="outline" class="font-mono text-[10px]">
-                                    Batch {{ student.internship.batch_no }}
-                                </Badge>
-                            </div>
-                            <Badge variant="outline" :class="['rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase', getStatusBadge(student.status)]">
-                                {{ formatStatus(student.status) }}
-                            </Badge>
-                        </div>
-                    </CardHeader>
-                    <CardContent class="p-4">
-                        <p class="text-xs text-slate-500">
-                            Primary active training batch.
-                        </p>
-                    </CardContent>
-                </Card>
-            </div>
-
-            <div v-else class="space-y-4">
-                <Card
-                    v-for="batch in student.internships"
-                    :key="batch.id"
-                    class="border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900 transition-all hover:border-indigo-300 dark:hover:border-indigo-800"
-                >
-                    <CardHeader class="pb-3 border-b border-slate-200/60 dark:border-slate-800">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-2">
-                                <GraduationCap class="h-4 w-4 text-indigo-600" />
-                                <CardTitle class="text-sm font-bold text-slate-900 dark:text-white">
-                                    {{ batch.name }}
-                                </CardTitle>
-                                <Badge variant="outline" class="font-mono text-[10px]">
-                                    Batch {{ batch.batch_no }}
-                                </Badge>
-                            </div>
-
-                            <Badge
-                                variant="outline"
-                                :class="['rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase', getStatusBadge(batch.pivot.status)]"
-                            >
-                                {{ formatStatus(batch.pivot.status) }}
-                            </Badge>
-                        </div>
-                    </CardHeader>
-                    <CardContent class="p-4 space-y-3">
-                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 text-xs">
-                            <div class="flex items-center gap-1.5 text-slate-500">
-                                <Calendar class="h-3.5 w-3.5 text-slate-400" />
-                                <span>Joined Date: <strong class="text-slate-800 dark:text-slate-200">{{ batch.pivot.joined_at || 'Registered' }}</strong></span>
-                            </div>
-                            <div v-if="batch.pivot.completed_at" class="flex items-center gap-1.5 text-slate-500">
-                                <CheckCircle2 class="h-3.5 w-3.5 text-emerald-500" />
-                                <span>Completed Date: <strong class="text-slate-800 dark:text-slate-200">{{ batch.pivot.completed_at }}</strong></span>
-                            </div>
-                        </div>
-
-                        <!-- Progress Bar -->
-                        <div class="space-y-1">
-                            <div class="flex items-center justify-between text-[11px] font-bold">
-                                <span class="text-slate-600 dark:text-slate-400">Batch Progress</span>
-                                <span class="text-indigo-600 dark:text-indigo-400">{{ batch.pivot.progress }}%</span>
-                            </div>
-                            <div class="h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
-                                <div
-                                    class="h-full rounded-full bg-indigo-600 transition-all duration-300"
-                                    :style="{ width: `${batch.pivot.progress}%` }"
                                 ></div>
                             </div>
                         </div>
