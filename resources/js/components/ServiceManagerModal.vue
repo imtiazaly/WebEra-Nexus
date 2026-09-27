@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
-import { useForm, router } from "@inertiajs/vue3";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+import { ref, computed } from 'vue';
+import { useForm, router } from '@inertiajs/vue3';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import {
     Dialog,
     DialogContent,
     DialogHeader,
     DialogTitle,
     DialogDescription,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
     Plus,
     Pencil,
@@ -20,7 +20,7 @@ import {
     ToggleLeft,
     ToggleRight,
     Users,
-} from "@lucide/vue";
+} from '@lucide/vue';
 
 export interface ClientService {
     id: number;
@@ -38,39 +38,39 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-    (e: "close"): void;
+    (e: 'close'): void;
 }>();
 
 const handleOpenChange = (open: boolean) => {
     if (!open) {
-        emit("close");
+        emit('close');
     }
 };
 
-const searchQuery = ref("");
+const searchQuery = ref('');
 const editingServiceId = ref<number | null>(null);
 
 // New Service Form
 const newServiceForm = useForm({
-    name: "",
-    type: "client",
-    description: "",
+    name: '',
+    type: 'client',
+    description: '',
     is_active: true,
 });
 
 // Edit Service Form
 const editServiceForm = useForm({
-    name: "",
-    type: "client",
-    description: "",
+    name: '',
+    type: 'client',
+    description: '',
     is_active: true,
 });
 
 const submitNewService = () => {
-    newServiceForm.post("/services", {
+    newServiceForm.post('/services', {
         preserveScroll: true,
         onSuccess: () => {
-            newServiceForm.reset("name", "description");
+            newServiceForm.reset('name', 'description');
         },
     });
 };
@@ -78,8 +78,8 @@ const submitNewService = () => {
 const startEdit = (service: ClientService) => {
     editingServiceId.value = service.id;
     editServiceForm.name = service.name;
-    editServiceForm.type = service.type || "client";
-    editServiceForm.description = service.description || "";
+    editServiceForm.type = service.type || 'client';
+    editServiceForm.description = service.description || '';
     editServiceForm.is_active = service.is_active ?? true;
 };
 
@@ -122,11 +122,11 @@ const filteredServices = computed(() => {
 <template>
     <Dialog :open="isOpen" @update:open="handleOpenChange">
         <DialogContent
-            class="max-w-2xl sm:max-w-2xl max-h-[85vh] flex flex-col p-6 gap-0"
+            class="flex max-h-[85vh] max-w-2xl flex-col gap-0 p-6 sm:max-w-2xl"
         >
             <!-- Header -->
             <DialogHeader
-                class="pb-4 border-b border-slate-200/80 dark:border-slate-800"
+                class="border-b border-slate-200/80 pb-4 dark:border-slate-800"
             >
                 <div class="space-y-1 text-left">
                     <div
@@ -151,14 +151,14 @@ const filteredServices = computed(() => {
 
             <!-- Scrollable Body -->
             <div
-                class="flex-1 overflow-y-auto scrollbar-hide space-y-6 pt-4 pr-1"
+                class="scrollbar-hide flex-1 space-y-6 overflow-y-auto pt-4 pr-1"
             >
                 <!-- 1. ADD NEW SERVICE INLINE FORM -->
                 <div
-                    class="rounded-2xl border border-indigo-500/30 bg-indigo-50/50 p-4 space-y-4 dark:border-indigo-500/20 dark:bg-indigo-950/30"
+                    class="space-y-4 rounded-2xl border border-indigo-500/30 bg-indigo-50/50 p-4 dark:border-indigo-500/20 dark:bg-indigo-950/30"
                 >
                     <div
-                        class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-300"
+                        class="flex items-center gap-2 text-xs font-bold tracking-wider text-indigo-700 uppercase dark:text-indigo-300"
                     >
                         <Plus class="h-4 w-4" />
                         <span>Add New Client Service</span>
@@ -170,14 +170,14 @@ const filteredServices = computed(() => {
                             type="text"
                             required
                             placeholder="e.g. Mobile App Development Service"
-                            class="h-10 rounded-xl border-slate-200 text-xs bg-white focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
+                            class="h-10 rounded-xl border-slate-200 bg-white text-xs focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
                         />
 
                         <Input
                             v-model="newServiceForm.description"
                             type="text"
                             placeholder="Service offering details or package scope..."
-                            class="h-10 rounded-xl border-slate-200 text-xs bg-white focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
+                            class="h-10 rounded-xl border-slate-200 bg-white text-xs focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
                         />
 
                         <div class="flex justify-end">
@@ -233,12 +233,12 @@ const filteredServices = computed(() => {
                                     v-model="editServiceForm.name"
                                     type="text"
                                     required
-                                    class="h-9 rounded-xl border-slate-200 text-xs bg-white dark:border-slate-700 dark:bg-slate-900"
+                                    class="h-9 rounded-xl border-slate-200 bg-white text-xs dark:border-slate-700 dark:bg-slate-900"
                                 />
                                 <Input
                                     v-model="editServiceForm.description"
                                     type="text"
-                                    class="h-9 rounded-xl border-slate-200 text-xs bg-white dark:border-slate-700 dark:bg-slate-900"
+                                    class="h-9 rounded-xl border-slate-200 bg-white text-xs dark:border-slate-700 dark:bg-slate-900"
                                 />
                                 <div class="flex justify-end gap-2">
                                     <Button
@@ -276,12 +276,12 @@ const filteredServices = computed(() => {
                                                     ? 'default'
                                                     : 'secondary'
                                             "
-                                            class="rounded-full px-2 py-0.2 text-[10px] font-bold"
+                                            class="py-0.2 rounded-full px-2 text-[10px] font-bold"
                                         >
                                             {{
                                                 service.is_active !== false
-                                                    ? "Active"
-                                                    : "Inactive"
+                                                    ? 'Active'
+                                                    : 'Inactive'
                                             }}
                                         </Badge>
                                     </div>

@@ -1,25 +1,25 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
-import { Head, Link, useForm, router } from "@inertiajs/vue3";
-import { index, edit, show, assignProject } from "@/routes/students";
+import { ref, computed } from 'vue';
+import { Head, Link, useForm, router } from '@inertiajs/vue3';
+import { index, edit, show, assignProject } from '@/routes/students';
 import {
     store as storeWeeklyReport,
     update as updateWeeklyReport,
     aiSummary as reportAiSummary,
-} from "@/routes/weekly-reports";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+} from '@/routes/weekly-reports';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import {
     Card,
     CardContent,
     CardHeader,
     CardTitle,
     CardDescription,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import InputError from "@/components/InputError.vue";
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import InputError from '@/components/InputError.vue';
 import {
     ArrowLeft,
     User,
@@ -48,13 +48,13 @@ import {
     ShieldCheck,
     Check,
     Copy,
-} from "@lucide/vue";
+} from '@lucide/vue';
 
 defineOptions({
     layout: {
         breadcrumbs: [
-            { title: "Students Portal", href: index.url() },
-            { title: "Student Profile", href: "#" },
+            { title: 'Students Portal', href: index.url() },
+            { title: 'Student Profile', href: '#' },
         ],
     },
 });
@@ -152,12 +152,14 @@ const props = defineProps<{
 }>();
 
 // Active tab state
-const activeTab = ref<"projects" | "reports" | "batches" | "submit_report">("batches");
+const activeTab = ref<'projects' | 'reports' | 'batches' | 'submit_report'>(
+    'batches',
+);
 
 // Initials Helper
 const getInitials = (name: string) => {
-    if (!name) return "ST";
-    const parts = name.trim().split(" ");
+    if (!name) return 'ST';
+    const parts = name.trim().split(' ');
     if (parts.length >= 2) {
         return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
     }
@@ -166,43 +168,43 @@ const getInitials = (name: string) => {
 
 const getStatusBadge = (status: string) => {
     switch (status) {
-        case "enrolled":
-            return "bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/60 dark:text-sky-300 dark:border-sky-800";
-        case "active":
-            return "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800";
-        case "completed":
-            return "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/60 dark:text-purple-300 dark:border-purple-800";
-        case "dropped_out":
-            return "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-800";
+        case 'enrolled':
+            return 'bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/60 dark:text-sky-300 dark:border-sky-800';
+        case 'active':
+            return 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800';
+        case 'completed':
+            return 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/60 dark:text-purple-300 dark:border-purple-800';
+        case 'dropped_out':
+            return 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-800';
         default:
-            return "bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-950 dark:text-slate-300 dark:border-slate-800";
+            return 'bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-950 dark:text-slate-300 dark:border-slate-800';
     }
 };
 
 const formatStatus = (status: string) => {
-    return status.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase());
+    return status.replace('_', ' ').replace(/\b\w/g, (l) => l.toUpperCase());
 };
 
 const getProjectStatusBadge = (status: string) => {
     switch (status) {
-        case "approved":
-            return "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300";
-        case "submitted":
-            return "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/60 dark:text-indigo-300";
-        case "in_progress":
-            return "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/60 dark:text-amber-300";
-        case "revision_needed":
-            return "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/60 dark:text-rose-300";
+        case 'approved':
+            return 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300';
+        case 'submitted':
+            return 'bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/60 dark:text-indigo-300';
+        case 'in_progress':
+            return 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/60 dark:text-amber-300';
+        case 'revision_needed':
+            return 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/60 dark:text-rose-300';
         default:
-            return "bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-950 dark:text-slate-300";
+            return 'bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-950 dark:text-slate-300';
     }
 };
 
 // Enroll in New Batch Form & State
 const isEnrollModalOpen = ref(false);
 const enrollForm = useForm({
-    internship_id: "" as string | number,
-    status: "enrolled",
+    internship_id: '' as string | number,
+    status: 'enrolled',
     progress_val: 0,
 });
 
@@ -224,20 +226,20 @@ const submitEnrollment = () => {
 // Edit Per-Batch Evaluation & Progress State
 const editingBatchId = ref<number | null>(null);
 const batchEditForm = useForm({
-    status: "active",
+    status: 'active',
     progress_val: 0,
-    grade: "",
-    certificate_code: "",
-    notes: "",
+    grade: '',
+    certificate_code: '',
+    notes: '',
 });
 
 const openBatchEdit = (batch: EnrolledBatch) => {
     editingBatchId.value = batch.id;
     batchEditForm.status = batch.pivot.status;
     batchEditForm.progress_val = batch.pivot.progress;
-    batchEditForm.grade = batch.pivot.grade || "";
-    batchEditForm.certificate_code = batch.pivot.certificate_code || "";
-    batchEditForm.notes = batch.pivot.notes || "";
+    batchEditForm.grade = batch.pivot.grade || '';
+    batchEditForm.certificate_code = batch.pivot.certificate_code || '';
+    batchEditForm.notes = batch.pivot.notes || '';
 };
 
 const submitBatchEdit = (batchId: number) => {
@@ -263,20 +265,27 @@ const setActiveBatch = (batchId: number) => {
 
 // Graduate Candidate in Batch
 const graduateBatch = (batchId: number) => {
-    if (confirm("Are you sure you want to graduate this candidate and generate an official completion certificate?")) {
-        router.post(`/students/${props.student.id}/batches/${batchId}/graduate`, {
-            grade: "Distinction",
-        });
+    if (
+        confirm(
+            'Are you sure you want to graduate this candidate and generate an official completion certificate?',
+        )
+    ) {
+        router.post(
+            `/students/${props.student.id}/batches/${batchId}/graduate`,
+            {
+                grade: 'Distinction',
+            },
+        );
     }
 };
 
 // Assign Project Form & State
 const isAssignProjectOpen = ref(false);
 const assignForm = useForm({
-    project_id: "" as string | number,
-    role: "Frontend Developer",
+    project_id: '' as string | number,
+    role: 'Frontend Developer',
     progress_val: 0,
-    submission_status: "assigned",
+    submission_status: 'assigned',
 });
 
 const submitAssignProject = () => {
@@ -298,18 +307,19 @@ const submitAssignProject = () => {
 // Submit Weekly Report Form
 const reportForm = useForm({
     week_number: (props.student.weekly_reports?.length || 0) + 1,
-    tasks_completed: "",
-    learnings: "",
-    blockers: "",
-    status: "submitted",
+    tasks_completed: '',
+    learnings: '',
+    blockers: '',
+    status: 'submitted',
 });
 
 const submitWeeklyReport = () => {
     reportForm.post(storeWeeklyReport.url(props.student.id), {
         onSuccess: () => {
-            reportForm.reset("tasks_completed", "learnings", "blockers");
-            reportForm.week_number = (props.student.weekly_reports?.length || 0) + 1;
-            activeTab.value = "reports";
+            reportForm.reset('tasks_completed', 'learnings', 'blockers');
+            reportForm.week_number =
+                (props.student.weekly_reports?.length || 0) + 1;
+            activeTab.value = 'reports';
         },
     });
 };
@@ -317,14 +327,14 @@ const submitWeeklyReport = () => {
 // Review Weekly Report (Admin Feedback)
 const editingReportId = ref<number | null>(null);
 const reviewForm = useForm({
-    status: "approved",
-    feedback: "",
+    status: 'approved',
+    feedback: '',
 });
 
 const openReview = (report: WeeklyReport) => {
     editingReportId.value = report.id;
     reviewForm.status = report.status;
-    reviewForm.feedback = report.feedback || "";
+    reviewForm.feedback = report.feedback || '';
 };
 
 const submitReportReview = (reportId: number) => {
@@ -354,10 +364,29 @@ const generateReportAi = (reportId: number) => {
 // Computed Performance Tier
 const performanceTier = computed(() => {
     const progress = props.student.overall_progress || 0;
-    if (progress >= 85) return { label: "Top Performer", color: "text-emerald-600 dark:text-emerald-400", badge: "bg-emerald-50 border-emerald-200 text-emerald-700" };
-    if (progress >= 50) return { label: "On Track", color: "text-indigo-600 dark:text-indigo-400", badge: "bg-indigo-50 border-indigo-200 text-indigo-700" };
-    if (progress > 0) return { label: "In Progress", color: "text-amber-600 dark:text-amber-400", badge: "bg-amber-50 border-amber-200 text-amber-700" };
-    return { label: "Just Enrolled", color: "text-slate-500", badge: "bg-slate-50 border-slate-200 text-slate-700" };
+    if (progress >= 85)
+        return {
+            label: 'Top Performer',
+            color: 'text-emerald-600 dark:text-emerald-400',
+            badge: 'bg-emerald-50 border-emerald-200 text-emerald-700',
+        };
+    if (progress >= 50)
+        return {
+            label: 'On Track',
+            color: 'text-indigo-600 dark:text-indigo-400',
+            badge: 'bg-indigo-50 border-indigo-200 text-indigo-700',
+        };
+    if (progress > 0)
+        return {
+            label: 'In Progress',
+            color: 'text-amber-600 dark:text-amber-400',
+            badge: 'bg-amber-50 border-amber-200 text-amber-700',
+        };
+    return {
+        label: 'Just Enrolled',
+        color: 'text-slate-500',
+        badge: 'bg-slate-50 border-slate-200 text-slate-700',
+    };
 });
 
 const copiedCode = ref<string | null>(null);
@@ -391,15 +420,21 @@ const copyCertCode = (code: string) => {
                 class="flex flex-col gap-5 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs sm:flex-row sm:items-center sm:justify-between dark:border-slate-800 dark:bg-slate-900"
             >
                 <div class="flex items-center gap-4">
-                    <Avatar class="h-16 w-16 border-2 border-indigo-500/20 shadow-sm">
-                        <AvatarFallback class="bg-indigo-600 text-xl font-black text-white">
+                    <Avatar
+                        class="h-16 w-16 border-2 border-indigo-500/20 shadow-sm"
+                    >
+                        <AvatarFallback
+                            class="bg-indigo-600 text-xl font-black text-white"
+                        >
                             {{ getInitials(student.name) }}
                         </AvatarFallback>
                     </Avatar>
 
                     <div class="space-y-1">
                         <div class="flex flex-wrap items-center gap-2.5">
-                            <h1 class="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
+                            <h1
+                                class="text-2xl font-black tracking-tight text-slate-900 dark:text-white"
+                            >
                                 {{ student.name }}
                             </h1>
                             <Badge variant="outline" class="font-mono text-xs">
@@ -407,24 +442,36 @@ const copyCertCode = (code: string) => {
                             </Badge>
                             <Badge
                                 variant="outline"
-                                :class="['rounded-full px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider', getStatusBadge(student.status)]"
+                                :class="[
+                                    'rounded-full px-2.5 py-0.5 text-xs font-bold tracking-wider uppercase',
+                                    getStatusBadge(student.status),
+                                ]"
                             >
                                 {{ formatStatus(student.status) }}
                             </Badge>
                         </div>
 
-                        <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
+                        <div
+                            class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 dark:text-slate-400"
+                        >
                             <span class="flex items-center gap-1.5">
                                 <Mail class="h-3.5 w-3.5 text-slate-400" />
                                 {{ student.email }}
                             </span>
-                            <span v-if="student.phone" class="flex items-center gap-1.5">
+                            <span
+                                v-if="student.phone"
+                                class="flex items-center gap-1.5"
+                            >
                                 <Phone class="h-3.5 w-3.5 text-slate-400" />
                                 {{ student.phone }}
                             </span>
-                            <span v-if="student.internship" class="flex items-center gap-1.5 font-semibold text-indigo-600 dark:text-indigo-400">
+                            <span
+                                v-if="student.internship"
+                                class="flex items-center gap-1.5 font-semibold text-indigo-600 dark:text-indigo-400"
+                            >
                                 <GraduationCap class="h-3.5 w-3.5" />
-                                {{ student.internship.name }} (Batch {{ student.internship.batch_no }})
+                                {{ student.internship.name }} (Batch
+                                {{ student.internship.batch_no }})
                             </span>
                         </div>
                     </div>
@@ -433,7 +480,10 @@ const copyCertCode = (code: string) => {
                 <!-- Action Buttons -->
                 <div class="flex flex-wrap items-center gap-2.5">
                     <Button
-                        @click="isEnrollModalOpen = !isEnrollModalOpen; activeTab = 'batches'"
+                        @click="
+                            isEnrollModalOpen = !isEnrollModalOpen;
+                            activeTab = 'batches';
+                        "
                         variant="outline"
                         size="sm"
                         class="h-9 border-indigo-200 text-xs font-semibold text-indigo-700 hover:bg-indigo-50 dark:border-indigo-800 dark:text-indigo-300 dark:hover:bg-indigo-950"
@@ -456,25 +506,37 @@ const copyCertCode = (code: string) => {
         <!-- Metric KPI Cards Bar (4 Metrics) -->
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <!-- 1. Overall Completion Rating -->
-            <Card class="border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+            <Card
+                class="border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900"
+            >
                 <CardContent class="p-5">
                     <div class="flex items-center justify-between">
-                        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                        <span
+                            class="text-xs font-semibold text-slate-500 dark:text-slate-400"
+                        >
                             Training Completion
                         </span>
-                        <div class="rounded-xl border border-indigo-200 bg-indigo-50/80 p-2 text-indigo-600 dark:border-indigo-900/60 dark:bg-indigo-950/60 dark:text-indigo-400">
+                        <div
+                            class="rounded-xl border border-indigo-200 bg-indigo-50/80 p-2 text-indigo-600 dark:border-indigo-900/60 dark:bg-indigo-950/60 dark:text-indigo-400"
+                        >
                             <Target class="h-4 w-4" />
                         </div>
                     </div>
                     <div class="mt-2 flex items-baseline justify-between">
-                        <span class="text-2xl font-black text-slate-900 dark:text-white">
+                        <span
+                            class="text-2xl font-black text-slate-900 dark:text-white"
+                        >
                             {{ student.overall_progress }}%
                         </span>
-                        <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400">
+                        <span
+                            class="text-xs font-bold text-indigo-600 dark:text-indigo-400"
+                        >
                             Overall Score
                         </span>
                     </div>
-                    <div class="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                    <div
+                        class="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800"
+                    >
                         <div
                             class="h-full rounded-full bg-indigo-600 transition-all duration-500"
                             :style="{ width: `${student.overall_progress}%` }"
@@ -484,58 +546,94 @@ const copyCertCode = (code: string) => {
             </Card>
 
             <!-- 2. Enrolled Training Batches -->
-            <Card class="border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+            <Card
+                class="border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900"
+            >
                 <CardContent class="p-5">
                     <div class="flex items-center justify-between">
-                        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                        <span
+                            class="text-xs font-semibold text-slate-500 dark:text-slate-400"
+                        >
                             Training Programs
                         </span>
-                        <div class="rounded-xl border border-emerald-200 bg-emerald-50/80 p-2 text-emerald-600 dark:border-emerald-900/60 dark:bg-emerald-950/60 dark:text-emerald-400">
+                        <div
+                            class="rounded-xl border border-emerald-200 bg-emerald-50/80 p-2 text-emerald-600 dark:border-emerald-900/60 dark:bg-emerald-950/60 dark:text-emerald-400"
+                        >
                             <GraduationCap class="h-4 w-4" />
                         </div>
                     </div>
                     <div class="mt-2 flex items-baseline gap-2">
-                        <span class="text-2xl font-black text-slate-900 dark:text-white">
-                            {{ student.internships?.length || (student.internship ? 1 : 0) }}
+                        <span
+                            class="text-2xl font-black text-slate-900 dark:text-white"
+                        >
+                            {{
+                                student.internships?.length ||
+                                (student.internship ? 1 : 0)
+                            }}
                         </span>
-                        <span class="text-[11px] font-medium text-emerald-600 dark:text-emerald-400">Enrolled Batches</span>
+                        <span
+                            class="text-[11px] font-medium text-emerald-600 dark:text-emerald-400"
+                            >Enrolled Batches</span
+                        >
                     </div>
                 </CardContent>
             </Card>
 
             <!-- 3. Assigned Client Projects -->
-            <Card class="border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+            <Card
+                class="border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900"
+            >
                 <CardContent class="p-5">
                     <div class="flex items-center justify-between">
-                        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                        <span
+                            class="text-xs font-semibold text-slate-500 dark:text-slate-400"
+                        >
                             Projects & Tasks
                         </span>
-                        <div class="rounded-xl border border-sky-200 bg-sky-50/80 p-2 text-sky-600 dark:border-sky-900/60 dark:bg-sky-950/60 dark:text-sky-400">
+                        <div
+                            class="rounded-xl border border-sky-200 bg-sky-50/80 p-2 text-sky-600 dark:border-sky-900/60 dark:bg-sky-950/60 dark:text-sky-400"
+                        >
                             <Briefcase class="h-4 w-4" />
                         </div>
                     </div>
                     <div class="mt-2 flex items-baseline gap-2">
-                        <span class="text-2xl font-black text-slate-900 dark:text-white">
+                        <span
+                            class="text-2xl font-black text-slate-900 dark:text-white"
+                        >
                             {{ student.projects?.length || 0 }}
                         </span>
-                        <span class="text-[11px] font-medium text-slate-400">Allocated Projects</span>
+                        <span class="text-[11px] font-medium text-slate-400"
+                            >Allocated Projects</span
+                        >
                     </div>
                 </CardContent>
             </Card>
 
             <!-- 4. Candidate Performance Rank -->
-            <Card class="border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+            <Card
+                class="border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900"
+            >
                 <CardContent class="p-5">
                     <div class="flex items-center justify-between">
-                        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                        <span
+                            class="text-xs font-semibold text-slate-500 dark:text-slate-400"
+                        >
                             Performance Status
                         </span>
-                        <div class="rounded-xl border border-purple-200 bg-purple-50/80 p-2 text-purple-600 dark:border-purple-900/60 dark:bg-purple-950/60 dark:text-purple-400">
+                        <div
+                            class="rounded-xl border border-purple-200 bg-purple-50/80 p-2 text-purple-600 dark:border-purple-900/60 dark:bg-purple-950/60 dark:text-purple-400"
+                        >
                             <Award class="h-4 w-4" />
                         </div>
                     </div>
                     <div class="mt-2 flex items-center gap-2">
-                        <Badge variant="outline" :class="['font-bold text-xs px-2.5 py-1', performanceTier.badge]">
+                        <Badge
+                            variant="outline"
+                            :class="[
+                                'px-2.5 py-1 text-xs font-bold',
+                                performanceTier.badge,
+                            ]"
+                        >
                             {{ performanceTier.label }}
                         </Badge>
                     </div>
@@ -544,7 +642,9 @@ const copyCertCode = (code: string) => {
         </div>
 
         <!-- Navigation Tabs Control Bar -->
-        <div class="flex flex-wrap items-center gap-2 border-b border-slate-200/80 pb-3 dark:border-slate-800">
+        <div
+            class="flex flex-wrap items-center gap-2 border-b border-slate-200/80 pb-3 dark:border-slate-800"
+        >
             <button
                 type="button"
                 @click="activeTab = 'batches'"
@@ -556,7 +656,12 @@ const copyCertCode = (code: string) => {
                 ]"
             >
                 <GraduationCap class="h-3.5 w-3.5" />
-                <span>Multi-Batch Enrollment Studio ({{ student.internships?.length || (student.internship ? 1 : 0) }})</span>
+                <span
+                    >Multi-Batch Enrollment Studio ({{
+                        student.internships?.length ||
+                        (student.internship ? 1 : 0)
+                    }})</span
+                >
             </button>
 
             <button
@@ -570,7 +675,11 @@ const copyCertCode = (code: string) => {
                 ]"
             >
                 <Briefcase class="h-3.5 w-3.5" />
-                <span>Assigned Projects & Tasks ({{ student.projects?.length || 0 }})</span>
+                <span
+                    >Assigned Projects & Tasks ({{
+                        student.projects?.length || 0
+                    }})</span
+                >
             </button>
 
             <button
@@ -584,7 +693,11 @@ const copyCertCode = (code: string) => {
                 ]"
             >
                 <FileText class="h-3.5 w-3.5" />
-                <span>Weekly Progress Reports ({{ student.weekly_reports?.length || 0 }})</span>
+                <span
+                    >Weekly Progress Reports ({{
+                        student.weekly_reports?.length || 0
+                    }})</span
+                >
             </button>
 
             <button
@@ -606,11 +719,15 @@ const copyCertCode = (code: string) => {
         <div v-if="activeTab === 'batches'" class="space-y-6">
             <div class="flex items-center justify-between">
                 <div>
-                    <h2 class="text-base font-extrabold text-slate-900 dark:text-white">
+                    <h2
+                        class="text-base font-extrabold text-slate-900 dark:text-white"
+                    >
                         Multi-Batch Enrollment & Performance Studio
                     </h2>
                     <p class="text-xs text-slate-500">
-                        Manage all training programs {{ student.name }} has been enrolled in with per-batch evaluation, certificates, and grades.
+                        Manage all training programs {{ student.name }} has been
+                        enrolled in with per-batch evaluation, certificates, and
+                        grades.
                     </p>
                 </div>
                 <Button
@@ -619,34 +736,53 @@ const copyCertCode = (code: string) => {
                     class="h-9 bg-indigo-600 px-3.5 text-xs font-bold text-white shadow-xs hover:bg-indigo-700"
                 >
                     <Plus class="mr-1.5 h-3.5 w-3.5" />
-                    {{ isEnrollModalOpen ? "Close Panel" : "+ Enroll in Additional Batch" }}
+                    {{
+                        isEnrollModalOpen
+                            ? 'Close Panel'
+                            : '+ Enroll in Additional Batch'
+                    }}
                 </Button>
             </div>
 
             <!-- Inline Enroll in New Batch Card Form -->
             <div
                 v-if="isEnrollModalOpen"
-                class="rounded-2xl border border-indigo-200 bg-indigo-50/40 p-5 dark:border-indigo-900/60 dark:bg-indigo-950/30 space-y-4"
+                class="space-y-4 rounded-2xl border border-indigo-200 bg-indigo-50/40 p-5 dark:border-indigo-900/60 dark:bg-indigo-950/30"
             >
-                <div class="flex items-center justify-between border-b border-indigo-200/60 pb-3 dark:border-indigo-900/40">
-                    <div class="flex items-center gap-2 font-extrabold text-xs text-indigo-900 dark:text-indigo-200 uppercase tracking-wider">
+                <div
+                    class="flex items-center justify-between border-b border-indigo-200/60 pb-3 dark:border-indigo-900/40"
+                >
+                    <div
+                        class="flex items-center gap-2 text-xs font-extrabold tracking-wider text-indigo-900 uppercase dark:text-indigo-200"
+                    >
                         <GraduationCap class="h-4 w-4 text-indigo-600" />
-                        <span>Enroll Candidate into Additional Training Batch</span>
+                        <span
+                            >Enroll Candidate into Additional Training
+                            Batch</span
+                        >
                     </div>
                 </div>
 
-                <form @submit.prevent="submitEnrollment" class="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <form
+                    @submit.prevent="submitEnrollment"
+                    class="grid grid-cols-1 gap-4 md:grid-cols-3"
+                >
                     <!-- Batch Selector -->
                     <div class="space-y-1.5 md:col-span-2">
-                        <Label class="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                            Select Training Batch <span class="text-rose-500">*</span>
+                        <Label
+                            class="text-xs font-semibold text-slate-700 dark:text-slate-300"
+                        >
+                            Select Training Batch
+                            <span class="text-rose-500">*</span>
                         </Label>
                         <select
                             v-model="enrollForm.internship_id"
                             required
                             class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-900 shadow-2xs focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
                         >
-                            <option value="" disabled>-- Choose Training Batch --</option>
+                            <option value="" disabled>
+                                -- Choose Training Batch --
+                            </option>
                             <option
                                 v-for="batch in availableBatches"
                                 :key="batch.id"
@@ -659,7 +795,9 @@ const copyCertCode = (code: string) => {
 
                     <!-- Initial Status -->
                     <div class="space-y-1.5">
-                        <Label class="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                        <Label
+                            class="text-xs font-semibold text-slate-700 dark:text-slate-300"
+                        >
                             Enrollment Status
                         </Label>
                         <select
@@ -672,7 +810,7 @@ const copyCertCode = (code: string) => {
                         </select>
                     </div>
 
-                    <div class="md:col-span-3 flex justify-end gap-2 pt-2">
+                    <div class="flex justify-end gap-2 pt-2 md:col-span-3">
                         <Button
                             type="button"
                             variant="ghost"
@@ -687,7 +825,10 @@ const copyCertCode = (code: string) => {
                             :disabled="enrollForm.processing"
                             class="bg-indigo-600 font-bold text-white hover:bg-indigo-700"
                         >
-                            <Loader2 v-if="enrollForm.processing" class="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                            <Loader2
+                                v-if="enrollForm.processing"
+                                class="mr-1.5 h-3.5 w-3.5 animate-spin"
+                            />
                             Enroll Student
                         </Button>
                     </div>
@@ -695,23 +836,47 @@ const copyCertCode = (code: string) => {
             </div>
 
             <!-- Enrolled Batches Cards List -->
-            <div v-if="!student.internships || student.internships.length === 0" class="space-y-4">
-                <Card v-if="student.internship" class="border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-                    <CardHeader class="pb-3 border-b border-slate-200/60 dark:border-slate-800">
+            <div
+                v-if="!student.internships || student.internships.length === 0"
+                class="space-y-4"
+            >
+                <Card
+                    v-if="student.internship"
+                    class="border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900"
+                >
+                    <CardHeader
+                        class="border-b border-slate-200/60 pb-3 dark:border-slate-800"
+                    >
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-2">
-                                <GraduationCap class="h-4 w-4 text-indigo-600" />
-                                <CardTitle class="text-sm font-bold text-slate-900 dark:text-white">
+                                <GraduationCap
+                                    class="h-4 w-4 text-indigo-600"
+                                />
+                                <CardTitle
+                                    class="text-sm font-bold text-slate-900 dark:text-white"
+                                >
                                     {{ student.internship.name }}
                                 </CardTitle>
-                                <Badge variant="outline" class="font-mono text-[10px]">
+                                <Badge
+                                    variant="outline"
+                                    class="font-mono text-[10px]"
+                                >
                                     Batch {{ student.internship.batch_no }}
                                 </Badge>
-                                <Badge variant="secondary" class="bg-indigo-100 text-indigo-800 font-bold text-[10px]">
+                                <Badge
+                                    variant="secondary"
+                                    class="bg-indigo-100 text-[10px] font-bold text-indigo-800"
+                                >
                                     ⭐ Primary Active Batch
                                 </Badge>
                             </div>
-                            <Badge variant="outline" :class="['rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase', getStatusBadge(student.status)]">
+                            <Badge
+                                variant="outline"
+                                :class="[
+                                    'rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase',
+                                    getStatusBadge(student.status),
+                                ]"
+                            >
                                 {{ formatStatus(student.status) }}
                             </Badge>
                         </div>
@@ -729,25 +894,36 @@ const copyCertCode = (code: string) => {
                     v-for="batch in student.internships"
                     :key="batch.id"
                     :class="[
-                        'border shadow-xs dark:bg-slate-900 transition-all',
+                        'border shadow-xs transition-all dark:bg-slate-900',
                         student.internship_id === batch.id
-                            ? 'border-indigo-500/80 bg-indigo-50/20 dark:border-indigo-700/80 dark:bg-indigo-950/20 shadow-sm'
+                            ? 'border-indigo-500/80 bg-indigo-50/20 shadow-sm dark:border-indigo-700/80 dark:bg-indigo-950/20'
                             : 'border-slate-200/80 dark:border-slate-800',
                     ]"
                 >
-                    <CardHeader class="pb-3 border-b border-slate-200/60 dark:border-slate-800">
-                        <div class="flex flex-wrap items-center justify-between gap-3">
+                    <CardHeader
+                        class="border-b border-slate-200/60 pb-3 dark:border-slate-800"
+                    >
+                        <div
+                            class="flex flex-wrap items-center justify-between gap-3"
+                        >
                             <div class="flex items-center gap-2">
-                                <GraduationCap class="h-4.5 w-4.5 text-indigo-600 dark:text-indigo-400" />
-                                <CardTitle class="text-base font-bold text-slate-900 dark:text-white">
+                                <GraduationCap
+                                    class="h-4.5 w-4.5 text-indigo-600 dark:text-indigo-400"
+                                />
+                                <CardTitle
+                                    class="text-base font-bold text-slate-900 dark:text-white"
+                                >
                                     {{ batch.name }}
                                 </CardTitle>
-                                <Badge variant="outline" class="font-mono text-xs">
+                                <Badge
+                                    variant="outline"
+                                    class="font-mono text-xs"
+                                >
                                     Batch {{ batch.batch_no }}
                                 </Badge>
                                 <Badge
                                     v-if="student.internship_id === batch.id"
-                                    class="bg-indigo-600 text-white font-bold text-[10px] uppercase tracking-wider"
+                                    class="bg-indigo-600 text-[10px] font-bold tracking-wider text-white uppercase"
                                 >
                                     ⭐ Primary Active
                                 </Badge>
@@ -757,31 +933,45 @@ const copyCertCode = (code: string) => {
                                 <Badge
                                     v-if="batch.pivot.grade"
                                     variant="secondary"
-                                    class="bg-amber-100 text-amber-900 border-amber-300 font-extrabold text-[10px] dark:bg-amber-950 dark:text-amber-200"
+                                    class="border-amber-300 bg-amber-100 text-[10px] font-extrabold text-amber-900 dark:bg-amber-950 dark:text-amber-200"
                                 >
                                     Grade: {{ batch.pivot.grade }}
                                 </Badge>
 
                                 <Badge
                                     variant="outline"
-                                    :class="['rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider', getStatusBadge(batch.pivot.status)]"
+                                    :class="[
+                                        'rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wider uppercase',
+                                        getStatusBadge(batch.pivot.status),
+                                    ]"
                                 >
                                     {{ formatStatus(batch.pivot.status) }}
                                 </Badge>
                             </div>
                         </div>
                     </CardHeader>
-                    <CardContent class="p-5 space-y-4">
+                    <CardContent class="space-y-4 p-5">
                         <!-- Per-Batch Progress Bar -->
                         <div class="space-y-1.5">
-                            <div class="flex items-center justify-between text-xs font-bold">
-                                <span class="text-slate-700 dark:text-slate-300">Batch Progress</span>
-                                <span class="text-indigo-600 dark:text-indigo-400">{{ batch.pivot.progress }}%</span>
+                            <div
+                                class="flex items-center justify-between text-xs font-bold"
+                            >
+                                <span class="text-slate-700 dark:text-slate-300"
+                                    >Batch Progress</span
+                                >
+                                <span
+                                    class="text-indigo-600 dark:text-indigo-400"
+                                    >{{ batch.pivot.progress }}%</span
+                                >
                             </div>
-                            <div class="h-2.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                            <div
+                                class="h-2.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800"
+                            >
                                 <div
                                     class="h-full rounded-full bg-indigo-600 transition-all duration-300"
-                                    :style="{ width: `${batch.pivot.progress}%` }"
+                                    :style="{
+                                        width: `${batch.pivot.progress}%`,
+                                    }"
                                 ></div>
                             </div>
                         </div>
@@ -789,52 +979,107 @@ const copyCertCode = (code: string) => {
                         <!-- Certificate Verification Box (If Issued) -->
                         <div
                             v-if="batch.pivot.certificate_code"
-                            class="rounded-xl border border-purple-200 bg-purple-50/50 p-3.5 dark:border-purple-900/60 dark:bg-purple-950/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                            class="flex flex-col justify-between gap-3 rounded-xl border border-purple-200 bg-purple-50/50 p-3.5 sm:flex-row sm:items-center dark:border-purple-900/60 dark:bg-purple-950/30"
                         >
                             <div class="flex items-center gap-3">
-                                <div class="rounded-lg bg-purple-600 p-2 text-white">
+                                <div
+                                    class="rounded-lg bg-purple-600 p-2 text-white"
+                                >
                                     <ShieldCheck class="h-5 w-5" />
                                 </div>
                                 <div>
-                                    <div class="text-xs font-extrabold text-purple-950 dark:text-purple-100">
+                                    <div
+                                        class="text-xs font-extrabold text-purple-950 dark:text-purple-100"
+                                    >
                                         Verified Completion Certificate Issued
                                     </div>
-                                    <div class="font-mono text-xs font-bold text-purple-700 dark:text-purple-300 flex items-center gap-1.5 mt-0.5">
-                                        <span>Code: {{ batch.pivot.certificate_code }}</span>
+                                    <div
+                                        class="mt-0.5 flex items-center gap-1.5 font-mono text-xs font-bold text-purple-700 dark:text-purple-300"
+                                    >
+                                        <span
+                                            >Code:
+                                            {{
+                                                batch.pivot.certificate_code
+                                            }}</span
+                                        >
                                         <button
-                                            @click="copyCertCode(batch.pivot.certificate_code)"
+                                            @click="
+                                                copyCertCode(
+                                                    batch.pivot
+                                                        .certificate_code,
+                                                )
+                                            "
                                             class="text-purple-500 hover:text-purple-700 dark:text-purple-400"
                                             title="Copy Certificate Code"
                                         >
-                                            <Check v-if="copiedCode === batch.pivot.certificate_code" class="h-3.5 w-3.5 text-emerald-600" />
+                                            <Check
+                                                v-if="
+                                                    copiedCode ===
+                                                    batch.pivot.certificate_code
+                                                "
+                                                class="h-3.5 w-3.5 text-emerald-600"
+                                            />
                                             <Copy v-else class="h-3.5 w-3.5" />
                                         </button>
                                     </div>
                                 </div>
                             </div>
-                            <Badge variant="outline" class="border-purple-300 text-purple-800 dark:text-purple-200 self-start sm:self-center font-bold text-[10px]">
+                            <Badge
+                                variant="outline"
+                                class="self-start border-purple-300 text-[10px] font-bold text-purple-800 sm:self-center dark:text-purple-200"
+                            >
                                 Verified Credentials
                             </Badge>
                         </div>
 
                         <!-- Dates & Mentor Evaluation Notes -->
-                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 text-xs">
-                            <div class="flex items-center gap-1.5 text-slate-500">
+                        <div
+                            class="grid grid-cols-1 gap-3 text-xs sm:grid-cols-2"
+                        >
+                            <div
+                                class="flex items-center gap-1.5 text-slate-500"
+                            >
                                 <Calendar class="h-3.5 w-3.5 text-slate-400" />
-                                <span>Joined Date: <strong class="text-slate-800 dark:text-slate-200">{{ batch.pivot.joined_at || 'Registered' }}</strong></span>
+                                <span
+                                    >Joined Date:
+                                    <strong
+                                        class="text-slate-800 dark:text-slate-200"
+                                        >{{
+                                            batch.pivot.joined_at ||
+                                            'Registered'
+                                        }}</strong
+                                    ></span
+                                >
                             </div>
-                            <div v-if="batch.pivot.completed_at" class="flex items-center gap-1.5 text-slate-500">
-                                <CheckCircle2 class="h-3.5 w-3.5 text-emerald-500" />
-                                <span>Completed Date: <strong class="text-slate-800 dark:text-slate-200">{{ batch.pivot.completed_at }}</strong></span>
+                            <div
+                                v-if="batch.pivot.completed_at"
+                                class="flex items-center gap-1.5 text-slate-500"
+                            >
+                                <CheckCircle2
+                                    class="h-3.5 w-3.5 text-emerald-500"
+                                />
+                                <span
+                                    >Completed Date:
+                                    <strong
+                                        class="text-slate-800 dark:text-slate-200"
+                                        >{{ batch.pivot.completed_at }}</strong
+                                    ></span
+                                >
                             </div>
                         </div>
 
-                        <div v-if="batch.pivot.notes" class="text-xs text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/40 p-3 rounded-xl border border-slate-200/60 dark:border-slate-800">
-                            <strong>Mentor Notes:</strong> {{ batch.pivot.notes }}
+                        <div
+                            v-if="batch.pivot.notes"
+                            class="rounded-xl border border-slate-200/60 bg-slate-50 p-3 text-xs text-slate-600 dark:border-slate-800 dark:bg-slate-800/40 dark:text-slate-400"
+                        >
+                            <strong>Mentor Notes:</strong>
+                            {{ batch.pivot.notes }}
                         </div>
 
                         <!-- Per-Batch Toolbar Actions -->
-                        <div class="flex flex-wrap items-center justify-between gap-2 border-t border-slate-200/80 pt-3 dark:border-slate-800">
+                        <div
+                            class="flex flex-wrap items-center justify-between gap-2 border-t border-slate-200/80 pt-3 dark:border-slate-800"
+                        >
                             <div class="flex items-center gap-2">
                                 <Button
                                     v-if="student.internship_id !== batch.id"
@@ -843,7 +1088,10 @@ const copyCertCode = (code: string) => {
                                     @click="setActiveBatch(batch.id)"
                                     class="h-8 text-xs font-semibold text-slate-700 dark:text-slate-300"
                                 >
-                                    <Star class="mr-1.5 h-3.5 w-3.5 text-amber-500" /> Set as Primary Active
+                                    <Star
+                                        class="mr-1.5 h-3.5 w-3.5 text-amber-500"
+                                    />
+                                    Set as Primary Active
                                 </Button>
 
                                 <Button
@@ -853,7 +1101,10 @@ const copyCertCode = (code: string) => {
                                     @click="graduateBatch(batch.id)"
                                     class="h-8 border-purple-200 text-xs font-bold text-purple-700 hover:bg-purple-50 dark:border-purple-800 dark:text-purple-300"
                                 >
-                                    <Award class="mr-1.5 h-3.5 w-3.5 text-purple-600" /> Graduate & Issue Certificate
+                                    <Award
+                                        class="mr-1.5 h-3.5 w-3.5 text-purple-600"
+                                    />
+                                    Graduate & Issue Certificate
                                 </Button>
                             </div>
 
@@ -873,60 +1124,85 @@ const copyCertCode = (code: string) => {
                         <form
                             v-if="editingBatchId === batch.id"
                             @submit.prevent="submitBatchEdit(batch.id)"
-                            class="rounded-xl border border-indigo-200 bg-indigo-50/50 p-4 space-y-3 dark:border-indigo-900/60 dark:bg-indigo-950/30"
+                            class="space-y-3 rounded-xl border border-indigo-200 bg-indigo-50/50 p-4 dark:border-indigo-900/60 dark:bg-indigo-950/30"
                         >
-                            <div class="text-xs font-bold text-indigo-900 dark:text-indigo-200">
+                            <div
+                                class="text-xs font-bold text-indigo-900 dark:text-indigo-200"
+                            >
                                 Update Batch Evaluation for {{ batch.name }}
                             </div>
 
                             <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
                                 <div class="space-y-1">
-                                    <Label class="text-[11px] font-semibold text-slate-700 dark:text-slate-300">Status</Label>
+                                    <Label
+                                        class="text-[11px] font-semibold text-slate-700 dark:text-slate-300"
+                                        >Status</Label
+                                    >
                                     <select
                                         v-model="batchEditForm.status"
                                         class="h-9 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs text-slate-900 shadow-2xs dark:border-slate-800 dark:bg-slate-900 dark:text-white"
                                     >
-                                        <option value="enrolled">Enrolled</option>
+                                        <option value="enrolled">
+                                            Enrolled
+                                        </option>
                                         <option value="active">Active</option>
-                                        <option value="completed">Completed</option>
-                                        <option value="dropped_out">Dropped Out</option>
+                                        <option value="completed">
+                                            Completed
+                                        </option>
+                                        <option value="dropped_out">
+                                            Dropped Out
+                                        </option>
                                     </select>
                                 </div>
 
                                 <div class="space-y-1">
-                                    <Label class="text-[11px] font-semibold text-slate-700 dark:text-slate-300">Progress (%)</Label>
+                                    <Label
+                                        class="text-[11px] font-semibold text-slate-700 dark:text-slate-300"
+                                        >Progress (%)</Label
+                                    >
                                     <Input
-                                        v-model.number="batchEditForm.progress_val"
+                                        v-model.number="
+                                            batchEditForm.progress_val
+                                        "
                                         type="number"
                                         min="0"
                                         max="100"
-                                        class="h-9 border-slate-200 text-xs bg-white dark:border-slate-800 dark:bg-slate-900"
+                                        class="h-9 border-slate-200 bg-white text-xs dark:border-slate-800 dark:bg-slate-900"
                                     />
                                 </div>
 
                                 <div class="space-y-1">
-                                    <Label class="text-[11px] font-semibold text-slate-700 dark:text-slate-300">Grade / Rating</Label>
+                                    <Label
+                                        class="text-[11px] font-semibold text-slate-700 dark:text-slate-300"
+                                        >Grade / Rating</Label
+                                    >
                                     <Input
                                         v-model="batchEditForm.grade"
                                         type="text"
                                         placeholder="e.g. A+ / Distinction"
-                                        class="h-9 border-slate-200 text-xs bg-white dark:border-slate-800 dark:bg-slate-900"
+                                        class="h-9 border-slate-200 bg-white text-xs dark:border-slate-800 dark:bg-slate-900"
                                     />
                                 </div>
                             </div>
 
                             <div class="space-y-1">
-                                <Label class="text-[11px] font-semibold text-slate-700 dark:text-slate-300">Certificate Verification Code</Label>
+                                <Label
+                                    class="text-[11px] font-semibold text-slate-700 dark:text-slate-300"
+                                    >Certificate Verification Code</Label
+                                >
                                 <Input
                                     v-model="batchEditForm.certificate_code"
                                     type="text"
                                     placeholder="e.g. CERT-2026-MERN-8842"
-                                    class="h-9 border-slate-200 font-mono text-xs bg-white dark:border-slate-800 dark:bg-slate-900"
+                                    class="h-9 border-slate-200 bg-white font-mono text-xs dark:border-slate-800 dark:bg-slate-900"
                                 />
                             </div>
 
                             <div class="space-y-1">
-                                <Label class="text-[11px] font-semibold text-slate-700 dark:text-slate-300">Mentor Notes / Evaluation</Label>
+                                <Label
+                                    class="text-[11px] font-semibold text-slate-700 dark:text-slate-300"
+                                    >Mentor Notes / Evaluation</Label
+                                >
                                 <textarea
                                     v-model="batchEditForm.notes"
                                     rows="2"
@@ -963,11 +1239,14 @@ const copyCertCode = (code: string) => {
         <div v-if="activeTab === 'projects'" class="space-y-6">
             <div class="flex items-center justify-between">
                 <div>
-                    <h2 class="text-base font-extrabold text-slate-900 dark:text-white">
+                    <h2
+                        class="text-base font-extrabold text-slate-900 dark:text-white"
+                    >
                         Assigned Client Projects & Tasks
                     </h2>
                     <p class="text-xs text-slate-500">
-                        Live project tasks allocated to {{ student.name }} for practical training.
+                        Live project tasks allocated to {{ student.name }} for
+                        practical training.
                     </p>
                 </div>
                 <Button
@@ -976,34 +1255,50 @@ const copyCertCode = (code: string) => {
                     class="h-9 bg-indigo-600 px-3.5 text-xs font-bold text-white shadow-xs hover:bg-indigo-700"
                 >
                     <Plus class="mr-1.5 h-3.5 w-3.5" />
-                    {{ isAssignProjectOpen ? "Close Assignment Panel" : "+ Assign New Project" }}
+                    {{
+                        isAssignProjectOpen
+                            ? 'Close Assignment Panel'
+                            : '+ Assign New Project'
+                    }}
                 </Button>
             </div>
 
             <!-- Inline Assign Project Card Form -->
             <div
                 v-if="isAssignProjectOpen"
-                class="rounded-2xl border border-indigo-200 bg-indigo-50/40 p-5 dark:border-indigo-900/60 dark:bg-indigo-950/30 space-y-4"
+                class="space-y-4 rounded-2xl border border-indigo-200 bg-indigo-50/40 p-5 dark:border-indigo-900/60 dark:bg-indigo-950/30"
             >
-                <div class="flex items-center justify-between border-b border-indigo-200/60 pb-3 dark:border-indigo-900/40">
-                    <div class="flex items-center gap-2 font-extrabold text-xs text-indigo-900 dark:text-indigo-200 uppercase tracking-wider">
+                <div
+                    class="flex items-center justify-between border-b border-indigo-200/60 pb-3 dark:border-indigo-900/40"
+                >
+                    <div
+                        class="flex items-center gap-2 text-xs font-extrabold tracking-wider text-indigo-900 uppercase dark:text-indigo-200"
+                    >
                         <Briefcase class="h-4 w-4 text-indigo-600" />
                         <span>Allocate Client / Practice Project</span>
                     </div>
                 </div>
 
-                <form @submit.prevent="submitAssignProject" class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <form
+                    @submit.prevent="submitAssignProject"
+                    class="grid grid-cols-1 gap-4 md:grid-cols-2"
+                >
                     <!-- Project Selector -->
                     <div class="space-y-1.5">
-                        <Label class="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                            Select Available Project <span class="text-rose-500">*</span>
+                        <Label
+                            class="text-xs font-semibold text-slate-700 dark:text-slate-300"
+                        >
+                            Select Available Project
+                            <span class="text-rose-500">*</span>
                         </Label>
                         <select
                             v-model="assignForm.project_id"
                             required
                             class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-900 shadow-2xs focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
                         >
-                            <option value="" disabled>-- Choose Project from Database --</option>
+                            <option value="" disabled>
+                                -- Choose Project from Database --
+                            </option>
                             <option
                                 v-for="proj in availableProjects"
                                 :key="proj.id"
@@ -1016,25 +1311,32 @@ const copyCertCode = (code: string) => {
 
                     <!-- Role Assigned -->
                     <div class="space-y-1.5">
-                        <Label class="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                            Assigned Role / Title <span class="text-rose-500">*</span>
+                        <Label
+                            class="text-xs font-semibold text-slate-700 dark:text-slate-300"
+                        >
+                            Assigned Role / Title
+                            <span class="text-rose-500">*</span>
                         </Label>
                         <Input
                             v-model="assignForm.role"
                             type="text"
                             required
                             placeholder="e.g. Frontend React Developer"
-                            class="h-10 rounded-xl border-slate-200 text-xs bg-white focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-900"
+                            class="h-10 rounded-xl border-slate-200 bg-white text-xs focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-900"
                         />
                     </div>
 
                     <!-- Progress Percentage -->
                     <div class="space-y-1.5">
                         <div class="flex justify-between">
-                            <Label class="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                            <Label
+                                class="text-xs font-semibold text-slate-700 dark:text-slate-300"
+                            >
                                 Completion Progress (%)
                             </Label>
-                            <span class="text-xs font-bold text-indigo-600">{{ assignForm.progress_val }}%</span>
+                            <span class="text-xs font-bold text-indigo-600"
+                                >{{ assignForm.progress_val }}%</span
+                            >
                         </div>
                         <input
                             v-model.number="assignForm.progress_val"
@@ -1047,22 +1349,30 @@ const copyCertCode = (code: string) => {
 
                     <!-- Submission Status -->
                     <div class="space-y-1.5">
-                        <Label class="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                        <Label
+                            class="text-xs font-semibold text-slate-700 dark:text-slate-300"
+                        >
                             Initial Submission Status
                         </Label>
                         <select
                             v-model="assignForm.submission_status"
                             class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-900 shadow-2xs focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
                         >
-                            <option value="assigned">🔵 Assigned (Not Started)</option>
+                            <option value="assigned">
+                                🔵 Assigned (Not Started)
+                            </option>
                             <option value="in_progress">🟡 In Progress</option>
-                            <option value="submitted">🟣 Submitted for Review</option>
+                            <option value="submitted">
+                                🟣 Submitted for Review
+                            </option>
                             <option value="approved">🟢 Approved</option>
-                            <option value="revision_needed">🔴 Revision Needed</option>
+                            <option value="revision_needed">
+                                🔴 Revision Needed
+                            </option>
                         </select>
                     </div>
 
-                    <div class="md:col-span-2 flex justify-end gap-2 pt-2">
+                    <div class="flex justify-end gap-2 pt-2 md:col-span-2">
                         <Button
                             type="button"
                             variant="ghost"
@@ -1077,7 +1387,10 @@ const copyCertCode = (code: string) => {
                             :disabled="assignForm.processing"
                             class="bg-indigo-600 font-bold text-white hover:bg-indigo-700"
                         >
-                            <Loader2 v-if="assignForm.processing" class="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                            <Loader2
+                                v-if="assignForm.processing"
+                                class="mr-1.5 h-3.5 w-3.5 animate-spin"
+                            />
                             Confirm Assignment
                         </Button>
                     </div>
@@ -1085,14 +1398,24 @@ const copyCertCode = (code: string) => {
             </div>
 
             <!-- Assigned Projects Grid Cards -->
-            <div v-if="!student.projects || student.projects.length === 0" class="py-12 text-center text-slate-400">
-                <div class="flex flex-col items-center justify-center space-y-2">
-                    <Briefcase class="h-8 w-8 text-slate-300 dark:text-slate-700" />
-                    <p class="text-sm font-semibold text-slate-600 dark:text-slate-400">
+            <div
+                v-if="!student.projects || student.projects.length === 0"
+                class="py-12 text-center text-slate-400"
+            >
+                <div
+                    class="flex flex-col items-center justify-center space-y-2"
+                >
+                    <Briefcase
+                        class="h-8 w-8 text-slate-300 dark:text-slate-700"
+                    />
+                    <p
+                        class="text-sm font-semibold text-slate-600 dark:text-slate-400"
+                    >
                         No projects assigned to {{ student.name }} yet.
                     </p>
                     <p class="text-xs text-slate-400">
-                        Click "+ Assign New Project" above to link candidate to client project tasks.
+                        Click "+ Assign New Project" above to link candidate to
+                        client project tasks.
                     </p>
                 </div>
             </div>
@@ -1101,42 +1424,73 @@ const copyCertCode = (code: string) => {
                 <Card
                     v-for="proj in student.projects"
                     :key="proj.id"
-                    class="border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900 transition-all hover:border-indigo-300 dark:hover:border-indigo-800"
+                    class="border-slate-200/80 shadow-xs transition-all hover:border-indigo-300 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-indigo-800"
                 >
-                    <CardHeader class="pb-3 border-b border-slate-200/60 dark:border-slate-800">
+                    <CardHeader
+                        class="border-b border-slate-200/60 pb-3 dark:border-slate-800"
+                    >
                         <div class="flex items-start justify-between gap-3">
                             <div>
-                                <CardTitle class="text-sm font-bold text-slate-900 dark:text-white">
+                                <CardTitle
+                                    class="text-sm font-bold text-slate-900 dark:text-white"
+                                >
                                     {{ proj.title }}
                                 </CardTitle>
-                                <CardDescription v-if="proj.client" class="text-xs text-indigo-600 dark:text-indigo-400 font-medium mt-0.5">
-                                    Client: {{ proj.client.name }} {{ proj.client.company_name ? `(${proj.client.company_name})` : '' }}
+                                <CardDescription
+                                    v-if="proj.client"
+                                    class="mt-0.5 text-xs font-medium text-indigo-600 dark:text-indigo-400"
+                                >
+                                    Client: {{ proj.client.name }}
+                                    {{
+                                        proj.client.company_name
+                                            ? `(${proj.client.company_name})`
+                                            : ''
+                                    }}
                                 </CardDescription>
                             </div>
                             <Badge
                                 variant="outline"
-                                :class="['rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase', getProjectStatusBadge(proj.pivot.submission_status)]"
+                                :class="[
+                                    'rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase',
+                                    getProjectStatusBadge(
+                                        proj.pivot.submission_status,
+                                    ),
+                                ]"
                             >
                                 {{ formatStatus(proj.pivot.submission_status) }}
                             </Badge>
                         </div>
                     </CardHeader>
-                    <CardContent class="p-4 space-y-3">
+                    <CardContent class="space-y-3 p-4">
                         <div class="flex items-center justify-between text-xs">
                             <span class="text-slate-500">Assigned Role:</span>
-                            <span class="font-bold text-slate-800 dark:text-slate-200">{{ proj.pivot.role }}</span>
+                            <span
+                                class="font-bold text-slate-800 dark:text-slate-200"
+                                >{{ proj.pivot.role }}</span
+                            >
                         </div>
 
                         <!-- Progress Bar -->
                         <div class="space-y-1">
-                            <div class="flex items-center justify-between text-[11px] font-bold">
-                                <span class="text-slate-600 dark:text-slate-400">Task Completion</span>
-                                <span class="text-indigo-600 dark:text-indigo-400">{{ proj.pivot.progress }}%</span>
+                            <div
+                                class="flex items-center justify-between text-[11px] font-bold"
+                            >
+                                <span class="text-slate-600 dark:text-slate-400"
+                                    >Task Completion</span
+                                >
+                                <span
+                                    class="text-indigo-600 dark:text-indigo-400"
+                                    >{{ proj.pivot.progress }}%</span
+                                >
                             </div>
-                            <div class="h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                            <div
+                                class="h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800"
+                            >
                                 <div
                                     class="h-full rounded-full bg-indigo-600 transition-all duration-300"
-                                    :style="{ width: `${proj.pivot.progress}%` }"
+                                    :style="{
+                                        width: `${proj.pivot.progress}%`,
+                                    }"
                                 ></div>
                             </div>
                         </div>
@@ -1149,11 +1503,14 @@ const copyCertCode = (code: string) => {
         <div v-if="activeTab === 'reports'" class="space-y-6">
             <div class="flex items-center justify-between">
                 <div>
-                    <h2 class="text-base font-extrabold text-slate-900 dark:text-white">
+                    <h2
+                        class="text-base font-extrabold text-slate-900 dark:text-white"
+                    >
                         Weekly Log Submissions & Feedback History
                     </h2>
                     <p class="text-xs text-slate-500">
-                        Review submitted weekly task logs, AI summaries, and mentor reviews.
+                        Review submitted weekly task logs, AI summaries, and
+                        mentor reviews.
                     </p>
                 </div>
                 <Button
@@ -1165,14 +1522,27 @@ const copyCertCode = (code: string) => {
                 </Button>
             </div>
 
-            <div v-if="!student.weekly_reports || student.weekly_reports.length === 0" class="py-12 text-center text-slate-400">
-                <div class="flex flex-col items-center justify-center space-y-2">
-                    <FileText class="h-8 w-8 text-slate-300 dark:text-slate-700" />
-                    <p class="text-sm font-semibold text-slate-600 dark:text-slate-400">
+            <div
+                v-if="
+                    !student.weekly_reports ||
+                    student.weekly_reports.length === 0
+                "
+                class="py-12 text-center text-slate-400"
+            >
+                <div
+                    class="flex flex-col items-center justify-center space-y-2"
+                >
+                    <FileText
+                        class="h-8 w-8 text-slate-300 dark:text-slate-700"
+                    />
+                    <p
+                        class="text-sm font-semibold text-slate-600 dark:text-slate-400"
+                    >
                         No weekly reports submitted yet for {{ student.name }}.
                     </p>
                     <p class="text-xs text-slate-400">
-                        Use the "+ Submit Weekly Log" tab above to record weekly candidate progress.
+                        Use the "+ Submit Weekly Log" tab above to record weekly
+                        candidate progress.
                     </p>
                 </div>
             </div>
@@ -1183,52 +1553,79 @@ const copyCertCode = (code: string) => {
                     :key="report.id"
                     class="border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900"
                 >
-                    <CardHeader class="pb-3 border-b border-slate-200/60 dark:border-slate-800">
+                    <CardHeader
+                        class="border-b border-slate-200/60 pb-3 dark:border-slate-800"
+                    >
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-2">
-                                <Badge variant="default" class="bg-indigo-600 font-bold text-xs">
+                                <Badge
+                                    variant="default"
+                                    class="bg-indigo-600 text-xs font-bold"
+                                >
                                     Week {{ report.week_number }}
                                 </Badge>
-                                <span class="text-xs text-slate-400 font-medium">
-                                    Submitted {{ report.submitted_at || 'Recently' }}
+                                <span
+                                    class="text-xs font-medium text-slate-400"
+                                >
+                                    Submitted
+                                    {{ report.submitted_at || 'Recently' }}
                                 </span>
                             </div>
 
                             <Badge
                                 variant="outline"
-                                class="rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-slate-50 text-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                                class="rounded-full bg-slate-50 px-2.5 py-0.5 text-[10px] font-bold tracking-wider text-slate-700 uppercase dark:bg-slate-800 dark:text-slate-300"
                             >
                                 {{ formatStatus(report.status) }}
                             </Badge>
                         </div>
                     </CardHeader>
-                    <CardContent class="p-5 space-y-4">
+                    <CardContent class="space-y-4 p-5">
                         <!-- Tasks Completed -->
                         <div class="space-y-1">
-                            <span class="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
-                                <CheckCircle2 class="h-3.5 w-3.5 text-emerald-500" /> Tasks Completed:
+                            <span
+                                class="flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-slate-100"
+                            >
+                                <CheckCircle2
+                                    class="h-3.5 w-3.5 text-emerald-500"
+                                />
+                                Tasks Completed:
                             </span>
-                            <p class="text-xs text-slate-700 dark:text-slate-300 pl-5 whitespace-pre-line">
+                            <p
+                                class="pl-5 text-xs whitespace-pre-line text-slate-700 dark:text-slate-300"
+                            >
                                 {{ report.tasks_completed }}
                             </p>
                         </div>
 
                         <!-- Learnings -->
                         <div v-if="report.learnings" class="space-y-1">
-                            <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">
-                                <Sparkles class="h-3.5 w-3.5 text-indigo-500" /> Key Learnings:
+                            <span
+                                class="flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400"
+                            >
+                                <Sparkles class="h-3.5 w-3.5 text-indigo-500" />
+                                Key Learnings:
                             </span>
-                            <p class="text-xs text-slate-700 dark:text-slate-300 pl-5 whitespace-pre-line">
+                            <p
+                                class="pl-5 text-xs whitespace-pre-line text-slate-700 dark:text-slate-300"
+                            >
                                 {{ report.learnings }}
                             </p>
                         </div>
 
                         <!-- Blockers -->
                         <div v-if="report.blockers" class="space-y-1">
-                            <span class="text-xs font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
-                                <AlertTriangle class="h-3.5 w-3.5 text-rose-500" /> Challenges / Blockers:
+                            <span
+                                class="flex items-center gap-1.5 text-xs font-bold text-rose-600 dark:text-rose-400"
+                            >
+                                <AlertTriangle
+                                    class="h-3.5 w-3.5 text-rose-500"
+                                />
+                                Challenges / Blockers:
                             </span>
-                            <p class="text-xs text-rose-700 dark:text-rose-300 pl-5 whitespace-pre-line bg-rose-50/50 p-2.5 rounded-xl border border-rose-200/60 dark:border-rose-900/40 dark:bg-rose-950/20">
+                            <p
+                                class="rounded-xl border border-rose-200/60 bg-rose-50/50 p-2.5 pl-5 text-xs whitespace-pre-line text-rose-700 dark:border-rose-900/40 dark:bg-rose-950/20 dark:text-rose-300"
+                            >
                                 {{ report.blockers }}
                             </p>
                         </div>
@@ -1236,13 +1633,19 @@ const copyCertCode = (code: string) => {
                         <!-- AI Summary Card -->
                         <div
                             v-if="report.ai_summary"
-                            class="rounded-2xl border border-purple-200/80 bg-purple-50/60 p-4 space-y-1.5 dark:border-purple-900/40 dark:bg-purple-950/30"
+                            class="space-y-1.5 rounded-2xl border border-purple-200/80 bg-purple-50/60 p-4 dark:border-purple-900/40 dark:bg-purple-950/30"
                         >
-                            <div class="flex items-center gap-1.5 font-bold text-xs text-purple-900 dark:text-purple-200">
-                                <Bot class="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                            <div
+                                class="flex items-center gap-1.5 text-xs font-bold text-purple-900 dark:text-purple-200"
+                            >
+                                <Bot
+                                    class="h-4 w-4 text-purple-600 dark:text-purple-400"
+                                />
                                 <span>AI Performance Executive Summary</span>
                             </div>
-                            <p class="text-xs text-purple-950 dark:text-purple-100 leading-relaxed">
+                            <p
+                                class="text-xs leading-relaxed text-purple-950 dark:text-purple-100"
+                            >
                                 {{ report.ai_summary }}
                             </p>
                         </div>
@@ -1250,19 +1653,27 @@ const copyCertCode = (code: string) => {
                         <!-- Admin Mentor Feedback Box -->
                         <div
                             v-if="report.feedback"
-                            class="rounded-2xl border border-indigo-200/80 bg-indigo-50/60 p-4 space-y-1.5 dark:border-indigo-900/40 dark:bg-indigo-950/30"
+                            class="space-y-1.5 rounded-2xl border border-indigo-200/80 bg-indigo-50/60 p-4 dark:border-indigo-900/40 dark:bg-indigo-950/30"
                         >
-                            <div class="flex items-center gap-1.5 font-bold text-xs text-indigo-900 dark:text-indigo-200">
-                                <MessageSquare class="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                            <div
+                                class="flex items-center gap-1.5 text-xs font-bold text-indigo-900 dark:text-indigo-200"
+                            >
+                                <MessageSquare
+                                    class="h-4 w-4 text-indigo-600 dark:text-indigo-400"
+                                />
                                 <span>Mentor Review & Feedback</span>
                             </div>
-                            <p class="text-xs text-indigo-950 dark:text-indigo-100">
+                            <p
+                                class="text-xs text-indigo-950 dark:text-indigo-100"
+                            >
                                 {{ report.feedback }}
                             </p>
                         </div>
 
                         <!-- Bottom Card Actions (AI Summary Button & Review Form Toggle) -->
-                        <div class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200/80 pt-3 dark:border-slate-800">
+                        <div
+                            class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200/80 pt-3 dark:border-slate-800"
+                        >
                             <Button
                                 variant="outline"
                                 size="sm"
@@ -1270,9 +1681,19 @@ const copyCertCode = (code: string) => {
                                 :disabled="generatingReportAi === report.id"
                                 class="h-8 border-purple-200 text-xs font-bold text-purple-700 hover:bg-purple-50 dark:border-purple-800 dark:text-purple-300 dark:hover:bg-purple-950"
                             >
-                                <Loader2 v-if="generatingReportAi === report.id" class="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                                <Bot v-else class="mr-1.5 h-3.5 w-3.5 text-purple-600" />
-                                <span>{{ generatingReportAi === report.id ? "Generating AI Summary..." : "Generate AI Summary" }}</span>
+                                <Loader2
+                                    v-if="generatingReportAi === report.id"
+                                    class="mr-1.5 h-3.5 w-3.5 animate-spin"
+                                />
+                                <Bot
+                                    v-else
+                                    class="mr-1.5 h-3.5 w-3.5 text-purple-600"
+                                />
+                                <span>{{
+                                    generatingReportAi === report.id
+                                        ? 'Generating AI Summary...'
+                                        : 'Generate AI Summary'
+                                }}</span>
                             </Button>
 
                             <Button
@@ -1291,39 +1712,54 @@ const copyCertCode = (code: string) => {
                         <form
                             v-if="editingReportId === report.id"
                             @submit.prevent="submitReportReview(report.id)"
-                            class="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-3 dark:border-slate-800 dark:bg-slate-950"
+                            class="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950"
                         >
                             <div class="flex items-center justify-between">
-                                <span class="text-xs font-bold text-slate-800 dark:text-slate-200">
-                                    Update Review & Feedback for Week {{ report.week_number }}
+                                <span
+                                    class="text-xs font-bold text-slate-800 dark:text-slate-200"
+                                >
+                                    Update Review & Feedback for Week
+                                    {{ report.week_number }}
                                 </span>
                             </div>
 
                             <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
                                 <div class="space-y-1">
-                                    <Label class="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                                    <Label
+                                        class="text-[11px] font-semibold text-slate-700 dark:text-slate-300"
+                                    >
                                         Report Status
                                     </Label>
                                     <select
                                         v-model="reviewForm.status"
                                         class="h-9 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs text-slate-900 shadow-2xs dark:border-slate-800 dark:bg-slate-900 dark:text-white"
                                     >
-                                        <option value="submitted">Submitted</option>
-                                        <option value="under_review">Under Review</option>
-                                        <option value="approved">Approved</option>
-                                        <option value="revision_requested">Revision Requested</option>
+                                        <option value="submitted">
+                                            Submitted
+                                        </option>
+                                        <option value="under_review">
+                                            Under Review
+                                        </option>
+                                        <option value="approved">
+                                            Approved
+                                        </option>
+                                        <option value="revision_requested">
+                                            Revision Requested
+                                        </option>
                                     </select>
                                 </div>
 
                                 <div class="space-y-1">
-                                    <Label class="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                                    <Label
+                                        class="text-[11px] font-semibold text-slate-700 dark:text-slate-300"
+                                    >
                                         Mentor Comments / Feedback
                                     </Label>
                                     <Input
                                         v-model="reviewForm.feedback"
                                         type="text"
                                         placeholder="Add mentor feedback or notes..."
-                                        class="h-9 border-slate-200 text-xs bg-white dark:border-slate-800 dark:bg-slate-900"
+                                        class="h-9 border-slate-200 bg-white text-xs dark:border-slate-800 dark:bg-slate-900"
                                     />
                                 </div>
                             </div>
@@ -1354,25 +1790,41 @@ const copyCertCode = (code: string) => {
 
         <!-- TAB 4: SUBMIT NEW WEEKLY REPORT FORM -->
         <div v-if="activeTab === 'submit_report'" class="space-y-6">
-            <Card class="border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-                <CardHeader class="border-b border-slate-200/80 pb-4 dark:border-slate-800">
-                    <div class="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
+            <Card
+                class="border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900"
+            >
+                <CardHeader
+                    class="border-b border-slate-200/80 pb-4 dark:border-slate-800"
+                >
+                    <div
+                        class="flex items-center gap-2 text-emerald-600 dark:text-emerald-400"
+                    >
                         <FileText class="h-5 w-5" />
-                        <CardTitle class="text-base font-bold text-slate-900 dark:text-slate-100">
+                        <CardTitle
+                            class="text-base font-bold text-slate-900 dark:text-slate-100"
+                        >
                             Submit Weekly Candidate Progress Log
                         </CardTitle>
                     </div>
                     <CardDescription class="text-xs text-slate-500">
-                        Record tasks completed, key learnings, and blockers faced during the week.
+                        Record tasks completed, key learnings, and blockers
+                        faced during the week.
                     </CardDescription>
                 </CardHeader>
                 <CardContent class="p-6">
-                    <form @submit.prevent="submitWeeklyReport" class="space-y-5">
+                    <form
+                        @submit.prevent="submitWeeklyReport"
+                        class="space-y-5"
+                    >
                         <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
                             <!-- Week Number -->
                             <div class="space-y-1.5 md:col-span-2">
-                                <Label for="report-week" class="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                                    Week Number <span class="text-rose-500">*</span>
+                                <Label
+                                    for="report-week"
+                                    class="text-xs font-semibold text-slate-700 dark:text-slate-300"
+                                >
+                                    Week Number
+                                    <span class="text-rose-500">*</span>
                                 </Label>
                                 <Input
                                     id="report-week"
@@ -1382,13 +1834,19 @@ const copyCertCode = (code: string) => {
                                     required
                                     class="h-10 w-32 border-slate-200 text-xs shadow-2xs dark:border-slate-800 dark:bg-slate-950"
                                 />
-                                <InputError :message="reportForm.errors.week_number" />
+                                <InputError
+                                    :message="reportForm.errors.week_number"
+                                />
                             </div>
 
                             <!-- Tasks Completed -->
                             <div class="space-y-1.5 md:col-span-2">
-                                <Label for="report-tasks" class="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                                    Tasks Completed This Week <span class="text-rose-500">*</span>
+                                <Label
+                                    for="report-tasks"
+                                    class="text-xs font-semibold text-slate-700 dark:text-slate-300"
+                                >
+                                    Tasks Completed This Week
+                                    <span class="text-rose-500">*</span>
                                 </Label>
                                 <textarea
                                     id="report-tasks"
@@ -1398,12 +1856,17 @@ const copyCertCode = (code: string) => {
                                     placeholder="Detail major tasks, features built, bug fixes, or modules completed..."
                                     class="w-full rounded-md border border-slate-200 p-3 text-xs text-slate-900 shadow-2xs focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
                                 ></textarea>
-                                <InputError :message="reportForm.errors.tasks_completed" />
+                                <InputError
+                                    :message="reportForm.errors.tasks_completed"
+                                />
                             </div>
 
                             <!-- Key Learnings -->
                             <div class="space-y-1.5">
-                                <Label for="report-learnings" class="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                <Label
+                                    for="report-learnings"
+                                    class="text-xs font-semibold text-slate-700 dark:text-slate-300"
+                                >
                                     Key Concept Learnings
                                 </Label>
                                 <textarea
@@ -1417,7 +1880,10 @@ const copyCertCode = (code: string) => {
 
                             <!-- Challenges / Blockers -->
                             <div class="space-y-1.5">
-                                <Label for="report-blockers" class="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                <Label
+                                    for="report-blockers"
+                                    class="text-xs font-semibold text-slate-700 dark:text-slate-300"
+                                >
                                     Challenges & Blockers Faced
                                 </Label>
                                 <textarea
@@ -1430,7 +1896,9 @@ const copyCertCode = (code: string) => {
                             </div>
                         </div>
 
-                        <div class="flex justify-end gap-3 border-t border-slate-200/80 pt-4 dark:border-slate-800">
+                        <div
+                            class="flex justify-end gap-3 border-t border-slate-200/80 pt-4 dark:border-slate-800"
+                        >
                             <Button
                                 type="button"
                                 variant="outline"
@@ -1443,7 +1911,10 @@ const copyCertCode = (code: string) => {
                                 :disabled="reportForm.processing"
                                 class="bg-emerald-600 px-6 font-bold text-white hover:bg-emerald-700"
                             >
-                                <Loader2 v-if="reportForm.processing" class="mr-2 h-4 w-4 animate-spin" />
+                                <Loader2
+                                    v-if="reportForm.processing"
+                                    class="mr-2 h-4 w-4 animate-spin"
+                                />
                                 <Send v-else class="mr-2 h-3.5 w-3.5" />
                                 Submit Weekly Report
                             </Button>

@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import { Head, Link, useForm } from "@inertiajs/vue3";
-import { index, create, store } from "@/routes/clients";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { ref } from 'vue';
+import { Head, Link, useForm } from '@inertiajs/vue3';
+import { index, create, store } from '@/routes/clients';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import {
     Card,
     CardContent,
     CardHeader,
     CardTitle,
     CardDescription,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import InputError from "@/components/InputError.vue";
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import InputError from '@/components/InputError.vue';
 import {
     ArrowLeft,
     User,
@@ -27,15 +27,15 @@ import {
     Loader2,
     Sparkles,
     UserPlus,
-} from "@lucide/vue";
+} from '@lucide/vue';
 
-import ServiceManagerModal from "@/components/ServiceManagerModal.vue";
+import ServiceManagerModal from '@/components/ServiceManagerModal.vue';
 
 defineOptions({
     layout: {
         breadcrumbs: [
-            { title: "Clients & Leads", href: index.url() },
-            { title: "Create Client", href: create.url() },
+            { title: 'Clients & Leads', href: index.url() },
+            { title: 'Create Client', href: create.url() },
         ],
     },
 });
@@ -61,12 +61,12 @@ const selectedServices = ref<
 >([]);
 
 const form = useForm({
-    name: "",
-    email: "",
-    phone: "",
-    company_name: "",
-    status: "new_lead",
-    notes: "",
+    name: '',
+    email: '',
+    phone: '',
+    company_name: '',
+    status: 'new_lead',
+    notes: '',
     services: [] as {
         id: number;
         requirements: string;
@@ -81,8 +81,8 @@ const toggleService = (serviceId: number) => {
     } else {
         selectedServices.value.push({
             id: serviceId,
-            requirements: "",
-            estimated_budget: "",
+            requirements: '',
+            estimated_budget: '',
         });
     }
 };
@@ -165,8 +165,8 @@ const submit = () => {
                         />
                         <span>{{
                             form.processing
-                                ? "Saving Client..."
-                                : "Save Client / Lead"
+                                ? 'Saving Client...'
+                                : 'Save Client / Lead'
                         }}</span>
                     </Button>
                 </div>
