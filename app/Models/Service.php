@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Builder;
 
 class Service extends Model
 {
@@ -28,7 +29,7 @@ class Service extends Model
     /**
      * Scope query to only include client services.
      */
-    public function scopeForClients($query)
+    public function scopeForClients(Builder $query): Builder
     {
         return $query->whereIn('type', ['client', 'both']);
     }
@@ -36,7 +37,7 @@ class Service extends Model
     /**
      * Scope query to only include internship track services.
      */
-    public function scopeForInternships($query)
+    public function scopeForInternships(Builder $query): Builder
     {
         return $query->whereIn('type', ['internship', 'both']);
     }

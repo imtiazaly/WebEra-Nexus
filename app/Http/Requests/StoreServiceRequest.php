@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\ValidationRule;
 
 class StoreServiceRequest extends FormRequest
 {
@@ -11,6 +12,7 @@ class StoreServiceRequest extends FormRequest
         return true;
     }
 
+    /** @return array<string, array<int, string|ValidationRule>> */
     public function rules(): array
     {
         return [

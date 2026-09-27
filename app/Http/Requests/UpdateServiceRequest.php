@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Contracts\Validation\ValidationRule;
 
 class UpdateServiceRequest extends FormRequest
 {
@@ -12,9 +13,11 @@ class UpdateServiceRequest extends FormRequest
         return true;
     }
 
+    /** @return array<string, array<int, string|ValidationRule>> */
     public function rules(): array
     {
-        $serviceId = $this->route('service') ? $this->route('service')->id : null;
+        $service = $this->route('service');
+        $serviceId = is_object($service) ? $service->id : $service;
 
         return [
             'name' => ['required', 'string', 'max:255', Rule::unique('services', 'name')->ignore($serviceId)],
