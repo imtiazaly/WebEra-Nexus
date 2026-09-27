@@ -678,7 +678,7 @@ const deleteProject = (id: number) => {
                     <!-- Desktop Table (md & larger) -->
                     <div class="hidden w-full overflow-x-auto md:block">
                         <table
-                            class="w-full min-w-[900px] table-fixed border-collapse text-left"
+                            class="w-full min-w-225 table-fixed border-collapse text-left"
                         >
                             <thead>
                                 <tr

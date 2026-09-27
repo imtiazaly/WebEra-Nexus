@@ -101,7 +101,7 @@ const submit = () => {
     <div class="w-full space-y-8 p-4 sm:p-6 lg:p-8">
         <!-- 🌟 HERO HEADER BANNER -->
         <div
-            class="relative overflow-hidden rounded-3xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50/90 via-purple-50/60 to-slate-50/90 p-6 text-slate-900 shadow-xl backdrop-blur-xl sm:p-8 dark:border-indigo-500/20 dark:from-indigo-950 dark:via-slate-900 dark:to-purple-950 dark:text-white"
+            class="relative overflow-hidden rounded-3xl border border-indigo-200/80 bg-linear-to-br from-indigo-50/90 via-purple-50/60 to-slate-50/90 p-6 text-slate-900 shadow-xl backdrop-blur-xl sm:p-8 dark:border-indigo-500/20 dark:from-indigo-950 dark:via-slate-900 dark:to-purple-950 dark:text-white"
         >
             <div
                 class="pointer-events-none absolute -top-20 -right-20 h-80 w-80 rounded-full bg-indigo-500/15 blur-3xl dark:bg-indigo-500/20"
@@ -505,7 +505,7 @@ const submit = () => {
                     class="relative overflow-hidden rounded-3xl border border-indigo-500/30 bg-white p-6 shadow-xl dark:bg-slate-900"
                 >
                     <div
-                        class="pointer-events-none absolute -top-12 -right-12 h-36 w-36 rounded-full bg-gradient-to-br from-indigo-500/20 to-purple-500/10 blur-2xl"
+                        class="pointer-events-none absolute -top-12 -right-12 h-36 w-36 rounded-full bg-linear-to-br from-indigo-500/20 to-purple-500/10 blur-2xl"
                     ></div>
 
                     <div class="relative z-10 space-y-5">
@@ -566,7 +566,7 @@ const submit = () => {
                                 class="h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700"
                             >
                                 <div
-                                    class="h-full w-3/4 rounded-full bg-gradient-to-r from-indigo-500 via-cyan-500 to-emerald-500"
+                                    class="h-full w-3/4 rounded-full bg-linear-to-r from-indigo-500 via-cyan-500 to-emerald-500"
                                 ></div>
                             </div>
                             <div

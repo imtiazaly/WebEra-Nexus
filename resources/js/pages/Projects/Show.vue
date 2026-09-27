@@ -218,7 +218,7 @@ const getStatusConfig = (status: string) => {
                             class="h-16 w-16 shrink-0 border-2 border-indigo-200 shadow-sm dark:border-indigo-900"
                         >
                             <AvatarFallback
-                                class="bg-gradient-to-br from-indigo-600 to-purple-700 text-lg font-extrabold text-white"
+                                class="bg-linear-to-br from-indigo-600 to-purple-700 text-lg font-extrabold text-white"
                             >
                                 {{ getInitials(project.title) }}
                             </AvatarFallback>
@@ -422,7 +422,7 @@ const getStatusConfig = (status: string) => {
                         class="h-4 w-full overflow-hidden rounded-full bg-slate-100 p-0.5 shadow-inner dark:bg-slate-800"
                     >
                         <div
-                            class="h-3 rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500 shadow-sm transition-all duration-700"
+                            class="h-3 rounded-full bg-linear-to-r from-indigo-500 via-purple-500 to-emerald-500 shadow-sm transition-all duration-700"
                             :style="{ width: `${project.progress}%` }"
                         ></div>
                     </div>
@@ -439,7 +439,7 @@ const getStatusConfig = (status: string) => {
 
         <!-- 🪄 MAGICAL AI Executive Status Summary Card -->
         <Card
-            class="overflow-hidden border-purple-200/80 bg-gradient-to-br from-purple-50/40 via-white to-indigo-50/20 shadow-xs dark:border-purple-900/50 dark:from-purple-950/20 dark:via-slate-900 dark:to-indigo-950/10"
+            class="overflow-hidden border-purple-200/80 bg-linear-to-br from-purple-50/40 via-white to-indigo-50/20 shadow-xs dark:border-purple-900/50 dark:from-purple-950/20 dark:via-slate-900 dark:to-indigo-950/10"
         >
             <CardHeader
                 class="border-b border-purple-100 pb-4 dark:border-purple-900/40"
@@ -449,7 +449,7 @@ const getStatusConfig = (status: string) => {
                 >
                     <div class="flex items-center gap-3">
                         <div
-                            class="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-tr from-purple-600 to-indigo-600 text-white shadow-xs"
+                            class="flex h-10 w-10 items-center justify-center rounded-lg bg-linear-to-tr from-purple-600 to-indigo-600 text-white shadow-xs"
                         >
                             <Wand2
                                 class="h-5 w-5 animate-pulse text-purple-200"
