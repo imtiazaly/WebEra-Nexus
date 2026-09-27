@@ -17,6 +17,7 @@ import {
     AlertTriangle,
     ArrowUpRight,
     Award,
+    BarChart3,
     Briefcase,
     Building2,
     Calendar,
@@ -360,8 +361,8 @@ const totalUrgentCount = computed(() => {
     <Head title="Executive Command Center — WebEra-Nexus" />
 
     <div class="w-full space-y-6 p-4 sm:p-6 lg:p-8">
-        <!-- 🌟 TOP MASTER EXECUTIVE HEADER -->
-        <div class="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-linear-to-r from-slate-900 via-indigo-950 to-slate-900 p-6 text-white shadow-xl dark:border-slate-800">
+        <!-- TOP MASTER EXECUTIVE HEADER -->
+        <div class="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-6 text-white shadow-xl dark:border-slate-800">
             <!-- Background Decorative Lighting -->
             <div class="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-indigo-500/15 blur-3xl"></div>
             <div class="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-blue-500/15 blur-3xl"></div>
@@ -448,7 +449,7 @@ const totalUrgentCount = computed(() => {
             </div>
         </div>
 
-        <!-- 🚀 TOP TIER 5 EXECUTIVE KPI BENTO CARDS -->
+        <!-- TOP TIER 5 EXECUTIVE KPI BENTO CARDS -->
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
             <!-- 1. Revenue & Commercial Pipeline -->
             <div class="group relative flex flex-col justify-between overflow-hidden rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs transition-all hover:border-indigo-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-indigo-800">
@@ -606,7 +607,7 @@ const totalUrgentCount = computed(() => {
             </div>
         </div>
 
-        <!-- 🧭 PERSPECTIVE CONTROLS & LIVE SEARCH BAR -->
+        <!-- PERSPECTIVE CONTROLS & LIVE SEARCH BAR -->
         <div class="flex flex-col gap-3 rounded-xl border border-slate-200/80 bg-white p-3 shadow-xs lg:flex-row lg:items-center lg:justify-between dark:border-slate-800 dark:bg-slate-900">
             <!-- Tabs -->
             <div class="flex max-w-full items-center gap-1.5 overflow-x-auto">
@@ -685,7 +686,7 @@ const totalUrgentCount = computed(() => {
             </div>
         </div>
 
-        <!-- 🚨 CRITICAL ATTENTION / URGENT RADAR STRIP (Always visible if urgent items exist) -->
+        <!-- CRITICAL ATTENTION / URGENT RADAR STRIP -->
         <div v-if="totalUrgentCount > 0" class="rounded-xl border border-rose-200/80 bg-rose-50/60 p-4 dark:border-rose-900/60 dark:bg-rose-950/20">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div class="flex items-center gap-3">
@@ -715,7 +716,7 @@ const totalUrgentCount = computed(() => {
         </div>
 
         <!-- ========================================================================= -->
-        <!-- TAB 1: 🌟 COMMAND CENTER (FULL PANORAMIC VIEW) -->
+        <!-- TAB 1: COMMAND CENTER (FULL PANORAMIC VIEW) -->
         <!-- ========================================================================= -->
         <div v-if="activeTab === 'overview'" class="space-y-6">
             <!-- Row 1: Interactive Pipeline Funnel & Project Status Radar -->
@@ -724,8 +725,9 @@ const totalUrgentCount = computed(() => {
                 <div class="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs lg:col-span-2 dark:border-slate-800 dark:bg-slate-900">
                     <div class="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
                         <div>
-                            <h2 class="text-base font-extrabold text-slate-900 dark:text-white">
-                                🔄 Commercial & Delivery Pipeline Funnel
+                            <h2 class="flex items-center gap-2 text-base font-extrabold text-slate-900 dark:text-white">
+                                <TrendingUp class="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                                Commercial & Delivery Pipeline Funnel
                             </h2>
                             <p class="text-xs text-slate-500 dark:text-slate-400">
                                 End-to-end journey from initial inquiry to final project completion
@@ -787,7 +789,7 @@ const totalUrgentCount = computed(() => {
                         </div>
                         <div class="h-2.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                             <div
-                                class="h-2.5 rounded-full bg-linear-to-r from-blue-500 via-indigo-500 to-emerald-500 transition-all duration-700"
+                                class="h-2.5 rounded-full bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-500 transition-all duration-700"
                                 :style="{ width: `${Math.min(100, Math.max(10, metrics.conversion_rate))}%` }"
                             ></div>
                         </div>
@@ -797,8 +799,9 @@ const totalUrgentCount = computed(() => {
                 <!-- 2. Project Status Distribution Chart (1 Col) -->
                 <div class="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
                     <div class="border-b border-slate-100 pb-3 dark:border-slate-800">
-                        <h2 class="text-base font-extrabold text-slate-900 dark:text-white">
-                            📊 Project Workload Distribution
+                        <h2 class="flex items-center gap-2 text-base font-extrabold text-slate-900 dark:text-white">
+                            <BarChart3 class="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                            Project Workload Distribution
                         </h2>
                         <p class="text-xs text-slate-500 dark:text-slate-400">
                             Current operational status across all projects
@@ -864,8 +867,9 @@ const totalUrgentCount = computed(() => {
                 <div class="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs lg:col-span-2 dark:border-slate-800 dark:bg-slate-900">
                     <div class="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
                         <div>
-                            <h2 class="text-base font-extrabold text-slate-900 dark:text-white">
-                                🚀 Active Delivery Matrix
+                            <h2 class="flex items-center gap-2 text-base font-extrabold text-slate-900 dark:text-white">
+                                <FolderKanban class="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                                Active Delivery Matrix
                             </h2>
                             <p class="text-xs text-slate-500 dark:text-slate-400">
                                 Real-time completion progress and team allocations
@@ -950,8 +954,9 @@ const totalUrgentCount = computed(() => {
                 <!-- Upcoming & Overdue Deadlines Radar (1 Col) -->
                 <div class="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
                     <div class="border-b border-slate-100 pb-3 dark:border-slate-800">
-                        <h2 class="text-base font-extrabold text-slate-900 dark:text-white">
-                            ⏰ Deadlines Radar
+                        <h2 class="flex items-center gap-2 text-base font-extrabold text-slate-900 dark:text-white">
+                            <Clock class="h-4 w-4 text-rose-500" />
+                            Deadlines Radar
                         </h2>
                         <p class="text-xs text-slate-500 dark:text-slate-400">
                             Critical milestones due in the next 14 days
@@ -961,7 +966,9 @@ const totalUrgentCount = computed(() => {
                     <!-- Overdue items -->
                     <div class="mt-4 space-y-3">
                         <div v-if="overdueProjects.length > 0" class="space-y-2">
-                            <span class="text-[10px] font-bold tracking-wider text-rose-600 uppercase">⚠️ Overdue Projects</span>
+                            <span class="flex items-center gap-1 text-[10px] font-bold tracking-wider text-rose-600 uppercase">
+                                <AlertTriangle class="h-3 w-3" /> Overdue Projects
+                            </span>
                             <div
                                 v-for="proj in overdueProjects.slice(0, 3)"
                                 :key="proj.id"
@@ -982,7 +989,9 @@ const totalUrgentCount = computed(() => {
 
                         <!-- Upcoming 14 days -->
                         <div v-if="upcomingDeadlines.length > 0" class="space-y-2">
-                            <span class="text-[10px] font-bold tracking-wider text-amber-600 uppercase">📅 Due in Next 14 Days</span>
+                            <span class="flex items-center gap-1 text-[10px] font-bold tracking-wider text-amber-600 uppercase">
+                                <Calendar class="h-3 w-3" /> Due in Next 14 Days
+                            </span>
                             <div
                                 v-for="proj in upcomingDeadlines.slice(0, 3)"
                                 :key="proj.id"
@@ -1018,8 +1027,9 @@ const totalUrgentCount = computed(() => {
                 <div class="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
                     <div class="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
                         <div>
-                            <h2 class="text-base font-extrabold text-slate-900 dark:text-white">
-                                🎓 Active Batches
+                            <h2 class="flex items-center gap-2 text-base font-extrabold text-slate-900 dark:text-white">
+                                <GraduationCap class="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                                Active Batches
                             </h2>
                             <p class="text-xs text-slate-500 dark:text-slate-400">
                                 Running training cohorts
@@ -1074,8 +1084,9 @@ const totalUrgentCount = computed(() => {
                 <div class="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
                     <div class="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
                         <div>
-                            <h2 class="text-base font-extrabold text-slate-900 dark:text-white">
-                                ⭐ Star Interns
+                            <h2 class="flex items-center gap-2 text-base font-extrabold text-slate-900 dark:text-white">
+                                <Award class="h-4 w-4 text-amber-500" />
+                                Star Interns
                             </h2>
                             <p class="text-xs text-slate-500 dark:text-slate-400">
                                 High-velocity student talent
@@ -1125,8 +1136,9 @@ const totalUrgentCount = computed(() => {
                 <!-- 3. Unified Real-Time Activity Feed (1 Col) -->
                 <div class="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
                     <div class="border-b border-slate-100 pb-3 dark:border-slate-800">
-                        <h2 class="text-base font-extrabold text-slate-900 dark:text-white">
-                            ⚡ Real-Time Audit Stream
+                        <h2 class="flex items-center gap-2 text-base font-extrabold text-slate-900 dark:text-white">
+                            <Activity class="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                            Real-Time Audit Stream
                         </h2>
                         <p class="text-xs text-slate-500 dark:text-slate-400">
                             Chronological events across WebEra-Nexus
@@ -1175,7 +1187,7 @@ const totalUrgentCount = computed(() => {
         </div>
 
         <!-- ========================================================================= -->
-        <!-- TAB 2: 💼 CLIENTS & REVENUE PIPELINE -->
+        <!-- TAB 2: CLIENTS & REVENUE PIPELINE -->
         <!-- ========================================================================= -->
         <div v-else-if="activeTab === 'commercial'" class="space-y-6">
             <!-- Commercial Metrics Summary -->
@@ -1203,8 +1215,9 @@ const totalUrgentCount = computed(() => {
             <div class="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
                 <div class="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
                     <div>
-                        <h2 class="text-base font-extrabold text-slate-900 dark:text-white">
-                            🌐 Service Track Market Demand
+                        <h2 class="flex items-center gap-2 text-base font-extrabold text-slate-900 dark:text-white">
+                            <Layers class="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                            Service Track Market Demand
                         </h2>
                         <p class="text-xs text-slate-500 dark:text-slate-400">
                             Active projects and client requirements mapped across service tracks
@@ -1238,8 +1251,9 @@ const totalUrgentCount = computed(() => {
             <div class="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
                 <div class="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
                     <div>
-                        <h2 class="text-base font-extrabold text-slate-900 dark:text-white">
-                            🎯 Uncontacted Leads Awaiting Response
+                        <h2 class="flex items-center gap-2 text-base font-extrabold text-slate-900 dark:text-white">
+                            <Target class="h-4 w-4 text-rose-500" />
+                            Uncontacted Leads Awaiting Response
                         </h2>
                         <p class="text-xs text-slate-500 dark:text-slate-400">
                             Inquiries needing qualification to prevent lead leakage
@@ -1288,15 +1302,15 @@ const totalUrgentCount = computed(() => {
                         </div>
                     </div>
 
-                    <div v-if="uncontactedLeads.length === 0" class="py-8 text-center text-xs text-slate-500">
-                        🎉 All leads have been contacted promptly!
+                    <div v-if="uncontactedLeads.length === 0" class="flex items-center justify-center gap-2 py-8 text-center text-xs text-slate-500">
+                        <CheckCircle2 class="h-4 w-4 text-emerald-500" /> All leads have been contacted promptly!
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- ========================================================================= -->
-        <!-- TAB 3: 🚀 PROJECTS & OPERATIONAL RADAR -->
+        <!-- TAB 3: PROJECTS & OPERATIONAL RADAR -->
         <!-- ========================================================================= -->
         <div v-else-if="activeTab === 'projects'" class="space-y-6">
             <!-- Project Execution Stats Grid -->
@@ -1330,8 +1344,9 @@ const totalUrgentCount = computed(() => {
             <div v-if="overdueProjects.length > 0" class="rounded-xl border border-rose-200 bg-white p-5 shadow-xs dark:border-rose-900/60 dark:bg-slate-900">
                 <div class="flex items-center justify-between border-b border-rose-100 pb-3 dark:border-rose-900/40">
                     <div>
-                        <h2 class="text-base font-extrabold text-rose-900 dark:text-rose-200">
-                            🚨 Overdue Projects ({{ overdueProjects.length }})
+                        <h2 class="flex items-center gap-2 text-base font-extrabold text-rose-900 dark:text-rose-200">
+                            <AlertTriangle class="h-4 w-4 text-rose-600" />
+                            Overdue Projects ({{ overdueProjects.length }})
                         </h2>
                         <p class="text-xs text-rose-600 dark:text-rose-400">
                             Deliverables that require immediate schedule re-alignment or blocker removal
@@ -1367,8 +1382,9 @@ const totalUrgentCount = computed(() => {
             <div class="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
                 <div class="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
                     <div>
-                        <h2 class="text-base font-extrabold text-slate-900 dark:text-white">
-                            📋 Projects Execution Roster
+                        <h2 class="flex items-center gap-2 text-base font-extrabold text-slate-900 dark:text-white">
+                            <Briefcase class="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                            Projects Execution Roster
                         </h2>
                         <p class="text-xs text-slate-500 dark:text-slate-400">
                             Active projects with progress breakdown and quick actions
@@ -1422,7 +1438,7 @@ const totalUrgentCount = computed(() => {
         </div>
 
         <!-- ========================================================================= -->
-        <!-- TAB 4: 🎓 ACADEMY & TALENT ENGINE -->
+        <!-- TAB 4: ACADEMY & TALENT ENGINE -->
         <!-- ========================================================================= -->
         <div v-else-if="activeTab === 'academy'" class="space-y-6">
             <!-- Academy Stats Grid -->
@@ -1456,8 +1472,9 @@ const totalUrgentCount = computed(() => {
             <div class="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
                 <div class="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
                     <div>
-                        <h2 class="text-base font-extrabold text-slate-900 dark:text-white">
-                            🎓 Batch Lifecycle Progress
+                        <h2 class="flex items-center gap-2 text-base font-extrabold text-slate-900 dark:text-white">
+                            <GraduationCap class="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                            Batch Lifecycle Progress
                         </h2>
                         <p class="text-xs text-slate-500 dark:text-slate-400">
                             Active internship batches with timeline progress and enrolled headcount
@@ -1512,8 +1529,9 @@ const totalUrgentCount = computed(() => {
             <div class="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
                 <div class="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
                     <div>
-                        <h2 class="text-base font-extrabold text-slate-900 dark:text-white">
-                            ⭐ Star Interns Leaderboard
+                        <h2 class="flex items-center gap-2 text-base font-extrabold text-slate-900 dark:text-white">
+                            <Award class="h-4 w-4 text-amber-500" />
+                            Star Interns Leaderboard
                         </h2>
                         <p class="text-xs text-slate-500 dark:text-slate-400">
                             Top performing interns ranked by overall progress and client project assignments
@@ -1569,7 +1587,7 @@ const totalUrgentCount = computed(() => {
         </div>
 
         <!-- ========================================================================= -->
-        <!-- TAB 5: 🚨 ACTION CENTER & MENTORSHIP HUB -->
+        <!-- TAB 5: ACTION CENTER & MENTORSHIP HUB -->
         <!-- ========================================================================= -->
         <div v-else-if="activeTab === 'action_center'" class="space-y-6">
             <!-- Action Center Banner -->
@@ -1595,8 +1613,9 @@ const totalUrgentCount = computed(() => {
                 <div class="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
                     <div class="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
                         <div>
-                            <h2 class="text-base font-extrabold text-rose-600 dark:text-rose-400">
-                                ⚡ Active Intern Blockers ({{ blockerReports.length }})
+                            <h2 class="flex items-center gap-2 text-base font-extrabold text-rose-600 dark:text-rose-400">
+                                <AlertCircle class="h-4 w-4 text-rose-600" />
+                                Active Intern Blockers ({{ blockerReports.length }})
                             </h2>
                             <p class="text-xs text-slate-500 dark:text-slate-400">
                                 Obstacles reported in weekly reports needing mentor rescue
@@ -1635,8 +1654,8 @@ const totalUrgentCount = computed(() => {
                             </div>
                         </div>
 
-                        <div v-if="blockerReports.length === 0" class="py-8 text-center text-xs text-slate-500">
-                            🎉 No active blockers reported by students!
+                        <div v-if="blockerReports.length === 0" class="flex items-center justify-center gap-2 py-8 text-center text-xs text-slate-500">
+                            <CheckCircle2 class="h-4 w-4 text-emerald-500" /> No active blockers reported by students!
                         </div>
                     </div>
                 </div>
@@ -1645,8 +1664,9 @@ const totalUrgentCount = computed(() => {
                 <div class="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
                     <div class="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
                         <div>
-                            <h2 class="text-base font-extrabold text-amber-600 dark:text-amber-400">
-                                📝 Weekly Reports Awaiting Review ({{ pendingReports.length }})
+                            <h2 class="flex items-center gap-2 text-base font-extrabold text-amber-600 dark:text-amber-400">
+                                <FileText class="h-4 w-4 text-amber-500" />
+                                Weekly Reports Awaiting Review ({{ pendingReports.length }})
                             </h2>
                             <p class="text-xs text-slate-500 dark:text-slate-400">
                                 Student submissions pending admin assessment
@@ -1677,8 +1697,8 @@ const totalUrgentCount = computed(() => {
                             </Link>
                         </div>
 
-                        <div v-if="pendingReports.length === 0" class="py-8 text-center text-xs text-slate-500">
-                            ✨ All weekly reports have been reviewed!
+                        <div v-if="pendingReports.length === 0" class="flex items-center justify-center gap-2 py-8 text-center text-xs text-slate-500">
+                            <CheckCircle2 class="h-4 w-4 text-emerald-500" /> All weekly reports have been reviewed!
                         </div>
                     </div>
                 </div>
@@ -1689,8 +1709,9 @@ const totalUrgentCount = computed(() => {
                 <!-- Overdue Deliverables -->
                 <div class="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
                     <div class="border-b border-slate-100 pb-3 dark:border-slate-800">
-                        <h2 class="text-base font-extrabold text-rose-600 dark:text-rose-400">
-                            ⏰ Overdue Deliverables ({{ overdueProjects.length }})
+                        <h2 class="flex items-center gap-2 text-base font-extrabold text-rose-600 dark:text-rose-400">
+                            <Clock class="h-4 w-4 text-rose-500" />
+                            Overdue Deliverables ({{ overdueProjects.length }})
                         </h2>
                     </div>
 
@@ -1711,8 +1732,8 @@ const totalUrgentCount = computed(() => {
                             </Button>
                         </div>
 
-                        <div v-if="overdueProjects.length === 0" class="py-8 text-center text-xs text-slate-500">
-                            🎉 No projects overdue!
+                        <div v-if="overdueProjects.length === 0" class="flex items-center justify-center gap-2 py-8 text-center text-xs text-slate-500">
+                            <CheckCircle2 class="h-4 w-4 text-emerald-500" /> No projects overdue!
                         </div>
                     </div>
                 </div>
@@ -1720,8 +1741,9 @@ const totalUrgentCount = computed(() => {
                 <!-- Uncontacted Leads -->
                 <div class="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
                     <div class="border-b border-slate-100 pb-3 dark:border-slate-800">
-                        <h2 class="text-base font-extrabold text-blue-600 dark:text-blue-400">
-                            📞 Leads Pending Contact ({{ uncontactedLeads.length }})
+                        <h2 class="flex items-center gap-2 text-base font-extrabold text-blue-600 dark:text-blue-400">
+                            <Phone class="h-4 w-4 text-blue-500" />
+                            Leads Pending Contact ({{ uncontactedLeads.length }})
                         </h2>
                     </div>
 
@@ -1742,8 +1764,8 @@ const totalUrgentCount = computed(() => {
                             </Button>
                         </div>
 
-                        <div v-if="uncontactedLeads.length === 0" class="py-8 text-center text-xs text-slate-500">
-                            🎉 All leads have been contacted!
+                        <div v-if="uncontactedLeads.length === 0" class="flex items-center justify-center gap-2 py-8 text-center text-xs text-slate-500">
+                            <CheckCircle2 class="h-4 w-4 text-emerald-500" /> All leads have been contacted!
                         </div>
                     </div>
                 </div>
