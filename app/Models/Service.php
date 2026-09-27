@@ -26,13 +26,19 @@ class Service extends Model
         'is_active' => 'boolean',
     ];
 
-    /** @param Builder<Service> $query */
+    /**
+     * @param  Builder<Service>  $query
+     * @return Builder<Service>
+     */
     public function scopeForClients(Builder $query): Builder
     {
         return $query->whereIn('type', ['client', 'both']);
     }
 
-    /** @param Builder<Service> $query */
+    /**
+     * @param  Builder<Service>  $query
+     * @return Builder<Service>
+     */
     public function scopeForInternships(Builder $query): Builder
     {
         return $query->whereIn('type', ['internship', 'both']);
