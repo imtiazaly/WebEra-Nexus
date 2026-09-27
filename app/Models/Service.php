@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Database\Factories\ServiceFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -26,17 +27,19 @@ class Service extends Model
     ];
 
     /**
-     * Scope query to only include client services.
+     * @param  Builder<Service>  $query
+     * @return Builder<Service>
      */
-    public function scopeForClients($query)
+    public function scopeForClients(Builder $query): Builder
     {
         return $query->whereIn('type', ['client', 'both']);
     }
 
     /**
-     * Scope query to only include internship track services.
+     * @param  Builder<Service>  $query
+     * @return Builder<Service>
      */
-    public function scopeForInternships($query)
+    public function scopeForInternships(Builder $query): Builder
     {
         return $query->whereIn('type', ['internship', 'both']);
     }
