@@ -26,17 +26,13 @@ class Service extends Model
         'is_active' => 'boolean',
     ];
 
-    /**
-     * Scope query to only include client services.
-     */
+    /** @param Builder<Service> $query */
     public function scopeForClients(Builder $query): Builder
     {
         return $query->whereIn('type', ['client', 'both']);
     }
 
-    /**
-     * Scope query to only include internship track services.
-     */
+    /** @param Builder<Service> $query */
     public function scopeForInternships(Builder $query): Builder
     {
         return $query->whereIn('type', ['internship', 'both']);
