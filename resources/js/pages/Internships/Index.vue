@@ -297,7 +297,7 @@ const deleteInternship = (id: number) => {
     <div class="w-full space-y-8 p-4 sm:p-6 lg:p-8">
         <!-- 🚀 MAGICAL HERO COMMAND CONSOLE (Light & Dark Responsive) -->
         <div
-            class="relative overflow-hidden rounded-3xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50/90 via-purple-50/60 to-slate-50/90 p-6 text-slate-900 shadow-xl backdrop-blur-xl sm:p-8 dark:border-indigo-500/20 dark:from-indigo-950/90 dark:via-slate-900 dark:to-purple-950/90 dark:text-white"
+            class="relative overflow-hidden rounded-3xl border border-indigo-200/80 bg-linear-to-br from-indigo-50/90 via-purple-50/60 to-slate-50/90 p-6 text-slate-900 shadow-xl backdrop-blur-xl sm:p-8 dark:border-indigo-500/20 dark:from-indigo-950/90 dark:via-slate-900 dark:to-purple-950/90 dark:text-white"
         >
             <!-- Background Glow Effects -->
             <div
@@ -353,7 +353,7 @@ const deleteInternship = (id: number) => {
                         <Button
                             as-child
                             size="lg"
-                            class="group relative overflow-hidden rounded-xl border border-indigo-500/30 bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 px-5 py-2.5 font-bold text-white shadow-lg transition-all duration-300 hover:scale-[1.02] hover:shadow-indigo-500/25"
+                            class="group relative overflow-hidden rounded-xl border border-indigo-500/30 bg-linear-to-r from-indigo-600 via-indigo-500 to-purple-600 px-5 py-2.5 font-bold text-white shadow-lg transition-all duration-300 hover:scale-[1.02] hover:shadow-indigo-500/25"
                         >
                             <Link :href="create.url()">
                                 <Plus
@@ -491,7 +491,7 @@ const deleteInternship = (id: number) => {
                             class="mt-3 h-1.5 w-full overflow-hidden rounded-full border border-slate-300/50 bg-slate-200 dark:border-slate-700 dark:bg-slate-800"
                         >
                             <div
-                                class="h-full rounded-full bg-gradient-to-r from-cyan-500 to-indigo-500 transition-all duration-500"
+                                class="h-full rounded-full bg-linear-to-r from-cyan-500 to-indigo-500 transition-all duration-500"
                                 :style="{ width: `${globalAverageProgress}%` }"
                             ></div>
                         </div>
@@ -761,7 +761,7 @@ const deleteInternship = (id: number) => {
                 <!-- Glowing Corner Mesh -->
                 <div
                     :class="[
-                        'pointer-events-none absolute -top-12 -right-12 h-36 w-36 rounded-full bg-gradient-to-br opacity-60 blur-2xl transition-opacity duration-300 group-hover:opacity-100',
+                        'pointer-events-none absolute -top-12 -right-12 h-36 w-36 rounded-full bg-linear-to-br opacity-60 blur-2xl transition-opacity duration-300 group-hover:opacity-100',
                         getStatusConfig(batch.status).glowGradient,
                     ]"
                 ></div>
@@ -904,7 +904,7 @@ const deleteInternship = (id: number) => {
                             class="h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700"
                         >
                             <div
-                                class="h-full rounded-full bg-gradient-to-r from-indigo-500 via-cyan-500 to-emerald-500 transition-all duration-500"
+                                class="h-full rounded-full bg-linear-to-r from-indigo-500 via-cyan-500 to-emerald-500 transition-all duration-500"
                                 :style="{
                                     width: `${getTimelineProgress(batch.start_date, batch.end_date, batch.status)}%`,
                                 }"
@@ -1025,7 +1025,7 @@ const deleteInternship = (id: number) => {
                         <!-- Timeline Node Bullet -->
                         <div
                             :class="[
-                                'absolute top-1.5 -left-[31px] h-4 w-4 rounded-full border-2 border-white shadow-md transition-transform group-hover:scale-125 dark:border-slate-900',
+                                'absolute top-1.5 -left-7.75 h-4 w-4 rounded-full border-2 border-white shadow-md transition-transform group-hover:scale-125 dark:border-slate-900',
                                 batch.status === 'active'
                                     ? 'animate-pulse bg-emerald-500'
                                     : batch.status === 'upcoming'

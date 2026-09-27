@@ -248,7 +248,7 @@ const filteredStudents = computed(() => {
     <div class="w-full space-y-8 p-4 sm:p-6 lg:p-8">
         <!-- ⚡ HERO CYBER BANNER (Light & Dark Responsive) -->
         <div
-            class="relative overflow-hidden rounded-3xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50/90 via-purple-50/60 to-slate-50/90 p-6 text-slate-900 shadow-xl backdrop-blur-xl sm:p-8 dark:border-indigo-500/20 dark:from-indigo-950 dark:via-slate-900 dark:to-purple-950 dark:text-white"
+            class="relative overflow-hidden rounded-3xl border border-indigo-200/80 bg-linear-to-br from-indigo-50/90 via-purple-50/60 to-slate-50/90 p-6 text-slate-900 shadow-xl backdrop-blur-xl sm:p-8 dark:border-indigo-500/20 dark:from-indigo-950 dark:via-slate-900 dark:to-purple-950 dark:text-white"
         >
             <div
                 class="pointer-events-none absolute -top-20 -right-20 h-80 w-80 rounded-full bg-indigo-500/15 blur-3xl dark:bg-indigo-500/20"
@@ -384,7 +384,7 @@ const filteredStudents = computed(() => {
                         class="h-2.5 w-full overflow-hidden rounded-full border border-slate-300/50 bg-slate-200 dark:border-slate-700 dark:bg-slate-800"
                     >
                         <div
-                            class="h-full rounded-full bg-gradient-to-r from-indigo-500 via-cyan-500 to-emerald-500 transition-all duration-500"
+                            class="h-full rounded-full bg-linear-to-r from-indigo-500 via-cyan-500 to-emerald-500 transition-all duration-500"
                             :style="{
                                 width: `${getTimelineProgress(internship.start_date, internship.end_date, internship.status)}%`,
                             }"

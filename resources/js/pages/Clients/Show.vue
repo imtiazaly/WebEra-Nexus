@@ -361,7 +361,7 @@ const formatProjectStatus = (status: string) => {
 
         <!-- 🤖 AI Strategic Lead Brief Card -->
         <Card
-            class="overflow-hidden border-purple-200/80 bg-gradient-to-br from-purple-50/40 via-white to-indigo-50/20 shadow-xs dark:border-purple-900/50 dark:from-purple-950/20 dark:via-slate-900 dark:to-indigo-950/10"
+            class="overflow-hidden border-purple-200/80 bg-linear-to-br from-purple-50/40 via-white to-indigo-50/20 shadow-xs dark:border-purple-900/50 dark:from-purple-950/20 dark:via-slate-900 dark:to-indigo-950/10"
         >
             <CardHeader
                 class="border-b border-purple-100 pb-4 dark:border-purple-900/40"

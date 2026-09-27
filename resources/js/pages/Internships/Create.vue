@@ -566,7 +566,7 @@ const submit = () => {
                                 class="h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700"
                             >
                                 <div
-                                    class="h-full w-1/2 rounded-full bg-gradient-to-r from-indigo-500 via-cyan-500 to-emerald-500"
+                                    class="h-full w-1/2 rounded-full bg-linear-to-r from-indigo-500 via-cyan-500 to-emerald-500"
                                 ></div>
                             </div>
                             <div

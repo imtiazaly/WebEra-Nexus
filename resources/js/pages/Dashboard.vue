@@ -361,7 +361,7 @@ const totalUrgentCount = computed(() => {
 
     <div class="w-full space-y-6 p-4 sm:p-6 lg:p-8">
         <!-- 🌟 TOP MASTER EXECUTIVE HEADER -->
-        <div class="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-6 text-white shadow-xl dark:border-slate-800">
+        <div class="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-linear-to-r from-slate-900 via-indigo-950 to-slate-900 p-6 text-white shadow-xl dark:border-slate-800">
             <!-- Background Decorative Lighting -->
             <div class="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-indigo-500/15 blur-3xl"></div>
             <div class="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-blue-500/15 blur-3xl"></div>
@@ -787,7 +787,7 @@ const totalUrgentCount = computed(() => {
                         </div>
                         <div class="h-2.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                             <div
-                                class="h-2.5 rounded-full bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-500 transition-all duration-700"
+                                class="h-2.5 rounded-full bg-linear-to-r from-blue-500 via-indigo-500 to-emerald-500 transition-all duration-700"
                                 :style="{ width: `${Math.min(100, Math.max(10, metrics.conversion_rate))}%` }"
                             ></div>
                         </div>
