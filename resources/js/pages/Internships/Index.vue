@@ -485,7 +485,7 @@ const deleteInternship = (id: number) => {
                 <!-- Track Filter Dropdown -->
                 <select
                     v-model="selectedTrack"
-                    class="h-10 rounded-xl border border-slate-200/80 bg-slate-50/70 px-3 text-xs font-semibold text-slate-700 dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-300"
+                    class="h-10 rounded-xl border border-slate-200/80 bg-slate-50/70 px-3 text-xs font-semibold text-slate-700 dark:border-slate-800 dark:bg-slate-900/90 dark:text-slate-300"
                 >
                     <option value="all">All Learning Tracks</option>
                     <option v-for="track in uniqueTracks" :key="track" :value="track">
