@@ -7,25 +7,59 @@ use App\Http\Requests\UpdateClientRequest;
 use App\Models\Client;
 use App\Models\Service;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ClientController extends Controller
 {
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $clients = Client::with('services:id,name')
-            ->latest()
-            ->paginate(15);
+        $status = $request->query('status', 'all');
+        $search = $request->query('search');
+
+        $query = Client::with('services:id,name');
+
+        if ($status && $status !== 'all') {
+            $query->where('status', $status);
+        }
+
+        if ($search) {
+            $term = trim($search);
+            $query->where(function ($q) use ($term) {
+                $q->where('name', 'like', "%{$term}%")
+                    ->orWhere('email', 'like', "%{$term}%")
+                    ->orWhere('company_name', 'like', "%{$term}%")
+                    ->orWhere('phone', 'like', "%{$term}%");
+            });
+        }
+
+        $perPage = (int) $request->query('per_page', 10);
+        $clients = $query->latest()
+            ->paginate($perPage)
+            ->withQueryString();
 
         $allClientServices = Service::forClients()
             ->withCount('clients')
             ->latest()
             ->get();
 
+        $metrics = [
+            'total' => Client::count(),
+            'new_leads' => Client::where('status', 'new_lead')->count(),
+            'contacted' => Client::where('status', 'contacted')->count(),
+            'converted' => Client::where('status', 'converted')->count(),
+            'lost' => Client::where('status', 'lost')->count(),
+        ];
+
         return Inertia::render('Clients/Index', [
             'clients' => $clients,
             'all_client_services' => $allClientServices,
+            'filters' => [
+                'status' => $status,
+                'search' => $search ?? '',
+            ],
+            'metrics' => $metrics,
         ]);
     }
 

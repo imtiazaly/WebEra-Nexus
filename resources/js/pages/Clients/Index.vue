@@ -32,10 +32,12 @@ import {
     CheckCircle2,
     ChevronLeft,
     ChevronRight,
+    Briefcase,
+    SlidersHorizontal,
+    X,
 } from '@lucide/vue';
 
 import ServiceManagerModal from '@/components/ServiceManagerModal.vue';
-import { Briefcase } from '@lucide/vue';
 
 defineOptions({
     layout: {
@@ -64,25 +66,59 @@ interface Client {
     created_at: string;
 }
 
+interface PaginationLink {
+    url: string | null;
+    label: string;
+    active: boolean;
+}
+
 interface PaginatedClients {
     data: Client[];
-    links: any[];
+    links: PaginationLink[];
     current_page: number;
     last_page: number;
-    total?: number;
-    from?: number;
-    to?: number;
+    total: number;
+    from: number | null;
+    to: number | null;
+    prev_page_url: string | null;
+    next_page_url: string | null;
+}
+
+interface ClientMetrics {
+    total: number;
+    new_leads: number;
+    contacted: number;
+    converted: number;
+    lost: number;
 }
 
 const props = defineProps<{
     clients: PaginatedClients;
     all_client_services?: any[];
+    filters?: {
+        status?: string;
+        search?: string;
+    };
+    metrics?: ClientMetrics;
 }>();
 
 // Search & Filter State
-const searchQuery = ref('');
-const selectedStatus = ref<string>('all');
+const searchQuery = ref(props.filters?.search || '');
+const selectedStatus = ref<string>(props.filters?.status || 'all');
 const isServiceModalOpen = ref(false);
+
+// Metrics with graceful fallbacks
+const metricsCount = computed(() => {
+    return (
+        props.metrics || {
+            total: props.clients.total || 0,
+            new_leads: 0,
+            contacted: 0,
+            converted: 0,
+            lost: 0,
+        }
+    );
+});
 
 // Helper for Initials
 const getInitials = (name: string) => {
@@ -109,20 +145,6 @@ const getAvatarColor = (name: string) => {
     }
     return colors[Math.abs(hash) % colors.length];
 };
-
-// Metrics
-const totalClientsCount = computed(
-    () => props.clients.total || props.clients.data.length,
-);
-const newLeadsCount = computed(
-    () => props.clients.data.filter((c) => c.status === 'new_lead').length,
-);
-const contactedCount = computed(
-    () => props.clients.data.filter((c) => c.status === 'contacted').length,
-);
-const convertedCount = computed(
-    () => props.clients.data.filter((c) => c.status === 'converted').length,
-);
 
 // Status Badge Config
 const getStatusConfig = (status: string) => {
@@ -165,24 +187,51 @@ const getStatusConfig = (status: string) => {
     }
 };
 
-// Filtered Clients List
-const filteredClients = computed(() => {
-    return props.clients.data.filter((client) => {
-        const matchesStatus =
-            selectedStatus.value === 'all' ||
-            client.status === selectedStatus.value;
-        const query = searchQuery.value.toLowerCase().trim();
-        const matchesSearch =
-            !query ||
-            client.name.toLowerCase().includes(query) ||
-            client.email.toLowerCase().includes(query) ||
-            (client.company_name &&
-                client.company_name.toLowerCase().includes(query)) ||
-            (client.phone && client.phone.toLowerCase().includes(query));
+// Database-Driven Server-Side Filtering
+let searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
-        return matchesStatus && matchesSearch;
-    });
-});
+const applyServerFilters = (newStatus?: string, newSearch?: string) => {
+    const statusToApply = newStatus !== undefined ? newStatus : selectedStatus.value;
+    const searchToApply = newSearch !== undefined ? newSearch : searchQuery.value;
+
+    router.get(
+        index.url(),
+        {
+            status: statusToApply !== 'all' ? statusToApply : undefined,
+            search: searchToApply.trim() ? searchToApply.trim() : undefined,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            replace: true,
+        }
+    );
+};
+
+const setStatus = (status: string) => {
+    selectedStatus.value = status;
+    applyServerFilters(status, searchQuery.value);
+};
+
+const handleSearchInput = () => {
+    if (searchDebounceTimer) {
+        clearTimeout(searchDebounceTimer);
+    }
+    searchDebounceTimer = setTimeout(() => {
+        applyServerFilters(selectedStatus.value, searchQuery.value);
+    }, 350);
+};
+
+const clearSearch = () => {
+    searchQuery.value = '';
+    applyServerFilters(selectedStatus.value, '');
+};
+
+const resetAllFilters = () => {
+    selectedStatus.value = 'all';
+    searchQuery.value = '';
+    applyServerFilters('all', '');
+};
 
 const deleteClient = (id: number) => {
     if (confirm('Are you sure you want to delete this client/lead?')) {
@@ -210,7 +259,7 @@ const deleteClient = (id: number) => {
                         variant="outline"
                         class="rounded-full border-indigo-200 bg-indigo-50/50 px-2.5 py-0.5 text-xs font-semibold text-indigo-700 dark:border-indigo-900 dark:bg-indigo-950/50 dark:text-indigo-300"
                     >
-                        {{ totalClientsCount }} Total
+                        {{ metricsCount.total }} Total Records
                     </Badge>
                 </div>
                 <p
@@ -227,8 +276,8 @@ const deleteClient = (id: number) => {
                     @click="isServiceModalOpen = true"
                     class="rounded-xl border-slate-200 bg-white font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
                 >
-                    <Briefcase class="mr-1.5 h-4 w-4 text-indigo-500" />
-                    <span>Manage Services ⚙️</span>
+                    <SlidersHorizontal class="mr-1.5 h-4 w-4 text-indigo-500" />
+                    <span>Manage Services</span>
                 </Button>
 
                 <Button
@@ -243,12 +292,18 @@ const deleteClient = (id: number) => {
             </div>
         </div>
 
-        <!-- Metric Stat Cards -->
+        <!-- Metric Stat Cards (Connected directly to database counts) -->
         <div
             class="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4"
         >
             <div
-                class="flex items-center justify-between rounded-xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900"
+                @click="setStatus('all')"
+                :class="[
+                    'cursor-pointer flex items-center justify-between rounded-xl border p-4 shadow-xs transition-all hover:shadow-sm',
+                    selectedStatus === 'all'
+                        ? 'border-indigo-500 bg-indigo-50/20 dark:border-indigo-500 dark:bg-indigo-950/20'
+                        : 'border-slate-200/80 bg-white dark:border-slate-800 dark:bg-slate-900',
+                ]"
             >
                 <div class="space-y-0.5">
                     <p
@@ -259,7 +314,7 @@ const deleteClient = (id: number) => {
                     <p
                         class="text-2xl font-extrabold text-slate-900 dark:text-slate-50"
                     >
-                        {{ totalClientsCount }}
+                        {{ metricsCount.total }}
                     </p>
                 </div>
                 <div
@@ -270,7 +325,13 @@ const deleteClient = (id: number) => {
             </div>
 
             <div
-                class="flex items-center justify-between rounded-xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900"
+                @click="setStatus('new_lead')"
+                :class="[
+                    'cursor-pointer flex items-center justify-between rounded-xl border p-4 shadow-xs transition-all hover:shadow-sm',
+                    selectedStatus === 'new_lead'
+                        ? 'border-blue-500 bg-blue-50/20 dark:border-blue-500 dark:bg-blue-950/20'
+                        : 'border-slate-200/80 bg-white dark:border-slate-800 dark:bg-slate-900',
+                ]"
             >
                 <div class="space-y-0.5">
                     <p
@@ -281,7 +342,7 @@ const deleteClient = (id: number) => {
                     <p
                         class="text-2xl font-extrabold text-blue-600 dark:text-blue-400"
                     >
-                        {{ newLeadsCount }}
+                        {{ metricsCount.new_leads }}
                     </p>
                 </div>
                 <div
@@ -292,7 +353,13 @@ const deleteClient = (id: number) => {
             </div>
 
             <div
-                class="flex items-center justify-between rounded-xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900"
+                @click="setStatus('contacted')"
+                :class="[
+                    'cursor-pointer flex items-center justify-between rounded-xl border p-4 shadow-xs transition-all hover:shadow-sm',
+                    selectedStatus === 'contacted'
+                        ? 'border-amber-500 bg-amber-50/20 dark:border-amber-500 dark:bg-amber-950/20'
+                        : 'border-slate-200/80 bg-white dark:border-slate-800 dark:bg-slate-900',
+                ]"
             >
                 <div class="space-y-0.5">
                     <p
@@ -303,7 +370,7 @@ const deleteClient = (id: number) => {
                     <p
                         class="text-2xl font-extrabold text-amber-600 dark:text-amber-400"
                     >
-                        {{ contactedCount }}
+                        {{ metricsCount.contacted }}
                     </p>
                 </div>
                 <div
@@ -314,7 +381,13 @@ const deleteClient = (id: number) => {
             </div>
 
             <div
-                class="flex items-center justify-between rounded-xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900"
+                @click="setStatus('converted')"
+                :class="[
+                    'cursor-pointer flex items-center justify-between rounded-xl border p-4 shadow-xs transition-all hover:shadow-sm',
+                    selectedStatus === 'converted'
+                        ? 'border-emerald-500 bg-emerald-50/20 dark:border-emerald-500 dark:bg-emerald-950/20'
+                        : 'border-slate-200/80 bg-white dark:border-slate-800 dark:bg-slate-900',
+                ]"
             >
                 <div class="space-y-0.5">
                     <p
@@ -325,7 +398,7 @@ const deleteClient = (id: number) => {
                     <p
                         class="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400"
                     >
-                        {{ convertedCount }}
+                        {{ metricsCount.converted }}
                     </p>
                 </div>
                 <div
@@ -344,25 +417,36 @@ const deleteClient = (id: number) => {
             <div
                 class="flex flex-col gap-3 border-b border-slate-200/80 p-4 lg:flex-row lg:items-center lg:justify-between dark:border-slate-800"
             >
-                <!-- Search Input -->
+                <!-- Search Input with Clear Button -->
                 <div class="relative w-full lg:w-80">
                     <Search
                         class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400"
                     />
                     <Input
                         v-model="searchQuery"
+                        @input="handleSearchInput"
                         type="text"
-                        placeholder="Search by name, email, company..."
-                        class="h-9 border-slate-200 bg-slate-50/50 pl-9 text-xs focus:bg-white dark:border-slate-800 dark:bg-slate-800/40 dark:focus:bg-slate-900"
+                        placeholder="Search name, email, company, phone..."
+                        class="h-9 border-slate-200 bg-slate-50/50 pr-8 pl-9 text-xs focus:bg-white dark:border-slate-800 dark:bg-slate-800/40 dark:focus:bg-slate-900"
                     />
+                    <button
+                        v-if="searchQuery"
+                        @click="clearSearch"
+                        type="button"
+                        class="absolute top-1/2 right-2.5 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                        title="Clear search"
+                    >
+                        <X class="h-3.5 w-3.5" />
+                    </button>
                 </div>
 
-                <!-- Status Filter Tabs (Scrollable on mobile) -->
+                <!-- Status Filter Tabs (Directly connected to DB query) -->
                 <div
                     class="flex max-w-full items-center gap-1.5 overflow-x-auto rounded-lg bg-slate-100 p-1 text-xs font-medium dark:bg-slate-800/70"
                 >
                     <button
-                        @click="selectedStatus = 'all'"
+                        @click="setStatus('all')"
+                        type="button"
                         :class="[
                             'rounded-md px-3 py-1.5 whitespace-nowrap transition-all',
                             selectedStatus === 'all'
@@ -370,10 +454,11 @@ const deleteClient = (id: number) => {
                                 : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
                         ]"
                     >
-                        All ({{ props.clients.data.length }})
+                        All ({{ metricsCount.total }})
                     </button>
                     <button
-                        @click="selectedStatus = 'new_lead'"
+                        @click="setStatus('new_lead')"
+                        type="button"
                         :class="[
                             'rounded-md px-3 py-1.5 whitespace-nowrap transition-all',
                             selectedStatus === 'new_lead'
@@ -381,10 +466,11 @@ const deleteClient = (id: number) => {
                                 : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
                         ]"
                     >
-                        New Leads
+                        New Leads ({{ metricsCount.new_leads }})
                     </button>
                     <button
-                        @click="selectedStatus = 'contacted'"
+                        @click="setStatus('contacted')"
+                        type="button"
                         :class="[
                             'rounded-md px-3 py-1.5 whitespace-nowrap transition-all',
                             selectedStatus === 'contacted'
@@ -392,10 +478,11 @@ const deleteClient = (id: number) => {
                                 : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
                         ]"
                     >
-                        Contacted
+                        Contacted ({{ metricsCount.contacted }})
                     </button>
                     <button
-                        @click="selectedStatus = 'converted'"
+                        @click="setStatus('converted')"
+                        type="button"
                         :class="[
                             'rounded-md px-3 py-1.5 whitespace-nowrap transition-all',
                             selectedStatus === 'converted'
@@ -403,10 +490,11 @@ const deleteClient = (id: number) => {
                                 : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
                         ]"
                     >
-                        Converted
+                        Converted ({{ metricsCount.converted }})
                     </button>
                     <button
-                        @click="selectedStatus = 'lost'"
+                        @click="setStatus('lost')"
+                        type="button"
                         :class="[
                             'rounded-md px-3 py-1.5 whitespace-nowrap transition-all',
                             selectedStatus === 'lost'
@@ -414,7 +502,7 @@ const deleteClient = (id: number) => {
                                 : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
                         ]"
                     >
-                        Lost
+                        Lost ({{ metricsCount.lost }})
                     </button>
                 </div>
             </div>
@@ -423,7 +511,7 @@ const deleteClient = (id: number) => {
             <CardContent class="p-0">
                 <!-- Empty State -->
                 <div
-                    v-if="filteredClients.length === 0"
+                    v-if="props.clients.data.length === 0"
                     class="py-16 text-center"
                 >
                     <div
@@ -444,27 +532,37 @@ const deleteClient = (id: number) => {
                                 class="mt-0.5 text-xs text-slate-500 dark:text-slate-400"
                             >
                                 {{
-                                    searchQuery
-                                        ? 'Try adjusting your search query or filter.'
+                                    searchQuery || selectedStatus !== 'all'
+                                        ? 'No records match your filter criteria.'
                                         : 'Get started by adding your first client or lead.'
                                 }}
                             </p>
                         </div>
-                        <Button
-                            v-if="!searchQuery"
-                            as-child
-                            size="sm"
-                            class="mt-2 bg-indigo-600 text-white hover:bg-indigo-700"
-                        >
-                            <Link :href="create.url()">
-                                <Plus class="mr-1 h-3.5 w-3.5" />
-                                Add New Client
-                            </Link>
-                        </Button>
+                        <div class="flex items-center gap-2 pt-1">
+                            <Button
+                                v-if="searchQuery || selectedStatus !== 'all'"
+                                variant="outline"
+                                size="sm"
+                                @click="resetAllFilters"
+                            >
+                                Reset Filters
+                            </Button>
+                            <Button
+                                v-else
+                                as-child
+                                size="sm"
+                                class="bg-indigo-600 text-white hover:bg-indigo-700"
+                            >
+                                <Link :href="create.url()">
+                                    <Plus class="mr-1 h-3.5 w-3.5" />
+                                    Add New Client
+                                </Link>
+                            </Button>
+                        </div>
                     </div>
                 </div>
 
-                <!-- 1️⃣ DESKTOP TABLE VIEW (Visible on md & larger screens) -->
+                <!-- 1️⃣ DESKTOP TABLE VIEW (Direct from Database) -->
                 <div v-else class="hidden w-full overflow-x-auto md:block">
                     <table
                         class="w-full min-w-212.5 table-fixed border-collapse text-left"
@@ -495,7 +593,7 @@ const deleteClient = (id: number) => {
                             class="divide-y divide-slate-200/80 text-xs text-slate-700 dark:divide-slate-800 dark:text-slate-300"
                         >
                             <tr
-                                v-for="client in filteredClients"
+                                v-for="client in props.clients.data"
                                 :key="client.id"
                                 class="group transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/40"
                             >
@@ -560,21 +658,29 @@ const deleteClient = (id: number) => {
                                 <!-- Company -->
                                 <td class="px-5 py-4">
                                     <div
-                                        class="inline-flex max-w-full items-center gap-1.5 rounded-md border border-slate-200/80 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-700 dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-300"
+                                        class="flex items-center gap-1.5 text-slate-800 dark:text-slate-200"
                                     >
                                         <Building2
                                             class="h-3.5 w-3.5 shrink-0 text-slate-400"
                                         />
-                                        <span class="truncate">{{
-                                            client.company_name ||
-                                            'Individual / Freelance'
-                                        }}</span>
+                                        <span class="truncate font-medium">
+                                            {{
+                                                client.company_name ||
+                                                'Individual'
+                                            }}
+                                        </span>
                                     </div>
                                 </td>
 
-                                <!-- Services -->
+                                <!-- Services Requested -->
                                 <td class="px-5 py-4">
-                                    <div class="flex flex-wrap gap-1">
+                                    <div
+                                        v-if="
+                                            client.services &&
+                                            client.services.length > 0
+                                        "
+                                        class="flex flex-wrap gap-1"
+                                    >
                                         <Badge
                                             v-for="service in client.services"
                                             :key="service.id"
@@ -583,30 +689,24 @@ const deleteClient = (id: number) => {
                                         >
                                             {{ service.name }}
                                         </Badge>
-                                        <span
-                                            v-if="
-                                                !client.services ||
-                                                client.services.length === 0
-                                            "
-                                            class="text-xs text-slate-400 italic"
-                                        >
-                                            No services attached
-                                        </span>
                                     </div>
+                                    <span v-else class="text-slate-400 italic"
+                                        >None</span
+                                    >
                                 </td>
 
-                                <!-- Status -->
+                                <!-- Status Badge -->
                                 <td class="px-5 py-4">
                                     <span
                                         :class="[
-                                            'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap transition-all',
+                                            'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold',
                                             getStatusConfig(client.status)
                                                 .badgeClass,
                                         ]"
                                     >
                                         <span
                                             :class="[
-                                                'h-1.5 w-1.5 shrink-0 rounded-full',
+                                                'h-1.5 w-1.5 rounded-full',
                                                 getStatusConfig(client.status)
                                                     .dotClass,
                                             ]"
@@ -681,13 +781,13 @@ const deleteClient = (id: number) => {
                     </table>
                 </div>
 
-                <!-- 2️⃣ MOBILE CARDS VIEW (Visible on mobile screens < md) -->
+                <!-- 2️⃣ MOBILE CARDS VIEW (Direct from Database) -->
                 <div
-                    v-if="filteredClients.length > 0"
+                    v-if="props.clients.data.length > 0"
                     class="block space-y-4 divide-y divide-slate-200 p-4 md:hidden dark:divide-slate-800"
                 >
                     <div
-                        v-for="client in filteredClients"
+                        v-for="client in props.clients.data"
                         :key="client.id"
                         class="space-y-3 rounded-xl border border-slate-200/80 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-900/60"
                     >
@@ -828,9 +928,9 @@ const deleteClient = (id: number) => {
                     </div>
                 </div>
 
-                <!-- Footer Pagination Bar -->
+                <!-- Footer Pagination Bar (Direct Database Pagination) -->
                 <div
-                    v-if="filteredClients.length > 0"
+                    v-if="props.clients.total > 0"
                     class="flex flex-col gap-3 border-t border-slate-200/80 px-5 py-3 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800"
                 >
                     <p
@@ -839,33 +939,98 @@ const deleteClient = (id: number) => {
                         Showing
                         <span
                             class="font-semibold text-slate-700 dark:text-slate-300"
-                            >1</span
+                            >{{ props.clients.from || 0 }}</span
                         >
                         to
                         <span
                             class="font-semibold text-slate-700 dark:text-slate-300"
-                            >{{ filteredClients.length }}</span
+                            >{{ props.clients.to || 0 }}</span
                         >
                         of
                         <span
                             class="font-semibold text-slate-700 dark:text-slate-300"
-                            >{{ totalClientsCount }}</span
+                            >{{ props.clients.total }}</span
                         >
                         clients
                     </p>
-                    <div class="flex items-center justify-center gap-2">
+
+                    <!-- Interactive Pagination Navigation Links -->
+                    <div
+                        v-if="props.clients.last_page > 1"
+                        class="flex flex-wrap items-center justify-center gap-1.5"
+                    >
+                        <!-- Previous Page Button -->
                         <Button
+                            v-if="props.clients.prev_page_url"
+                            as-child
                             variant="outline"
                             size="sm"
                             class="h-8 gap-1 text-xs"
+                        >
+                            <Link
+                                :href="props.clients.prev_page_url"
+                                preserve-scroll
+                                preserve-state
+                            >
+                                <ChevronLeft class="h-3.5 w-3.5" /> Previous
+                            </Link>
+                        </Button>
+                        <Button
+                            v-else
+                            variant="outline"
+                            size="sm"
+                            class="h-8 gap-1 text-xs opacity-50"
                             disabled
                         >
                             <ChevronLeft class="h-3.5 w-3.5" /> Previous
                         </Button>
+
+                        <!-- Numbered Page Links -->
+                        <template
+                            v-for="(link, idx) in props.clients.links.slice(1, -1)"
+                            :key="idx"
+                        >
+                            <Link
+                                v-if="link.url"
+                                :href="link.url"
+                                preserve-scroll
+                                preserve-state
+                                :class="[
+                                    'inline-flex h-8 min-w-[2rem] items-center justify-center rounded-md px-2.5 text-xs font-semibold transition-all',
+                                    link.active
+                                        ? 'bg-indigo-600 text-white shadow-xs'
+                                        : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800',
+                                ]"
+                                v-html="link.label"
+                            />
+                            <span
+                                v-else
+                                class="inline-flex h-8 min-w-[2rem] items-center justify-center px-1 text-xs text-slate-400"
+                                v-html="link.label"
+                            />
+                        </template>
+
+                        <!-- Next Page Button -->
                         <Button
+                            v-if="props.clients.next_page_url"
+                            as-child
                             variant="outline"
                             size="sm"
                             class="h-8 gap-1 text-xs"
+                        >
+                            <Link
+                                :href="props.clients.next_page_url"
+                                preserve-scroll
+                                preserve-state
+                            >
+                                Next <ChevronRight class="h-3.5 w-3.5" />
+                            </Link>
+                        </Button>
+                        <Button
+                            v-else
+                            variant="outline"
+                            size="sm"
+                            class="h-8 gap-1 text-xs opacity-50"
                             disabled
                         >
                             Next <ChevronRight class="h-3.5 w-3.5" />
