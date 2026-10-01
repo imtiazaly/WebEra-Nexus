@@ -289,16 +289,27 @@ const deleteProject = (id: number) => {
     }
 };
 
-// Scroll indicators state & handlers for tab filters container
+// Scroll indicators state & handlers for tab filters & table container
 const tabsContainerRef = ref<HTMLElement | null>(null);
 const canScrollLeft = ref(false);
 const canScrollRight = ref(false);
+
+const tableContainerRef = ref<HTMLElement | null>(null);
+const canTableScrollLeft = ref(false);
+const canTableScrollRight = ref(false);
 
 const checkScrollState = () => {
     const el = tabsContainerRef.value;
     if (!el) return;
     canScrollLeft.value = el.scrollLeft > 5;
     canScrollRight.value = el.scrollLeft < el.scrollWidth - el.clientWidth - 5;
+};
+
+const checkTableScrollState = () => {
+    const el = tableContainerRef.value;
+    if (!el) return;
+    canTableScrollLeft.value = el.scrollLeft > 5;
+    canTableScrollRight.value = el.scrollLeft < el.scrollWidth - el.clientWidth - 5;
 };
 
 const scrollTabs = (direction: 'left' | 'right') => {
@@ -308,21 +319,41 @@ const scrollTabs = (direction: 'left' | 'right') => {
     el.scrollBy({ left: amount, behavior: 'smooth' });
 };
 
+const scrollTable = (direction: 'left' | 'right') => {
+    const el = tableContainerRef.value;
+    if (!el) return;
+    const amount = direction === 'left' ? -250 : 250;
+    el.scrollBy({ left: amount, behavior: 'smooth' });
+};
+
 onMounted(() => {
     nextTick(() => {
         checkScrollState();
+        checkTableScrollState();
     });
     if (tabsContainerRef.value) {
         tabsContainerRef.value.addEventListener('scroll', checkScrollState, { passive: true });
-        window.addEventListener('resize', checkScrollState);
     }
+    if (tableContainerRef.value) {
+        tableContainerRef.value.addEventListener('scroll', checkTableScrollState, { passive: true });
+    }
+    window.addEventListener('resize', () => {
+        checkScrollState();
+        checkTableScrollState();
+    });
 });
 
 onUnmounted(() => {
     if (tabsContainerRef.value) {
         tabsContainerRef.value.removeEventListener('scroll', checkScrollState);
     }
-    window.removeEventListener('resize', checkScrollState);
+    if (tableContainerRef.value) {
+        tableContainerRef.value.removeEventListener('scroll', checkTableScrollState);
+    }
+    window.removeEventListener('resize', () => {
+        checkScrollState();
+        checkTableScrollState();
+    });
 });
 
 // Custom directive for smooth auto-hiding thin scrollbar
@@ -875,8 +906,20 @@ const vAutoHideScroll = {
                 </div>
 
                 <!-- 2️⃣ ENTERPRISE TABLE VIEW -->
-                <div v-else class="w-full">
+                <div v-else class="relative w-full">
+                    <!-- Left Table Scroll Arrow -->
+                    <button
+                        v-if="canTableScrollLeft"
+                        @click="scrollTable('left')"
+                        type="button"
+                        class="absolute left-2 top-1/2 -translate-y-1/2 z-20 hidden md:flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-slate-700 shadow-lg transition-all hover:bg-white hover:text-indigo-600 dark:border-slate-700 dark:bg-slate-800/95 dark:text-slate-200 dark:hover:bg-slate-700"
+                        aria-label="Scroll table left"
+                    >
+                        <ChevronLeft class="h-4 w-4" />
+                    </button>
+
                     <div
+                        ref="tableContainerRef"
                         v-auto-hide-scroll
                         class="scrollbar-auto-hide hidden w-full overflow-x-auto md:block"
                     >
@@ -1128,6 +1171,17 @@ const vAutoHideScroll = {
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- Right Table Scroll Arrow -->
+                    <button
+                        v-if="canTableScrollRight"
+                        @click="scrollTable('right')"
+                        type="button"
+                        class="absolute right-2 top-1/2 -translate-y-1/2 z-20 hidden md:flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-slate-700 shadow-lg transition-all hover:bg-white hover:text-indigo-600 dark:border-slate-700 dark:bg-slate-800/95 dark:text-slate-200 dark:hover:bg-slate-700"
+                        aria-label="Scroll table right"
+                    >
+                        <ChevronRight class="h-4 w-4" />
+                    </button>
 
                     <!-- Mobile View (Cards for mobile < md) -->
                     <div
