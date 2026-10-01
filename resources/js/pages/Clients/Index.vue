@@ -302,6 +302,11 @@ onMounted(() => {
     });
 });
 
+const handleResize = () => {
+    checkScrollState();
+    checkTableScrollState();
+};
+
 onUnmounted(() => {
     if (tabsContainerRef.value) {
         tabsContainerRef.value.removeEventListener('scroll', checkScrollState);
@@ -312,10 +317,7 @@ onUnmounted(() => {
             checkTableScrollState,
         );
     }
-    window.removeEventListener('resize', () => {
-        checkScrollState();
-        checkTableScrollState();
-    });
+    window.addEventListener('resize', handleResize);
 });
 
 // Custom directive for smooth auto-hiding thin scrollbar
