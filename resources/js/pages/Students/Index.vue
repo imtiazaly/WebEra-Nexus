@@ -861,7 +861,7 @@ const vAutoHideScroll = {
                             :disabled="!link.url"
                             @click="link.url && router.get(link.url, {}, { preserveState: true, preserveScroll: true, replace: true })"
                             :class="[
-                                'inline-flex h-9 min-w-[2.25rem] items-center justify-center rounded-lg border px-2 text-sm font-medium transition-all',
+                                'inline-flex h-9 min-w-9 items-center justify-center rounded-lg border px-2 text-sm font-medium transition-all',
                                 link.active
                                     ? 'border-indigo-500 bg-indigo-500 text-white shadow-xs'
                                     : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700',

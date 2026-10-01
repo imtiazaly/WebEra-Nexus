@@ -1380,7 +1380,7 @@ const vAutoHideScroll = {
                                 preserve-scroll
                                 preserve-state
                                 :class="[
-                                    'inline-flex h-8 min-w-[2rem] items-center justify-center rounded-md px-2.5 text-xs font-semibold transition-all',
+                                    'inline-flex h-8 min-w-8 items-center justify-center rounded-md px-2.5 text-xs font-semibold transition-all',
                                     link.active
                                         ? 'bg-indigo-600 text-white shadow-xs'
                                         : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800',
@@ -1389,7 +1389,7 @@ const vAutoHideScroll = {
                             />
                             <span
                                 v-else
-                                class="inline-flex h-8 min-w-[2rem] items-center justify-center px-1 text-xs text-slate-400"
+                                class="inline-flex h-8 min-w-8 items-center justify-center px-1 text-xs text-slate-400"
                                 v-html="link.label"
                             />
                         </template>

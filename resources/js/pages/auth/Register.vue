@@ -116,7 +116,7 @@ defineOptions({
 
             <Button
                 type="submit"
-                class="mt-3 h-11 w-full rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-violet-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold shadow-lg shadow-purple-500/25 active:scale-[0.99] transition-all duration-200 text-sm flex items-center justify-center gap-2 group"
+                class="mt-3 h-11 w-full rounded-xl bg-linear-to-r from-purple-600 via-indigo-600 to-violet-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold shadow-lg shadow-purple-500/25 active:scale-[0.99] transition-all duration-200 text-sm flex items-center justify-center gap-2 group"
                 tabindex="5"
                 :disabled="processing"
                 data-test="register-user-button"
