@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { index, create, show, edit, destroy } from '@/routes/students';
 import { Button } from '@/components/ui/button';
@@ -34,6 +34,7 @@ import {
     Sparkles,
     UserX,
     Briefcase,
+    X,
 } from '@lucide/vue';
 
 defineOptions({
@@ -66,31 +67,86 @@ interface Student {
     created_at: string;
 }
 
+interface PaginationLink {
+    url: string | null;
+    label: string;
+    active: boolean;
+}
+
 interface PaginatedStudents {
     data: Student[];
-    links: any[];
+    links: PaginationLink[];
     current_page: number;
     last_page: number;
-    total?: number;
-    from?: number;
-    to?: number;
+    total: number;
+    from: number | null;
+    to: number | null;
+    prev_page_url: string | null;
+    next_page_url: string | null;
 }
 
 interface Stats {
     total_students: number;
     active_students: number;
+    enrolled_students?: number;
     completed_students: number;
+    dropped_out_students?: number;
     avg_progress: number;
+}
+
+interface Filters {
+    status?: string;
+    search?: string;
 }
 
 const props = defineProps<{
     students: PaginatedStudents;
     stats?: Stats;
+    filters?: Filters;
 }>();
 
-// Filter & Search state
-const searchQuery = ref('');
-const selectedStatus = ref<string>('all');
+// Filter & Search state initialized from props
+const searchQuery = ref(props.filters?.search || '');
+const selectedStatus = ref<string>(props.filters?.status || 'all');
+let searchTimeout: ReturnType<typeof setTimeout> | null = null;
+
+const applyServerFilters = () => {
+    router.get(
+        index.url(),
+        {
+            status: selectedStatus.value !== 'all' ? selectedStatus.value : undefined,
+            search: searchQuery.value.trim() !== '' ? searchQuery.value.trim() : undefined,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            replace: true,
+        },
+    );
+};
+
+const setStatus = (status: string) => {
+    selectedStatus.value = status;
+    applyServerFilters();
+};
+
+const handleSearchInput = () => {
+    if (searchTimeout) clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        applyServerFilters();
+    }, 350);
+};
+
+const clearSearch = () => {
+    searchQuery.value = '';
+    applyServerFilters();
+};
+
+const resetAllFilters = () => {
+    searchQuery.value = '';
+    selectedStatus.value = 'all';
+    applyServerFilters();
+};
 
 const getInitials = (name: string) => {
     if (!name) return 'ST';
@@ -120,34 +176,100 @@ const formatStatus = (status: string) => {
     return status.replace('_', ' ').replace(/\b\w/g, (l) => l.toUpperCase());
 };
 
-const filteredStudents = computed(() => {
-    let result = props.students.data;
-
-    if (selectedStatus.value !== 'all') {
-        result = result.filter((s) => s.status === selectedStatus.value);
-    }
-
-    if (searchQuery.value.trim() !== '') {
-        const query = searchQuery.value.toLowerCase().trim();
-        result = result.filter(
-            (s) =>
-                s.name.toLowerCase().includes(query) ||
-                s.email.toLowerCase().includes(query) ||
-                (s.phone && s.phone.toLowerCase().includes(query)) ||
-                (s.internship &&
-                    s.internship.name.toLowerCase().includes(query)) ||
-                (s.internship &&
-                    s.internship.batch_no.toLowerCase().includes(query)),
-        );
-    }
-
-    return result;
-});
-
 const deleteStudent = (id: number) => {
     if (confirm('Are you sure you want to delete this student record?')) {
         router.delete(destroy.url(id));
     }
+};
+
+// Scroll indicators state & handlers for tab filters & table container
+const tabsContainerRef = ref<HTMLElement | null>(null);
+const canScrollLeft = ref(false);
+const canScrollRight = ref(false);
+
+const tableContainerRef = ref<HTMLElement | null>(null);
+const canTableScrollLeft = ref(false);
+const canTableScrollRight = ref(false);
+
+const checkScrollState = () => {
+    const el = tabsContainerRef.value;
+    if (!el) return;
+    canScrollLeft.value = el.scrollLeft > 5;
+    canScrollRight.value = el.scrollLeft < el.scrollWidth - el.clientWidth - 5;
+};
+
+const checkTableScrollState = () => {
+    const el = tableContainerRef.value;
+    if (!el) return;
+    canTableScrollLeft.value = el.scrollLeft > 5;
+    canTableScrollRight.value = el.scrollLeft < el.scrollWidth - el.clientWidth - 5;
+};
+
+const scrollTabs = (direction: 'left' | 'right') => {
+    const el = tabsContainerRef.value;
+    if (!el) return;
+    const amount = direction === 'left' ? -200 : 200;
+    el.scrollBy({ left: amount, behavior: 'smooth' });
+};
+
+const scrollTable = (direction: 'left' | 'right') => {
+    const el = tableContainerRef.value;
+    if (!el) return;
+    const amount = direction === 'left' ? -250 : 250;
+    el.scrollBy({ left: amount, behavior: 'smooth' });
+};
+
+onMounted(() => {
+    nextTick(() => {
+        checkScrollState();
+        checkTableScrollState();
+    });
+    if (tabsContainerRef.value) {
+        tabsContainerRef.value.addEventListener('scroll', checkScrollState, { passive: true });
+    }
+    if (tableContainerRef.value) {
+        tableContainerRef.value.addEventListener('scroll', checkTableScrollState, { passive: true });
+    }
+    window.addEventListener('resize', () => {
+        checkScrollState();
+        checkTableScrollState();
+    });
+});
+
+onUnmounted(() => {
+    if (tabsContainerRef.value) {
+        tabsContainerRef.value.removeEventListener('scroll', checkScrollState);
+    }
+    if (tableContainerRef.value) {
+        tableContainerRef.value.removeEventListener('scroll', checkTableScrollState);
+    }
+    window.removeEventListener('resize', () => {
+        checkScrollState();
+        checkTableScrollState();
+    });
+});
+
+// Custom directive for smooth auto-hiding thin scrollbar
+const vAutoHideScroll = {
+    mounted(el: HTMLElement) {
+        let scrollTimeout: ReturnType<typeof setTimeout> | null = null;
+        const handleScroll = () => {
+            el.classList.add('is-scrolling');
+            if (scrollTimeout) {
+                clearTimeout(scrollTimeout);
+            }
+            scrollTimeout = setTimeout(() => {
+                el.classList.remove('is-scrolling');
+            }, 1000);
+        };
+        el.addEventListener('scroll', handleScroll, { passive: true });
+        (el as any)._onScrollCleanup = () => el.removeEventListener('scroll', handleScroll);
+    },
+    unmounted(el: HTMLElement) {
+        if ((el as any)._onScrollCleanup) {
+            (el as any)._onScrollCleanup();
+        }
+    },
 };
 </script>
 
@@ -329,84 +451,133 @@ const deleteStudent = (id: number) => {
                 />
                 <Input
                     v-model="searchQuery"
+                    @input="handleSearchInput"
                     type="text"
                     placeholder="Search by student name, email, or batch..."
-                    class="h-10 border-slate-200 bg-white pl-10 text-xs shadow-2xs focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
+                    class="h-10 border-slate-200 bg-white pl-10 pr-9 text-xs shadow-2xs focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
                 />
+                <button
+                    v-if="searchQuery"
+                    @click="clearSearch"
+                    class="absolute top-1/2 right-3 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                >
+                    <X class="h-3.5 w-3.5" />
+                </button>
             </div>
 
             <!-- Pipeline Filter Tabs -->
-            <div
-                class="flex flex-wrap items-center gap-1.5 rounded-xl border border-slate-200/80 bg-slate-100/60 p-1 dark:border-slate-800 dark:bg-slate-900"
-            >
+            <div class="relative max-w-full">
+                <!-- Left Scroll Arrow Indicator -->
                 <button
+                    v-if="canScrollLeft"
+                    @click="scrollTabs('left')"
                     type="button"
-                    @click="selectedStatus = 'all'"
-                    :class="[
-                        'rounded-lg px-3 py-1.5 text-xs font-semibold transition-all',
-                        selectedStatus === 'all'
-                            ? 'bg-white text-slate-900 shadow-2xs dark:bg-slate-800 dark:text-white'
-                            : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white',
-                    ]"
+                    class="absolute -left-2.5 top-1/2 -translate-y-1/2 z-20 flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-slate-700 shadow-md transition-all hover:bg-white hover:text-indigo-600 dark:border-slate-700 dark:bg-slate-800/95 dark:text-slate-200 dark:hover:bg-slate-700"
+                    aria-label="Scroll left"
                 >
-                    All Statuses
+                    <ChevronLeft class="h-3.5 w-3.5" />
                 </button>
-                <button
-                    type="button"
-                    @click="selectedStatus = 'active'"
-                    :class="[
-                        'rounded-lg px-3 py-1.5 text-xs font-semibold transition-all',
-                        selectedStatus === 'active'
-                            ? 'bg-emerald-500 text-white shadow-2xs'
-                            : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white',
-                    ]"
+
+                <div
+                    ref="tabsContainerRef"
+                    v-auto-hide-scroll
+                    class="scrollbar-auto-hide flex max-w-full items-center gap-1.5 overflow-x-auto rounded-xl border border-slate-200/80 bg-slate-100/60 p-1 dark:border-slate-800 dark:bg-slate-900"
                 >
-                    Active
-                </button>
+                    <button
+                        type="button"
+                        @click="setStatus('all')"
+                        :class="[
+                            'rounded-lg px-3 py-1.5 text-xs font-semibold transition-all shrink-0',
+                            selectedStatus === 'all'
+                                ? 'bg-white text-slate-900 shadow-2xs dark:bg-slate-800 dark:text-white'
+                                : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white',
+                        ]"
+                    >
+                        All Statuses
+                    </button>
+                    <button
+                        type="button"
+                        @click="setStatus('active')"
+                        :class="[
+                            'rounded-lg px-3 py-1.5 text-xs font-semibold transition-all shrink-0',
+                            selectedStatus === 'active'
+                                ? 'bg-emerald-500 text-white shadow-2xs'
+                                : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white',
+                        ]"
+                    >
+                        Active
+                    </button>
+                    <button
+                        type="button"
+                        @click="setStatus('enrolled')"
+                        :class="[
+                            'rounded-lg px-3 py-1.5 text-xs font-semibold transition-all shrink-0',
+                            selectedStatus === 'enrolled'
+                                ? 'bg-sky-600 text-white shadow-2xs'
+                                : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white',
+                        ]"
+                    >
+                        Enrolled
+                    </button>
+                    <button
+                        type="button"
+                        @click="setStatus('completed')"
+                        :class="[
+                            'rounded-lg px-3 py-1.5 text-xs font-semibold transition-all shrink-0',
+                            selectedStatus === 'completed'
+                                ? 'bg-purple-600 text-white shadow-2xs'
+                                : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white',
+                        ]"
+                    >
+                        Completed
+                    </button>
+                    <button
+                        type="button"
+                        @click="setStatus('dropped_out')"
+                        :class="[
+                            'rounded-lg px-3 py-1.5 text-xs font-semibold transition-all shrink-0',
+                            selectedStatus === 'dropped_out'
+                                ? 'bg-rose-600 text-white shadow-2xs'
+                                : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white',
+                        ]"
+                    >
+                        Dropped Out
+                    </button>
+                </div>
+
+                <!-- Right Scroll Arrow Indicator -->
                 <button
+                    v-if="canScrollRight"
+                    @click="scrollTabs('right')"
                     type="button"
-                    @click="selectedStatus = 'enrolled'"
-                    :class="[
-                        'rounded-lg px-3 py-1.5 text-xs font-semibold transition-all',
-                        selectedStatus === 'enrolled'
-                            ? 'bg-sky-600 text-white shadow-2xs'
-                            : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white',
-                    ]"
+                    class="absolute -right-2.5 top-1/2 -translate-y-1/2 z-20 flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-slate-700 shadow-md transition-all hover:bg-white hover:text-indigo-600 dark:border-slate-700 dark:bg-slate-800/95 dark:text-slate-200 dark:hover:bg-slate-700"
+                    aria-label="Scroll right"
                 >
-                    Enrolled
-                </button>
-                <button
-                    type="button"
-                    @click="selectedStatus = 'completed'"
-                    :class="[
-                        'rounded-lg px-3 py-1.5 text-xs font-semibold transition-all',
-                        selectedStatus === 'completed'
-                            ? 'bg-purple-600 text-white shadow-2xs'
-                            : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white',
-                    ]"
-                >
-                    Completed
-                </button>
-                <button
-                    type="button"
-                    @click="selectedStatus = 'dropped_out'"
-                    :class="[
-                        'rounded-lg px-3 py-1.5 text-xs font-semibold transition-all',
-                        selectedStatus === 'dropped_out'
-                            ? 'bg-rose-600 text-white shadow-2xs'
-                            : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white',
-                    ]"
-                >
-                    Dropped Out
+                    <ChevronRight class="h-3.5 w-3.5" />
                 </button>
             </div>
         </div>
 
         <!-- Main Table Card -->
         <Card
-            class="overflow-hidden border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900"
+            class="relative overflow-hidden border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900"
         >
-            <div class="overflow-x-auto">
+            <!-- Left Table Scroll Arrow -->
+            <button
+                v-if="canTableScrollLeft"
+                @click="scrollTable('left')"
+                type="button"
+                class="absolute left-2 top-1/2 -translate-y-1/2 z-20 flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-slate-700 shadow-lg transition-all hover:bg-white hover:text-indigo-600 dark:border-slate-700 dark:bg-slate-800/95 dark:text-slate-200 dark:hover:bg-slate-700"
+                aria-label="Scroll table left"
+            >
+                <ChevronLeft class="h-4 w-4" />
+            </button>
+
+            <div
+                ref="tableContainerRef"
+                v-auto-hide-scroll
+                class="scrollbar-auto-hide overflow-x-auto"
+            >
                 <table class="w-full text-left text-xs">
                     <thead>
                         <tr
@@ -425,7 +596,7 @@ const deleteStudent = (id: number) => {
                     <tbody
                         class="divide-y divide-slate-200/80 dark:divide-slate-800"
                     >
-                        <tr v-if="filteredStudents.length === 0">
+                        <tr v-if="props.students.data.length === 0">
                             <td
                                 colspan="6"
                                 class="py-12 text-center text-slate-400"
@@ -442,15 +613,23 @@ const deleteStudent = (id: number) => {
                                         No student records found.
                                     </p>
                                     <p class="text-xs text-slate-400">
-                                        Try adjusting your search query or
-                                        status filter.
+                                        Try adjusting your search query or status filter.
                                     </p>
+                                    <Button
+                                        v-if="searchQuery || selectedStatus !== 'all'"
+                                        variant="outline"
+                                        size="sm"
+                                        @click="resetAllFilters"
+                                        class="mt-2 text-xs"
+                                    >
+                                        Reset Filters
+                                    </Button>
                                 </div>
                             </td>
                         </tr>
 
                         <tr
-                            v-for="student in filteredStudents"
+                            v-for="student in props.students.data"
                             :key="student.id"
                             class="group transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/50"
                         >
@@ -640,56 +819,116 @@ const deleteStudent = (id: number) => {
                 </table>
             </div>
 
+            <!-- Right Table Scroll Arrow -->
+            <button
+                v-if="canTableScrollRight"
+                @click="scrollTable('right')"
+                type="button"
+                class="absolute right-2 top-1/2 -translate-y-1/2 z-20 flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-slate-700 shadow-lg transition-all hover:bg-white hover:text-indigo-600 dark:border-slate-700 dark:bg-slate-800/95 dark:text-slate-200 dark:hover:bg-slate-700"
+                aria-label="Scroll table right"
+            >
+                <ChevronRight class="h-4 w-4" />
+            </button>
+
             <!-- Footer Pagination Controls -->
             <div
-                v-if="students.links && students.links.length > 3"
-                class="flex flex-col items-center justify-between gap-3 border-t border-slate-200/80 px-4 py-3 sm:flex-row dark:border-slate-800"
+                v-if="props.students.total > 0"
+                class="flex flex-col items-center justify-between gap-4 border-t border-slate-200/80 px-6 py-4 sm:flex-row dark:border-slate-800"
             >
-                <div class="text-xs text-slate-500 dark:text-slate-400">
+                <p class="text-sm text-slate-600 dark:text-slate-400">
                     Showing
-                    <span
-                        class="font-semibold text-slate-700 dark:text-slate-200"
-                        >{{ students.from || 1 }}</span
-                    >
+                    <span class="font-semibold text-slate-900 dark:text-slate-100">{{ props.students.from }}</span>
                     to
-                    <span
-                        class="font-semibold text-slate-700 dark:text-slate-200"
-                        >{{ students.to || students.data.length }}</span
-                    >
+                    <span class="font-semibold text-slate-900 dark:text-slate-100">{{ props.students.to }}</span>
                     of
-                    <span
-                        class="font-semibold text-slate-700 dark:text-slate-200"
-                        >{{ students.total || students.data.length }}</span
-                    >
-                    results
-                </div>
+                    <span class="font-semibold text-slate-900 dark:text-slate-100">{{ props.students.total }}</span>
+                    candidates
+                </p>
+
                 <div class="flex items-center gap-1">
-                    <template v-for="(link, i) in students.links" :key="i">
-                        <Button
-                            v-if="
-                                link.url ||
-                                link.label.includes('Previous') ||
-                                link.label.includes('Next')
-                            "
-                            :variant="link.active ? 'default' : 'outline'"
-                            size="sm"
-                            as-child
+                    <!-- Previous Button -->
+                    <button
+                        :disabled="!props.students.prev_page_url"
+                        @click="props.students.prev_page_url && router.get(props.students.prev_page_url, {}, { preserveState: true, preserveScroll: true, replace: true })"
+                        class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition-all hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
+                    >
+                        <ChevronLeft class="h-4 w-4" />
+                    </button>
+
+                    <!-- Numbered Page Buttons -->
+                    <template v-for="(link, i) in props.students.links.slice(1, -1)" :key="i">
+                        <button
                             :disabled="!link.url"
+                            @click="link.url && router.get(link.url, {}, { preserveState: true, preserveScroll: true, replace: true })"
                             :class="[
-                                'h-8 text-xs',
+                                'inline-flex h-9 min-w-[2.25rem] items-center justify-center rounded-lg border px-2 text-sm font-medium transition-all',
                                 link.active
-                                    ? 'bg-indigo-600 text-white hover:bg-indigo-700'
-                                    : 'text-slate-600 dark:text-slate-300',
+                                    ? 'border-indigo-500 bg-indigo-500 text-white shadow-xs'
+                                    : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700',
                             ]"
-                        >
-                            <Link v-if="link.url" :href="link.url">
-                                <span v-html="link.label"></span>
-                            </Link>
-                            <span v-else v-html="link.label"></span>
-                        </Button>
+                            v-html="link.label"
+                        ></button>
                     </template>
+
+                    <!-- Next Button -->
+                    <button
+                        :disabled="!props.students.next_page_url"
+                        @click="props.students.next_page_url && router.get(props.students.next_page_url, {}, { preserveState: true, preserveScroll: true, replace: true })"
+                        class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition-all hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
+                    >
+                        <ChevronRight class="h-4 w-4" />
+                    </button>
                 </div>
             </div>
         </Card>
     </div>
 </template>
+
+<style scoped>
+/* Ultra-thin Auto-Hiding Horizontal Scrollbar */
+.scrollbar-auto-hide {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+    transition: scrollbar-color 0.5s ease-in-out;
+}
+
+.scrollbar-auto-hide::-webkit-scrollbar {
+    height: 4px;
+    width: 4px;
+}
+
+.scrollbar-auto-hide::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.scrollbar-auto-hide::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    border-radius: 9999px;
+    transition: background-color 0.5s ease-in-out;
+}
+
+/* Show thumb animatedly when scrolling or on hover */
+.scrollbar-auto-hide.is-scrolling::-webkit-scrollbar-thumb,
+.scrollbar-auto-hide:hover::-webkit-scrollbar-thumb {
+    background-color: rgba(99, 102, 241, 0.45);
+}
+
+.dark .scrollbar-auto-hide.is-scrolling::-webkit-scrollbar-thumb,
+.dark .scrollbar-auto-hide:hover::-webkit-scrollbar-thumb {
+    background-color: rgba(129, 140, 248, 0.45);
+}
+
+.scrollbar-auto-hide.is-scrolling::-webkit-scrollbar-thumb:hover,
+.scrollbar-auto-hide:hover::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(99, 102, 241, 0.8);
+}
+
+.dark .scrollbar-auto-hide.is-scrolling::-webkit-scrollbar-thumb:hover,
+.dark .scrollbar-auto-hide:hover::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(129, 140, 248, 0.8);
+}
+
+.scrollbar-auto-hide.is-scrolling {
+    scrollbar-color: rgba(99, 102, 241, 0.45) transparent;
+}
+</style>

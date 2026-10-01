@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { index, create, show, edit, destroy } from '@/routes/projects';
 import { Button } from '@/components/ui/button';
@@ -35,6 +35,7 @@ import {
     Wrench,
     Calendar,
     Briefcase,
+    X,
 } from '@lucide/vue';
 
 defineOptions({
@@ -57,6 +58,7 @@ interface Service {
 interface Project {
     id: number;
     title: string;
+    description?: string | null;
     status: string;
     progress: number;
     start_date: string | null;
@@ -66,25 +68,52 @@ interface Project {
     created_at: string;
 }
 
+interface PaginationLink {
+    url: string | null;
+    label: string;
+    active: boolean;
+}
+
 interface PaginatedProjects {
     data: Project[];
-    links: any[];
+    links: PaginationLink[];
     current_page: number;
     last_page: number;
-    total?: number;
+    total: number;
+    from: number | null;
+    to: number | null;
+    prev_page_url: string | null;
+    next_page_url: string | null;
+}
+
+interface ProjectMetrics {
+    total: number;
+    in_progress: number;
+    planning: number;
+    completed: number;
+    under_review: number;
+    on_hold: number;
+    cancelled: number;
+    overdue: number;
 }
 
 const props = defineProps<{
     projects: PaginatedProjects;
+    filters?: {
+        status?: string;
+        type?: string;
+        search?: string;
+    };
+    metrics?: ProjectMetrics;
 }>();
 
 // View Mode Toggle (Grid vs Table)
 const viewMode = ref<'grid' | 'table'>('table');
 
 // Search & Filter State
-const searchQuery = ref('');
-const selectedStatus = ref<string>('all');
-const selectedType = ref<string>('all');
+const searchQuery = ref(props.filters?.search || '');
+const selectedStatus = ref<string>(props.filters?.status || 'all');
+const selectedType = ref<string>(props.filters?.type || 'all');
 
 // Helper for Initials
 const getInitials = (name: string) => {
@@ -111,21 +140,20 @@ const getAvatarColor = (name: string) => {
     return colors[Math.abs(hash) % colors.length];
 };
 
-// Metrics
-const totalProjectsCount = computed(
-    () => props.projects.total || props.projects.data.length,
-);
-const inProgressCount = computed(
-    () => props.projects.data.filter((p) => p.status === 'in_progress').length,
-);
-const completedCount = computed(
-    () => props.projects.data.filter((p) => p.status === 'completed').length,
-);
-const overdueCount = computed(() => {
-    const today = new Date().toISOString().split('T')[0];
-    return props.projects.data.filter(
-        (p) => p.deadline && p.deadline < today && p.status !== 'completed',
-    ).length;
+// Metrics from Server with fallbacks
+const metricsCount = computed(() => {
+    return (
+        props.metrics || {
+            total: props.projects.total || 0,
+            in_progress: 0,
+            planning: 0,
+            completed: 0,
+            under_review: 0,
+            on_hold: 0,
+            cancelled: 0,
+            overdue: 0,
+        }
+    );
 });
 
 // Status Badge Config
@@ -191,34 +219,164 @@ const getProgressGradient = (progress: number) => {
     return 'bg-slate-400';
 };
 
-// Filtered Projects List
-const filteredProjects = computed(() => {
-    return props.projects.data.filter((project) => {
-        const matchesStatus =
-            selectedStatus.value === 'all' ||
-            project.status === selectedStatus.value;
-        const matchesType =
-            selectedType.value === 'all' ||
-            (selectedType.value === 'client' && project.client !== null) ||
-            (selectedType.value === 'internal' && project.client === null);
+// Database-Driven Server-Side Filtering
+let searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
-        const query = searchQuery.value.toLowerCase().trim();
-        const matchesSearch =
-            !query ||
-            project.title.toLowerCase().includes(query) ||
-            (project.client &&
-                project.client.name.toLowerCase().includes(query)) ||
-            (project.service &&
-                project.service.name.toLowerCase().includes(query));
+const applyServerFilters = (
+    newStatus?: string,
+    newType?: string,
+    newSearch?: string,
+) => {
+    const statusToApply =
+        newStatus !== undefined ? newStatus : selectedStatus.value;
+    const typeToApply = newType !== undefined ? newType : selectedType.value;
+    const searchToApply =
+        newSearch !== undefined ? newSearch : searchQuery.value;
 
-        return matchesStatus && matchesType && matchesSearch;
-    });
-});
+    router.get(
+        index.url(),
+        {
+            status: statusToApply !== 'all' ? statusToApply : undefined,
+            type: typeToApply !== 'all' ? typeToApply : undefined,
+            search: searchToApply.trim() ? searchToApply.trim() : undefined,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            replace: true,
+        },
+    );
+};
+
+const setStatus = (status: string) => {
+    selectedStatus.value = status;
+    applyServerFilters(status, selectedType.value, searchQuery.value);
+};
+
+const setType = (type: string) => {
+    selectedType.value = type;
+    applyServerFilters(selectedStatus.value, type, searchQuery.value);
+};
+
+const handleSearchInput = () => {
+    if (searchDebounceTimer) {
+        clearTimeout(searchDebounceTimer);
+    }
+    searchDebounceTimer = setTimeout(() => {
+        applyServerFilters(
+            selectedStatus.value,
+            selectedType.value,
+            searchQuery.value,
+        );
+    }, 350);
+};
+
+const clearSearch = () => {
+    searchQuery.value = '';
+    applyServerFilters(selectedStatus.value, selectedType.value, '');
+};
+
+const resetAllFilters = () => {
+    selectedStatus.value = 'all';
+    selectedType.value = 'all';
+    searchQuery.value = '';
+    applyServerFilters('all', 'all', '');
+};
 
 const deleteProject = (id: number) => {
     if (confirm('Are you sure you want to delete this project?')) {
         router.delete(destroy.url(id));
     }
+};
+
+// Scroll indicators state & handlers for tab filters & table container
+const tabsContainerRef = ref<HTMLElement | null>(null);
+const canScrollLeft = ref(false);
+const canScrollRight = ref(false);
+
+const tableContainerRef = ref<HTMLElement | null>(null);
+const canTableScrollLeft = ref(false);
+const canTableScrollRight = ref(false);
+
+const checkScrollState = () => {
+    const el = tabsContainerRef.value;
+    if (!el) return;
+    canScrollLeft.value = el.scrollLeft > 5;
+    canScrollRight.value = el.scrollLeft < el.scrollWidth - el.clientWidth - 5;
+};
+
+const checkTableScrollState = () => {
+    const el = tableContainerRef.value;
+    if (!el) return;
+    canTableScrollLeft.value = el.scrollLeft > 5;
+    canTableScrollRight.value = el.scrollLeft < el.scrollWidth - el.clientWidth - 5;
+};
+
+const scrollTabs = (direction: 'left' | 'right') => {
+    const el = tabsContainerRef.value;
+    if (!el) return;
+    const amount = direction === 'left' ? -200 : 200;
+    el.scrollBy({ left: amount, behavior: 'smooth' });
+};
+
+const scrollTable = (direction: 'left' | 'right') => {
+    const el = tableContainerRef.value;
+    if (!el) return;
+    const amount = direction === 'left' ? -250 : 250;
+    el.scrollBy({ left: amount, behavior: 'smooth' });
+};
+
+onMounted(() => {
+    nextTick(() => {
+        checkScrollState();
+        checkTableScrollState();
+    });
+    if (tabsContainerRef.value) {
+        tabsContainerRef.value.addEventListener('scroll', checkScrollState, { passive: true });
+    }
+    if (tableContainerRef.value) {
+        tableContainerRef.value.addEventListener('scroll', checkTableScrollState, { passive: true });
+    }
+    window.addEventListener('resize', () => {
+        checkScrollState();
+        checkTableScrollState();
+    });
+});
+
+onUnmounted(() => {
+    if (tabsContainerRef.value) {
+        tabsContainerRef.value.removeEventListener('scroll', checkScrollState);
+    }
+    if (tableContainerRef.value) {
+        tableContainerRef.value.removeEventListener('scroll', checkTableScrollState);
+    }
+    window.removeEventListener('resize', () => {
+        checkScrollState();
+        checkTableScrollState();
+    });
+});
+
+// Custom directive for smooth auto-hiding thin scrollbar
+const vAutoHideScroll = {
+    mounted(el: HTMLElement) {
+        let scrollTimeout: ReturnType<typeof setTimeout> | null = null;
+        const handleScroll = () => {
+            el.classList.add('is-scrolling');
+            if (scrollTimeout) {
+                clearTimeout(scrollTimeout);
+            }
+            scrollTimeout = setTimeout(() => {
+                el.classList.remove('is-scrolling');
+            }, 1000);
+        };
+        el.addEventListener('scroll', handleScroll, { passive: true });
+        (el as any)._onScrollCleanup = () => el.removeEventListener('scroll', handleScroll);
+    },
+    unmounted(el: HTMLElement) {
+        if ((el as any)._onScrollCleanup) {
+            (el as any)._onScrollCleanup();
+        }
+    },
 };
 </script>
 
@@ -241,7 +399,7 @@ const deleteProject = (id: number) => {
                         variant="outline"
                         class="rounded-full border-indigo-200 bg-indigo-50/50 px-2.5 py-0.5 text-xs font-semibold text-indigo-700 dark:border-indigo-900 dark:bg-indigo-950/50 dark:text-indigo-300"
                     >
-                        {{ totalProjectsCount }} Projects
+                        {{ metricsCount.total }} Projects
                     </Badge>
                 </div>
                 <p
@@ -280,7 +438,7 @@ const deleteProject = (id: number) => {
                     <p
                         class="text-2xl font-extrabold text-slate-900 dark:text-slate-50"
                     >
-                        {{ totalProjectsCount }}
+                        {{ metricsCount.total }}
                     </p>
                 </div>
                 <div
@@ -302,7 +460,7 @@ const deleteProject = (id: number) => {
                     <p
                         class="text-2xl font-extrabold text-amber-600 dark:text-amber-400"
                     >
-                        {{ inProgressCount }}
+                        {{ metricsCount.in_progress }}
                     </p>
                 </div>
                 <div
@@ -324,7 +482,7 @@ const deleteProject = (id: number) => {
                     <p
                         class="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400"
                     >
-                        {{ completedCount }}
+                        {{ metricsCount.completed }}
                     </p>
                 </div>
                 <div
@@ -346,7 +504,7 @@ const deleteProject = (id: number) => {
                     <p
                         class="text-2xl font-extrabold text-rose-600 dark:text-rose-400"
                     >
-                        {{ overdueCount }}
+                        {{ metricsCount.overdue }}
                     </p>
                 </div>
                 <div
@@ -363,89 +521,154 @@ const deleteProject = (id: number) => {
         >
             <!-- Toolbar -->
             <div
-                class="flex flex-col gap-3 border-b border-slate-200/80 p-4 lg:flex-row lg:items-center lg:justify-between dark:border-slate-800"
+                class="flex flex-col gap-3 border-b border-slate-200/80 p-4 xl:flex-row xl:items-center xl:justify-between dark:border-slate-800"
             >
                 <!-- Left: Search Input & Type Filter -->
                 <div
-                    class="flex w-full flex-col gap-3 sm:flex-row sm:items-center lg:w-auto"
+                    class="flex w-full flex-col gap-2.5 sm:flex-row sm:items-center xl:w-auto"
                 >
-                    <div class="relative w-full sm:w-72">
+                    <div class="relative w-full sm:w-64 shrink-0">
                         <Search
                             class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400"
                         />
                         <Input
                             v-model="searchQuery"
+                            @input="handleSearchInput"
                             type="text"
                             placeholder="Search by project, client, track..."
-                            class="h-9 border-slate-200 bg-slate-50/50 pl-9 text-xs focus:bg-white dark:border-slate-800 dark:bg-slate-800/40 dark:focus:bg-slate-900"
+                            class="h-9 border-slate-200 bg-slate-50/50 pr-8 pl-9 text-xs focus:bg-white dark:border-slate-800 dark:bg-slate-800/40 dark:focus:bg-slate-900"
                         />
+                        <button
+                            v-if="searchQuery"
+                            @click="clearSearch"
+                            type="button"
+                            class="absolute top-1/2 right-2.5 -translate-y-1/2 rounded-full p-0.5 text-slate-400 hover:bg-slate-200 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-200"
+                            title="Clear search"
+                        >
+                            <X class="h-3.5 w-3.5" />
+                        </button>
                     </div>
                     <select
                         v-model="selectedType"
-                        class="h-9 rounded-md border border-slate-200 bg-white px-3 text-xs text-slate-700 shadow-xs dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
+                        @change="setType(($event.target as HTMLSelectElement).value)"
+                        class="h-9 w-full sm:w-48 shrink-0 rounded-md border border-slate-200 bg-white px-3 text-xs text-slate-700 shadow-xs focus:border-indigo-500 focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
                     >
                         <option value="all">All Project Types</option>
-                        <option value="client">📁 Client Projects</option>
-                        <option value="internal">⚙️ Internal Tasks</option>
+                        <option value="client">Client Projects</option>
+                        <option value="internal">Internal Practice Tasks</option>
                     </select>
                 </div>
 
                 <!-- Right: Status Filter Tabs & View Mode Switcher -->
                 <div
-                    class="flex flex-wrap items-center justify-between gap-3 lg:justify-end"
+                    class="flex w-full min-w-0 items-center justify-between gap-2.5 xl:w-auto xl:justify-end"
                 >
-                    <div
-                        class="flex max-w-full items-center gap-1.5 overflow-x-auto rounded-lg bg-slate-100 p-1 text-xs font-medium dark:bg-slate-800/70"
-                    >
+                    <div class="relative flex-1 min-w-0 xl:w-auto">
+                        <!-- Left Scroll Arrow Indicator -->
                         <button
-                            @click="selectedStatus = 'all'"
-                            :class="[
-                                'rounded-md px-3 py-1.5 whitespace-nowrap transition-all',
-                                selectedStatus === 'all'
-                                    ? 'bg-white font-semibold text-slate-900 shadow-xs dark:bg-slate-900 dark:text-white'
-                                    : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
-                            ]"
+                            v-if="canScrollLeft"
+                            @click="scrollTabs('left')"
+                            type="button"
+                            class="absolute -left-2.5 top-1/2 -translate-y-1/2 z-20 flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-slate-700 shadow-md transition-all hover:bg-white hover:text-indigo-600 dark:border-slate-700 dark:bg-slate-800/95 dark:text-slate-200 dark:hover:bg-slate-700"
+                            aria-label="Scroll left"
                         >
-                            All ({{ props.projects.data.length }})
+                            <ChevronLeft class="h-3.5 w-3.5" />
                         </button>
-                        <button
-                            @click="selectedStatus = 'in_progress'"
-                            :class="[
-                                'rounded-md px-3 py-1.5 whitespace-nowrap transition-all',
-                                selectedStatus === 'in_progress'
-                                    ? 'bg-white font-semibold text-slate-900 shadow-xs dark:bg-slate-900 dark:text-white'
-                                    : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
-                            ]"
+
+                        <div
+                            ref="tabsContainerRef"
+                            v-auto-hide-scroll
+                            class="scrollbar-auto-hide flex w-full min-w-0 items-center gap-1.5 overflow-x-auto rounded-lg bg-slate-100 p-1 text-xs font-medium dark:bg-slate-800/70"
                         >
-                            In Progress
-                        </button>
+                            <button
+                                @click="setStatus('all')"
+                                type="button"
+                                :class="[
+                                    'rounded-md px-3 py-1.5 whitespace-nowrap transition-all shrink-0',
+                                    selectedStatus === 'all'
+                                        ? 'bg-white font-semibold text-slate-900 shadow-xs dark:bg-slate-900 dark:text-white'
+                                        : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
+                                ]"
+                            >
+                                All ({{ metricsCount.total }})
+                            </button>
+                            <button
+                                @click="setStatus('in_progress')"
+                                type="button"
+                                :class="[
+                                    'rounded-md px-3 py-1.5 whitespace-nowrap transition-all shrink-0',
+                                    selectedStatus === 'in_progress'
+                                        ? 'bg-white font-semibold text-slate-900 shadow-xs dark:bg-slate-900 dark:text-white'
+                                        : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
+                                ]"
+                            >
+                                In Progress ({{ metricsCount.in_progress }})
+                            </button>
+                            <button
+                                @click="setStatus('planning')"
+                                type="button"
+                                :class="[
+                                    'rounded-md px-3 py-1.5 whitespace-nowrap transition-all shrink-0',
+                                    selectedStatus === 'planning'
+                                        ? 'bg-white font-semibold text-slate-900 shadow-xs dark:bg-slate-900 dark:text-white'
+                                        : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
+                                ]"
+                            >
+                                Planning ({{ metricsCount.planning }})
+                            </button>
+                            <button
+                                @click="setStatus('under_review')"
+                                type="button"
+                                :class="[
+                                    'rounded-md px-3 py-1.5 whitespace-nowrap transition-all shrink-0',
+                                    selectedStatus === 'under_review'
+                                        ? 'bg-white font-semibold text-slate-900 shadow-xs dark:bg-slate-900 dark:text-white'
+                                        : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
+                                ]"
+                            >
+                                Under Review ({{ metricsCount.under_review }})
+                            </button>
+                            <button
+                                @click="setStatus('completed')"
+                                type="button"
+                                :class="[
+                                    'rounded-md px-3 py-1.5 whitespace-nowrap transition-all shrink-0',
+                                    selectedStatus === 'completed'
+                                        ? 'bg-white font-semibold text-slate-900 shadow-xs dark:bg-slate-900 dark:text-white'
+                                        : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
+                                ]"
+                            >
+                                Completed ({{ metricsCount.completed }})
+                            </button>
+                            <button
+                                @click="setStatus('on_hold')"
+                                type="button"
+                                :class="[
+                                    'rounded-md px-3 py-1.5 whitespace-nowrap transition-all shrink-0',
+                                    selectedStatus === 'on_hold'
+                                        ? 'bg-white font-semibold text-slate-900 shadow-xs dark:bg-slate-900 dark:text-white'
+                                        : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
+                                ]"
+                            >
+                                On Hold ({{ metricsCount.on_hold }})
+                            </button>
+                        </div>
+
+                        <!-- Right Scroll Arrow Indicator -->
                         <button
-                            @click="selectedStatus = 'planning'"
-                            :class="[
-                                'rounded-md px-3 py-1.5 whitespace-nowrap transition-all',
-                                selectedStatus === 'planning'
-                                    ? 'bg-white font-semibold text-slate-900 shadow-xs dark:bg-slate-900 dark:text-white'
-                                    : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
-                            ]"
+                            v-if="canScrollRight"
+                            @click="scrollTabs('right')"
+                            type="button"
+                            class="absolute -right-2.5 top-1/2 -translate-y-1/2 z-20 flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-slate-700 shadow-md transition-all hover:bg-white hover:text-indigo-600 dark:border-slate-700 dark:bg-slate-800/95 dark:text-slate-200 dark:hover:bg-slate-700"
+                            aria-label="Scroll right"
                         >
-                            Planning
-                        </button>
-                        <button
-                            @click="selectedStatus = 'completed'"
-                            :class="[
-                                'rounded-md px-3 py-1.5 whitespace-nowrap transition-all',
-                                selectedStatus === 'completed'
-                                    ? 'bg-white font-semibold text-slate-900 shadow-xs dark:bg-slate-900 dark:text-white'
-                                    : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
-                            ]"
-                        >
-                            Completed
+                            <ChevronRight class="h-3.5 w-3.5" />
                         </button>
                     </div>
 
                     <!-- Grid vs Table View Switcher -->
                     <div
-                        class="hidden items-center gap-1 rounded-lg border border-slate-200 p-1 sm:flex dark:border-slate-800"
+                        class="hidden items-center gap-1 shrink-0 rounded-lg border border-slate-200 p-1 sm:flex dark:border-slate-800"
                     >
                         <button
                             @click="viewMode = 'table'"
@@ -479,7 +702,7 @@ const deleteProject = (id: number) => {
             <CardContent class="p-0">
                 <!-- Empty State -->
                 <div
-                    v-if="filteredProjects.length === 0"
+                    v-if="props.projects.data.length === 0"
                     class="py-16 text-center"
                 >
                     <div
@@ -500,14 +723,23 @@ const deleteProject = (id: number) => {
                                 class="mt-0.5 text-xs text-slate-500 dark:text-slate-400"
                             >
                                 {{
-                                    searchQuery
+                                    searchQuery || selectedStatus !== 'all' || selectedType !== 'all'
                                         ? 'Try adjusting your search query or filters.'
                                         : 'Get started by creating your first project or task.'
                                 }}
                             </p>
                         </div>
                         <Button
-                            v-if="!searchQuery"
+                            v-if="searchQuery || selectedStatus !== 'all' || selectedType !== 'all'"
+                            @click="resetAllFilters"
+                            variant="outline"
+                            size="sm"
+                            class="mt-2"
+                        >
+                            Reset Filters
+                        </Button>
+                        <Button
+                            v-else
                             as-child
                             size="sm"
                             class="mt-2 bg-indigo-600 text-white hover:bg-indigo-700"
@@ -525,7 +757,7 @@ const deleteProject = (id: number) => {
                     class="grid grid-cols-1 gap-4 p-6 sm:grid-cols-2 lg:grid-cols-3"
                 >
                     <div
-                        v-for="project in filteredProjects"
+                        v-for="project in props.projects.data"
                         :key="project.id"
                         class="group relative flex flex-col justify-between rounded-xl border border-slate-200/80 bg-white p-5 shadow-2xs transition-all hover:shadow-sm dark:border-slate-800 dark:bg-slate-900"
                     >
@@ -674,9 +906,23 @@ const deleteProject = (id: number) => {
                 </div>
 
                 <!-- 2️⃣ ENTERPRISE TABLE VIEW -->
-                <div v-else class="w-full">
-                    <!-- Desktop Table (md & larger) -->
-                    <div class="hidden w-full overflow-x-auto md:block">
+                <div v-else class="relative w-full">
+                    <!-- Left Table Scroll Arrow -->
+                    <button
+                        v-if="canTableScrollLeft"
+                        @click="scrollTable('left')"
+                        type="button"
+                        class="absolute left-2 top-1/2 -translate-y-1/2 z-20 hidden md:flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-slate-700 shadow-lg transition-all hover:bg-white hover:text-indigo-600 dark:border-slate-700 dark:bg-slate-800/95 dark:text-slate-200 dark:hover:bg-slate-700"
+                        aria-label="Scroll table left"
+                    >
+                        <ChevronLeft class="h-4 w-4" />
+                    </button>
+
+                    <div
+                        ref="tableContainerRef"
+                        v-auto-hide-scroll
+                        class="scrollbar-auto-hide hidden w-full overflow-x-auto md:block"
+                    >
                         <table
                             class="w-full min-w-225 table-fixed border-collapse text-left"
                         >
@@ -709,7 +955,7 @@ const deleteProject = (id: number) => {
                                 class="divide-y divide-slate-200/80 text-xs text-slate-700 dark:divide-slate-800 dark:text-slate-300"
                             >
                                 <tr
-                                    v-for="project in filteredProjects"
+                                    v-for="project in props.projects.data"
                                     :key="project.id"
                                     class="group transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/40"
                                 >
@@ -764,9 +1010,9 @@ const deleteProject = (id: number) => {
                                         </div>
                                         <div v-else>
                                             <span
-                                                class="inline-flex items-center gap-1 rounded-md border border-indigo-200/80 bg-indigo-50/60 px-2.5 py-0.5 text-xs font-semibold text-indigo-700 dark:border-indigo-900 dark:bg-indigo-950/60 dark:text-indigo-300"
+                                                class="inline-flex items-center gap-1.5 rounded-md border border-indigo-200/80 bg-indigo-50/60 px-2.5 py-0.5 text-xs font-semibold text-indigo-700 dark:border-indigo-900 dark:bg-indigo-950/60 dark:text-indigo-300"
                                             >
-                                                ⚙️ Internal Task
+                                                <Wrench class="h-3 w-3" /> Internal Task
                                             </span>
                                         </div>
                                     </td>
@@ -926,12 +1172,23 @@ const deleteProject = (id: number) => {
                         </table>
                     </div>
 
+                    <!-- Right Table Scroll Arrow -->
+                    <button
+                        v-if="canTableScrollRight"
+                        @click="scrollTable('right')"
+                        type="button"
+                        class="absolute right-2 top-1/2 -translate-y-1/2 z-20 hidden md:flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-slate-700 shadow-lg transition-all hover:bg-white hover:text-indigo-600 dark:border-slate-700 dark:bg-slate-800/95 dark:text-slate-200 dark:hover:bg-slate-700"
+                        aria-label="Scroll table right"
+                    >
+                        <ChevronRight class="h-4 w-4" />
+                    </button>
+
                     <!-- Mobile View (Cards for mobile < md) -->
                     <div
                         class="block space-y-4 divide-y divide-slate-200 p-4 md:hidden dark:divide-slate-800"
                     >
                         <div
-                            v-for="project in filteredProjects"
+                            v-for="project in props.projects.data"
                             :key="project.id"
                             class="space-y-3 rounded-xl border border-slate-200/80 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-900/60"
                         >
@@ -1019,9 +1276,9 @@ const deleteProject = (id: number) => {
                                 </p>
                                 <p
                                     v-else
-                                    class="mt-0.5 text-xs font-medium text-indigo-600 dark:text-indigo-400"
+                                    class="mt-0.5 flex items-center gap-1 text-xs font-medium text-indigo-600 dark:text-indigo-400"
                                 >
-                                    ⚙️ Internal Practice Task
+                                    <Wrench class="h-3 w-3" /> Internal Practice Task
                                 </p>
                             </div>
 
@@ -1055,9 +1312,9 @@ const deleteProject = (id: number) => {
                     </div>
                 </div>
 
-                <!-- Footer Pagination Bar -->
+                <!-- Footer Pagination Bar (Direct Database Pagination) -->
                 <div
-                    v-if="filteredProjects.length > 0"
+                    v-if="props.projects.total > 0"
                     class="flex flex-col gap-3 border-t border-slate-200/80 px-5 py-3 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800"
                 >
                     <p
@@ -1066,33 +1323,98 @@ const deleteProject = (id: number) => {
                         Showing
                         <span
                             class="font-semibold text-slate-700 dark:text-slate-300"
-                            >1</span
+                            >{{ props.projects.from || 0 }}</span
                         >
                         to
                         <span
                             class="font-semibold text-slate-700 dark:text-slate-300"
-                            >{{ filteredProjects.length }}</span
+                            >{{ props.projects.to || 0 }}</span
                         >
                         of
                         <span
                             class="font-semibold text-slate-700 dark:text-slate-300"
-                            >{{ totalProjectsCount }}</span
+                            >{{ props.projects.total }}</span
                         >
                         projects
                     </p>
-                    <div class="flex items-center justify-center gap-2">
+
+                    <!-- Interactive Pagination Navigation Links -->
+                    <div
+                        v-if="props.projects.last_page > 1"
+                        class="flex flex-wrap items-center justify-center gap-1.5"
+                    >
+                        <!-- Previous Page Button -->
                         <Button
+                            v-if="props.projects.prev_page_url"
+                            as-child
                             variant="outline"
                             size="sm"
                             class="h-8 gap-1 text-xs"
+                        >
+                            <Link
+                                :href="props.projects.prev_page_url"
+                                preserve-scroll
+                                preserve-state
+                            >
+                                <ChevronLeft class="h-3.5 w-3.5" /> Previous
+                            </Link>
+                        </Button>
+                        <Button
+                            v-else
+                            variant="outline"
+                            size="sm"
+                            class="h-8 gap-1 text-xs opacity-50"
                             disabled
                         >
                             <ChevronLeft class="h-3.5 w-3.5" /> Previous
                         </Button>
+
+                        <!-- Numbered Page Links -->
+                        <template
+                            v-for="(link, idx) in props.projects.links.slice(1, -1)"
+                            :key="idx"
+                        >
+                            <Link
+                                v-if="link.url"
+                                :href="link.url"
+                                preserve-scroll
+                                preserve-state
+                                :class="[
+                                    'inline-flex h-8 min-w-[2rem] items-center justify-center rounded-md px-2.5 text-xs font-semibold transition-all',
+                                    link.active
+                                        ? 'bg-indigo-600 text-white shadow-xs'
+                                        : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800',
+                                ]"
+                                v-html="link.label"
+                            />
+                            <span
+                                v-else
+                                class="inline-flex h-8 min-w-[2rem] items-center justify-center px-1 text-xs text-slate-400"
+                                v-html="link.label"
+                            />
+                        </template>
+
+                        <!-- Next Page Button -->
                         <Button
+                            v-if="props.projects.next_page_url"
+                            as-child
                             variant="outline"
                             size="sm"
                             class="h-8 gap-1 text-xs"
+                        >
+                            <Link
+                                :href="props.projects.next_page_url"
+                                preserve-scroll
+                                preserve-state
+                            >
+                                Next <ChevronRight class="h-3.5 w-3.5" />
+                            </Link>
+                        </Button>
+                        <Button
+                            v-else
+                            variant="outline"
+                            size="sm"
+                            class="h-8 gap-1 text-xs opacity-50"
                             disabled
                         >
                             Next <ChevronRight class="h-3.5 w-3.5" />
@@ -1103,3 +1425,52 @@ const deleteProject = (id: number) => {
         </Card>
     </div>
 </template>
+
+<style scoped>
+/* Ultra-thin Auto-Hiding Horizontal Scrollbar */
+.scrollbar-auto-hide {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+    transition: scrollbar-color 0.5s ease-in-out;
+}
+
+.scrollbar-auto-hide::-webkit-scrollbar {
+    height: 4px;
+    width: 4px;
+}
+
+.scrollbar-auto-hide::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.scrollbar-auto-hide::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    border-radius: 9999px;
+    transition: background-color 0.5s ease-in-out;
+}
+
+/* Show thumb animatedly when scrolling or on hover */
+.scrollbar-auto-hide.is-scrolling::-webkit-scrollbar-thumb,
+.scrollbar-auto-hide:hover::-webkit-scrollbar-thumb {
+    background-color: rgba(99, 102, 241, 0.45);
+}
+
+.dark .scrollbar-auto-hide.is-scrolling::-webkit-scrollbar-thumb,
+.dark .scrollbar-auto-hide:hover::-webkit-scrollbar-thumb {
+    background-color: rgba(129, 140, 248, 0.45);
+}
+
+.scrollbar-auto-hide.is-scrolling::-webkit-scrollbar-thumb:hover,
+.scrollbar-auto-hide:hover::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(99, 102, 241, 0.8);
+}
+
+.dark .scrollbar-auto-hide.is-scrolling::-webkit-scrollbar-thumb:hover,
+.dark .scrollbar-auto-hide:hover::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(129, 140, 248, 0.8);
+}
+
+.scrollbar-auto-hide.is-scrolling {
+    scrollbar-color: rgba(99, 102, 241, 0.45) transparent;
+}
+</style>

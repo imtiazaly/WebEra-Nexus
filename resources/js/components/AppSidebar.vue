@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
 import {
-    BookOpen,
     Briefcase,
-    FolderGit2,
     GraduationCap,
     LayoutGrid,
     UserCheck,
@@ -11,6 +9,7 @@ import {
     Globe,
 } from '@lucide/vue';
 import AppLogo from '@/components/AppLogo.vue';
+import LinkedInIcon from '@/components/icons/LinkedInIcon.vue';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
@@ -60,14 +59,18 @@ const mainNavItems: NavItem[] = [
 
 const footerNavItems: NavItem[] = [
     {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#vue',
-        icon: BookOpen,
+        title: 'LinkedIn',
+        href: 'https://www.linkedin.com/company/webera-solutions',
+        icon: LinkedInIcon,
+        iconBg: 'bg-[#0A66C2]/10 dark:bg-[#0A66C2]/20 border-[#0A66C2]/25 group-hover:bg-[#0A66C2] group-hover:border-[#0A66C2]',
+        iconColor: 'text-[#0A66C2] dark:text-[#389ce0] group-hover:text-white',
     },
     {
         title: 'WebEra Solutions',
         href: 'https://weberasolutionspk.com/',
         icon: Globe,
+        iconBg: 'bg-emerald-500/10 dark:bg-emerald-500/20 border-emerald-500/25 group-hover:from-emerald-500 group-hover:to-teal-600 group-hover:border-emerald-500',
+        iconColor: 'text-emerald-600 dark:text-emerald-400 group-hover:text-white',
     },
 ];
 </script>
@@ -77,7 +80,7 @@ const footerNavItems: NavItem[] = [
         <SidebarHeader>
             <SidebarMenu>
                 <SidebarMenuItem>
-                    <SidebarMenuButton size="lg" as-child>
+                    <SidebarMenuButton size="lg" as-child class="hover:bg-slate-100/80 dark:hover:bg-slate-800/80 rounded-xl p-1.5 transition-all duration-200 group">
                         <Link :href="dashboard()">
                             <AppLogo />
                         </Link>
