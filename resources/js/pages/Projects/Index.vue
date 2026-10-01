@@ -288,6 +288,29 @@ const deleteProject = (id: number) => {
         router.delete(destroy.url(id));
     }
 };
+
+// Custom directive for smooth auto-hiding thin scrollbar
+const vAutoHideScroll = {
+    mounted(el: HTMLElement) {
+        let scrollTimeout: ReturnType<typeof setTimeout> | null = null;
+        const handleScroll = () => {
+            el.classList.add('is-scrolling');
+            if (scrollTimeout) {
+                clearTimeout(scrollTimeout);
+            }
+            scrollTimeout = setTimeout(() => {
+                el.classList.remove('is-scrolling');
+            }, 1000);
+        };
+        el.addEventListener('scroll', handleScroll, { passive: true });
+        (el as any)._onScrollCleanup = () => el.removeEventListener('scroll', handleScroll);
+    },
+    unmounted(el: HTMLElement) {
+        if ((el as any)._onScrollCleanup) {
+            (el as any)._onScrollCleanup();
+        }
+    },
+};
 </script>
 
 <template>
@@ -431,13 +454,13 @@ const deleteProject = (id: number) => {
         >
             <!-- Toolbar -->
             <div
-                class="flex flex-col gap-3 border-b border-slate-200/80 p-4 lg:flex-row lg:items-center lg:justify-between dark:border-slate-800"
+                class="flex flex-col gap-3 border-b border-slate-200/80 p-4 xl:flex-row xl:items-center xl:justify-between dark:border-slate-800"
             >
                 <!-- Left: Search Input & Type Filter -->
                 <div
-                    class="flex w-full flex-col gap-3 sm:flex-row sm:items-center lg:w-auto"
+                    class="flex w-full flex-col gap-2.5 sm:flex-row sm:items-center xl:w-auto"
                 >
-                    <div class="relative w-full sm:w-72">
+                    <div class="relative w-full sm:w-64 shrink-0">
                         <Search
                             class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400"
                         />
@@ -461,7 +484,7 @@ const deleteProject = (id: number) => {
                     <select
                         v-model="selectedType"
                         @change="setType(($event.target as HTMLSelectElement).value)"
-                        class="h-9 rounded-md border border-slate-200 bg-white px-3 text-xs text-slate-700 shadow-xs dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
+                        class="h-9 w-full sm:w-48 shrink-0 rounded-md border border-slate-200 bg-white px-3 text-xs text-slate-700 shadow-xs focus:border-indigo-500 focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
                     >
                         <option value="all">All Project Types</option>
                         <option value="client">Client Projects</option>
@@ -471,16 +494,17 @@ const deleteProject = (id: number) => {
 
                 <!-- Right: Status Filter Tabs & View Mode Switcher -->
                 <div
-                    class="flex flex-wrap items-center justify-between gap-3 lg:justify-end"
+                    class="flex w-full min-w-0 items-center justify-between gap-2.5 xl:w-auto xl:justify-end"
                 >
                     <div
-                        class="flex max-w-full items-center gap-1.5 overflow-x-auto rounded-lg bg-slate-100 p-1 text-xs font-medium dark:bg-slate-800/70"
+                        v-auto-hide-scroll
+                        class="scrollbar-auto-hide flex w-full min-w-0 items-center gap-1.5 overflow-x-auto rounded-lg bg-slate-100 p-1 text-xs font-medium dark:bg-slate-800/70"
                     >
                         <button
                             @click="setStatus('all')"
                             type="button"
                             :class="[
-                                'rounded-md px-3 py-1.5 whitespace-nowrap transition-all',
+                                'rounded-md px-3 py-1.5 whitespace-nowrap transition-all shrink-0',
                                 selectedStatus === 'all'
                                     ? 'bg-white font-semibold text-slate-900 shadow-xs dark:bg-slate-900 dark:text-white'
                                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
@@ -492,7 +516,7 @@ const deleteProject = (id: number) => {
                             @click="setStatus('in_progress')"
                             type="button"
                             :class="[
-                                'rounded-md px-3 py-1.5 whitespace-nowrap transition-all',
+                                'rounded-md px-3 py-1.5 whitespace-nowrap transition-all shrink-0',
                                 selectedStatus === 'in_progress'
                                     ? 'bg-white font-semibold text-slate-900 shadow-xs dark:bg-slate-900 dark:text-white'
                                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
@@ -504,7 +528,7 @@ const deleteProject = (id: number) => {
                             @click="setStatus('planning')"
                             type="button"
                             :class="[
-                                'rounded-md px-3 py-1.5 whitespace-nowrap transition-all',
+                                'rounded-md px-3 py-1.5 whitespace-nowrap transition-all shrink-0',
                                 selectedStatus === 'planning'
                                     ? 'bg-white font-semibold text-slate-900 shadow-xs dark:bg-slate-900 dark:text-white'
                                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
@@ -516,7 +540,7 @@ const deleteProject = (id: number) => {
                             @click="setStatus('under_review')"
                             type="button"
                             :class="[
-                                'rounded-md px-3 py-1.5 whitespace-nowrap transition-all',
+                                'rounded-md px-3 py-1.5 whitespace-nowrap transition-all shrink-0',
                                 selectedStatus === 'under_review'
                                     ? 'bg-white font-semibold text-slate-900 shadow-xs dark:bg-slate-900 dark:text-white'
                                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
@@ -528,7 +552,7 @@ const deleteProject = (id: number) => {
                             @click="setStatus('completed')"
                             type="button"
                             :class="[
-                                'rounded-md px-3 py-1.5 whitespace-nowrap transition-all',
+                                'rounded-md px-3 py-1.5 whitespace-nowrap transition-all shrink-0',
                                 selectedStatus === 'completed'
                                     ? 'bg-white font-semibold text-slate-900 shadow-xs dark:bg-slate-900 dark:text-white'
                                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
@@ -540,7 +564,7 @@ const deleteProject = (id: number) => {
                             @click="setStatus('on_hold')"
                             type="button"
                             :class="[
-                                'rounded-md px-3 py-1.5 whitespace-nowrap transition-all',
+                                'rounded-md px-3 py-1.5 whitespace-nowrap transition-all shrink-0',
                                 selectedStatus === 'on_hold'
                                     ? 'bg-white font-semibold text-slate-900 shadow-xs dark:bg-slate-900 dark:text-white'
                                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
@@ -552,7 +576,7 @@ const deleteProject = (id: number) => {
 
                     <!-- Grid vs Table View Switcher -->
                     <div
-                        class="hidden items-center gap-1 rounded-lg border border-slate-200 p-1 sm:flex dark:border-slate-800"
+                        class="hidden items-center gap-1 shrink-0 rounded-lg border border-slate-200 p-1 sm:flex dark:border-slate-800"
                     >
                         <button
                             @click="viewMode = 'table'"
@@ -791,8 +815,10 @@ const deleteProject = (id: number) => {
 
                 <!-- 2️⃣ ENTERPRISE TABLE VIEW -->
                 <div v-else class="w-full">
-                    <!-- Desktop Table (md & larger) -->
-                    <div class="hidden w-full overflow-x-auto md:block">
+                    <div
+                        v-auto-hide-scroll
+                        class="scrollbar-auto-hide hidden w-full overflow-x-auto md:block"
+                    >
                         <table
                             class="w-full min-w-225 table-fixed border-collapse text-left"
                         >
@@ -1284,3 +1310,52 @@ const deleteProject = (id: number) => {
         </Card>
     </div>
 </template>
+
+<style scoped>
+/* Ultra-thin Auto-Hiding Horizontal Scrollbar */
+.scrollbar-auto-hide {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+    transition: scrollbar-color 0.5s ease-in-out;
+}
+
+.scrollbar-auto-hide::-webkit-scrollbar {
+    height: 4px;
+    width: 4px;
+}
+
+.scrollbar-auto-hide::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.scrollbar-auto-hide::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    border-radius: 9999px;
+    transition: background-color 0.5s ease-in-out;
+}
+
+/* Show thumb animatedly when scrolling or on hover */
+.scrollbar-auto-hide.is-scrolling::-webkit-scrollbar-thumb,
+.scrollbar-auto-hide:hover::-webkit-scrollbar-thumb {
+    background-color: rgba(99, 102, 241, 0.45);
+}
+
+.dark .scrollbar-auto-hide.is-scrolling::-webkit-scrollbar-thumb,
+.dark .scrollbar-auto-hide:hover::-webkit-scrollbar-thumb {
+    background-color: rgba(129, 140, 248, 0.45);
+}
+
+.scrollbar-auto-hide.is-scrolling::-webkit-scrollbar-thumb:hover,
+.scrollbar-auto-hide:hover::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(99, 102, 241, 0.8);
+}
+
+.dark .scrollbar-auto-hide.is-scrolling::-webkit-scrollbar-thumb:hover,
+.dark .scrollbar-auto-hide:hover::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(129, 140, 248, 0.8);
+}
+
+.scrollbar-auto-hide.is-scrolling {
+    scrollbar-color: rgba(99, 102, 241, 0.45) transparent;
+}
+</style>
