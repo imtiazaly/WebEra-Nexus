@@ -32,7 +32,6 @@ import {
     CheckCircle2,
     ChevronLeft,
     ChevronRight,
-    Briefcase,
     SlidersHorizontal,
     X,
 } from '@lucide/vue';

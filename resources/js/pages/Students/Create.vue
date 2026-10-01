@@ -24,9 +24,6 @@ import {
     Loader2,
     Sparkles,
     UserPlus,
-    CheckCircle2,
-    Briefcase,
-    ShieldCheck,
 } from '@lucide/vue';
 
 defineOptions({

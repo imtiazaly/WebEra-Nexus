@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
+import { ref, onMounted, onUnmounted, nextTick } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { index, create, show, edit, destroy } from '@/routes/students';
 import { Button } from '@/components/ui/button';
@@ -33,7 +33,6 @@ import {
     FileText,
     Sparkles,
     UserX,
-    Briefcase,
     X,
 } from '@lucide/vue';
 

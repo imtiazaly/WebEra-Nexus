@@ -17,8 +17,6 @@ import {
     Wand2,
     Clock,
     Zap,
-    GraduationCap,
-    CheckCircle2,
     Eye,
 } from '@lucide/vue';
 import TrackManagerModal from '@/components/TrackManagerModal.vue';

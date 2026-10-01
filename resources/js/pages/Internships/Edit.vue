@@ -14,10 +14,8 @@ import {
     Layers,
     Tag,
     ShieldCheck,
-    Wand2,
     Clock,
     Zap,
-    GraduationCap,
     Eye,
     Save,
 } from '@lucide/vue';

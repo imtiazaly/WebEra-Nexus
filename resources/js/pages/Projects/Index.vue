@@ -34,7 +34,6 @@ import {
     ChevronRight,
     Wrench,
     Calendar,
-    Briefcase,
     X,
 } from '@lucide/vue';
 

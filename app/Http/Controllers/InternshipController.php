@@ -63,7 +63,7 @@ class InternshipController extends Controller
             'upcoming' => Internship::where('status', 'upcoming')->count(),
             'completed' => Internship::where('status', 'completed')->count(),
             'total_enrolled' => Student::count(),
-            'avg_progress' => (int) round(Student::avg('overall_progress') ?? 0),
+            'avg_progress' => (int) round((float) (Student::avg('overall_progress') ?? 0)),
             'unique_tracks_count' => Service::forInternships()->whereHas('internships')->count(),
         ];
 

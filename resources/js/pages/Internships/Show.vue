@@ -16,7 +16,6 @@ import {
     Pencil,
     ArrowLeft,
     Search,
-    Calendar,
     Award,
     TrendingUp,
     FileText,
@@ -26,7 +25,6 @@ import {
     CheckCircle2,
     Check,
     Copy,
-    Sparkles,
     BarChart2,
     Users,
 } from '@lucide/vue';

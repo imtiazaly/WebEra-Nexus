@@ -4,7 +4,6 @@ import { Head, Link, router } from '@inertiajs/vue3';
 import { index, create, show, edit, destroy } from '@/routes/internships';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
@@ -24,12 +23,10 @@ import {
     Search,
     MoreHorizontal,
     Sparkles,
-    Calendar,
     Users,
     TrendingUp,
     Zap,
     Clock,
-    CheckCircle2,
     Award,
     Layers,
     LayoutGrid,
