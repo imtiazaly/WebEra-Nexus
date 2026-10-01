@@ -31,7 +31,7 @@ defineProps<{
 
     <div
         v-if="status"
-        class="mb-6 flex items-center gap-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-3.5 text-xs font-medium text-emerald-600 dark:text-emerald-400"
+        class="mb-6 flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3.5 text-xs font-medium text-emerald-600 dark:text-emerald-400"
     >
         <CheckCircle2 class="size-4 shrink-0" />
         <span>{{ status }}</span>
@@ -45,11 +45,16 @@ defineProps<{
     >
         <div class="grid gap-5">
             <div class="grid gap-2">
-                <Label for="email" class="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                <Label
+                    for="email"
+                    class="text-xs font-semibold text-slate-700 dark:text-slate-300"
+                >
                     Email Address
                 </Label>
                 <div class="relative flex items-center">
-                    <Mail class="absolute left-3 size-4 text-slate-400 pointer-events-none" />
+                    <Mail
+                        class="pointer-events-none absolute left-3 size-4 text-slate-400"
+                    />
                     <Input
                         id="email"
                         type="email"
@@ -59,7 +64,7 @@ defineProps<{
                         :tabindex="1"
                         autocomplete="email"
                         placeholder="admin@webera.com"
-                        class="pl-9 h-11 rounded-xl border-slate-200 dark:border-slate-800 focus-visible:ring-purple-500 bg-slate-50/50 dark:bg-slate-900/50"
+                        class="h-11 rounded-xl border-slate-200 bg-slate-50/50 pl-9 focus-visible:ring-purple-500 dark:border-slate-800 dark:bg-slate-900/50"
                     />
                 </div>
                 <InputError :message="errors.email" />
@@ -67,20 +72,25 @@ defineProps<{
 
             <div class="grid gap-2">
                 <div class="flex items-center justify-between">
-                    <Label for="password" class="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    <Label
+                        for="password"
+                        class="text-xs font-semibold text-slate-700 dark:text-slate-300"
+                    >
                         Password
                     </Label>
                     <TextLink
                         v-if="canResetPassword"
                         :href="request()"
-                        class="text-xs font-medium text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors"
+                        class="text-xs font-medium text-purple-600 transition-colors hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300"
                         :tabindex="5"
                     >
                         Forgot password?
                     </TextLink>
                 </div>
                 <div class="relative flex items-center">
-                    <Lock class="absolute left-3 size-4 text-slate-400 pointer-events-none z-10" />
+                    <Lock
+                        class="pointer-events-none absolute left-3 z-10 size-4 text-slate-400"
+                    />
                     <PasswordInput
                         id="password"
                         name="password"
@@ -88,22 +98,30 @@ defineProps<{
                         :tabindex="2"
                         autocomplete="current-password"
                         placeholder="••••••••"
-                        class="pl-9 h-11 rounded-xl border-slate-200 dark:border-slate-800 focus-visible:ring-purple-500 bg-slate-50/50 dark:bg-slate-900/50 w-full"
+                        class="h-11 w-full rounded-xl border-slate-200 bg-slate-50/50 pl-9 focus-visible:ring-purple-500 dark:border-slate-800 dark:bg-slate-900/50"
                     />
                 </div>
                 <InputError :message="errors.password" />
             </div>
 
             <div class="flex items-center justify-between py-1">
-                <Label for="remember" class="flex items-center space-x-2.5 cursor-pointer text-xs text-slate-600 dark:text-slate-400">
-                    <Checkbox id="remember" name="remember" :tabindex="3" class="rounded-md border-slate-300 dark:border-slate-700 data-[state=checked]:bg-purple-600" />
+                <Label
+                    for="remember"
+                    class="flex cursor-pointer items-center space-x-2.5 text-xs text-slate-600 dark:text-slate-400"
+                >
+                    <Checkbox
+                        id="remember"
+                        name="remember"
+                        :tabindex="3"
+                        class="rounded-md border-slate-300 data-[state=checked]:bg-purple-600 dark:border-slate-700"
+                    />
                     <span class="font-medium">Remember for 30 days</span>
                 </Label>
             </div>
 
             <Button
                 type="submit"
-                class="mt-2 h-11 w-full rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-violet-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold shadow-lg shadow-purple-500/25 active:scale-[0.99] transition-all duration-200 text-sm flex items-center justify-center gap-2 group"
+                class="group mt-2 flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-violet-600 text-sm font-semibold text-white shadow-lg shadow-purple-500/25 transition-all duration-200 hover:from-purple-700 hover:to-indigo-700 active:scale-[0.99]"
                 :tabindex="4"
                 :disabled="processing"
                 data-test="login-button"
@@ -111,17 +129,21 @@ defineProps<{
                 <Spinner v-if="processing" />
                 <span v-else class="flex items-center gap-2">
                     Sign in to Portal
-                    <ArrowRight class="size-4 transition-transform duration-200 group-hover:translate-x-1" />
+                    <ArrowRight
+                        class="size-4 transition-transform duration-200 group-hover:translate-x-1"
+                    />
                 </span>
             </Button>
         </div>
 
-        <div class="text-center text-xs text-slate-500 dark:text-slate-400 mt-2">
+        <div
+            class="mt-2 text-center text-xs text-slate-500 dark:text-slate-400"
+        >
             Don't have an account?
             <TextLink
                 :href="register()"
                 :tabindex="5"
-                class="ms-1 font-semibold text-purple-600 dark:text-purple-400 hover:underline"
+                class="ms-1 font-semibold text-purple-600 hover:underline dark:text-purple-400"
             >
                 Create an account
             </TextLink>

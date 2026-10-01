@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, nextTick } from "vue";
-import { Head, Link, router } from "@inertiajs/vue3";
-import { index, create, show, edit, destroy } from "@/routes/clients";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
+import { Head, Link, router } from '@inertiajs/vue3';
+import { index, create, show, edit, destroy } from '@/routes/clients';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -14,7 +14,7 @@ import {
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 import {
     Plus,
     Eye,
@@ -35,15 +35,15 @@ import {
     Briefcase,
     SlidersHorizontal,
     X,
-} from "@lucide/vue";
+} from '@lucide/vue';
 
-import ServiceManagerModal from "@/components/ServiceManagerModal.vue";
+import ServiceManagerModal from '@/components/ServiceManagerModal.vue';
 
 defineOptions({
     layout: {
         breadcrumbs: [
             {
-                title: "Clients & Leads",
+                title: 'Clients & Leads',
                 href: index.url(),
             },
         ],
@@ -103,8 +103,8 @@ const props = defineProps<{
 }>();
 
 // Search & Filter State
-const searchQuery = ref(props.filters?.search || "");
-const selectedStatus = ref<string>(props.filters?.status || "all");
+const searchQuery = ref(props.filters?.search || '');
+const selectedStatus = ref<string>(props.filters?.status || 'all');
 const isServiceModalOpen = ref(false);
 
 // Metrics with graceful fallbacks
@@ -122,8 +122,8 @@ const metricsCount = computed(() => {
 
 // Helper for Initials
 const getInitials = (name: string) => {
-    if (!name) return "CL";
-    const parts = name.trim().split(" ");
+    if (!name) return 'CL';
+    const parts = name.trim().split(' ');
     if (parts.length >= 2) {
         return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
     }
@@ -133,11 +133,11 @@ const getInitials = (name: string) => {
 // Avatar background colors generator based on client name
 const getAvatarColor = (name: string) => {
     const colors = [
-        "bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 border-indigo-200",
-        "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300 border-blue-200",
-        "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 border-emerald-200",
-        "bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300 border-purple-200",
-        "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300 border-amber-200",
+        'bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 border-indigo-200',
+        'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300 border-blue-200',
+        'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 border-emerald-200',
+        'bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300 border-purple-200',
+        'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300 border-amber-200',
     ];
     let hash = 0;
     for (let i = 0; i < name.length; i++) {
@@ -149,40 +149,40 @@ const getAvatarColor = (name: string) => {
 // Status Badge Config
 const getStatusConfig = (status: string) => {
     switch (status) {
-        case "new_lead":
+        case 'new_lead':
             return {
-                label: "New Lead",
+                label: 'New Lead',
                 badgeClass:
-                    "bg-blue-50 text-blue-700 border-blue-200/80 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800/60",
-                dotClass: "bg-blue-500",
+                    'bg-blue-50 text-blue-700 border-blue-200/80 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800/60',
+                dotClass: 'bg-blue-500',
             };
-        case "contacted":
+        case 'contacted':
             return {
-                label: "Contacted",
+                label: 'Contacted',
                 badgeClass:
-                    "bg-amber-50 text-amber-700 border-amber-200/80 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/60",
-                dotClass: "bg-amber-500",
+                    'bg-amber-50 text-amber-700 border-amber-200/80 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/60',
+                dotClass: 'bg-amber-500',
             };
-        case "converted":
+        case 'converted':
             return {
-                label: "Converted",
+                label: 'Converted',
                 badgeClass:
-                    "bg-emerald-50 text-emerald-700 border-emerald-200/80 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/60",
-                dotClass: "bg-emerald-500",
+                    'bg-emerald-50 text-emerald-700 border-emerald-200/80 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/60',
+                dotClass: 'bg-emerald-500',
             };
-        case "lost":
+        case 'lost':
             return {
-                label: "Lost Lead",
+                label: 'Lost Lead',
                 badgeClass:
-                    "bg-rose-50 text-rose-700 border-rose-200/80 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800/60",
-                dotClass: "bg-rose-500",
+                    'bg-rose-50 text-rose-700 border-rose-200/80 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800/60',
+                dotClass: 'bg-rose-500',
             };
         default:
             return {
                 label: status,
                 badgeClass:
-                    "bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-900 dark:text-slate-300 dark:border-slate-800",
-                dotClass: "bg-slate-400",
+                    'bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-900 dark:text-slate-300 dark:border-slate-800',
+                dotClass: 'bg-slate-400',
             };
     }
 };
@@ -199,7 +199,7 @@ const applyServerFilters = (newStatus?: string, newSearch?: string) => {
     router.get(
         index.url(),
         {
-            status: statusToApply !== "all" ? statusToApply : undefined,
+            status: statusToApply !== 'all' ? statusToApply : undefined,
             search: searchToApply.trim() ? searchToApply.trim() : undefined,
         },
         {
@@ -225,18 +225,18 @@ const handleSearchInput = () => {
 };
 
 const clearSearch = () => {
-    searchQuery.value = "";
-    applyServerFilters(selectedStatus.value, "");
+    searchQuery.value = '';
+    applyServerFilters(selectedStatus.value, '');
 };
 
 const resetAllFilters = () => {
-    selectedStatus.value = "all";
-    searchQuery.value = "";
-    applyServerFilters("all", "");
+    selectedStatus.value = 'all';
+    searchQuery.value = '';
+    applyServerFilters('all', '');
 };
 
 const deleteClient = (id: number) => {
-    if (confirm("Are you sure you want to delete this client/lead?")) {
+    if (confirm('Are you sure you want to delete this client/lead?')) {
         router.delete(destroy.url(id));
     }
 };
@@ -265,18 +265,18 @@ const checkTableScrollState = () => {
         el.scrollLeft < el.scrollWidth - el.clientWidth - 5;
 };
 
-const scrollTabs = (direction: "left" | "right") => {
+const scrollTabs = (direction: 'left' | 'right') => {
     const el = tabsContainerRef.value;
     if (!el) return;
-    const amount = direction === "left" ? -200 : 200;
-    el.scrollBy({ left: amount, behavior: "smooth" });
+    const amount = direction === 'left' ? -200 : 200;
+    el.scrollBy({ left: amount, behavior: 'smooth' });
 };
 
-const scrollTable = (direction: "left" | "right") => {
+const scrollTable = (direction: 'left' | 'right') => {
     const el = tableContainerRef.value;
     if (!el) return;
-    const amount = direction === "left" ? -250 : 250;
-    el.scrollBy({ left: amount, behavior: "smooth" });
+    const amount = direction === 'left' ? -250 : 250;
+    el.scrollBy({ left: amount, behavior: 'smooth' });
 };
 
 onMounted(() => {
@@ -285,18 +285,18 @@ onMounted(() => {
         checkTableScrollState();
     });
     if (tabsContainerRef.value) {
-        tabsContainerRef.value.addEventListener("scroll", checkScrollState, {
+        tabsContainerRef.value.addEventListener('scroll', checkScrollState, {
             passive: true,
         });
     }
     if (tableContainerRef.value) {
         tableContainerRef.value.addEventListener(
-            "scroll",
+            'scroll',
             checkTableScrollState,
             { passive: true },
         );
     }
-    window.addEventListener("resize", () => {
+    window.addEventListener('resize', () => {
         checkScrollState();
         checkTableScrollState();
     });
@@ -304,15 +304,15 @@ onMounted(() => {
 
 onUnmounted(() => {
     if (tabsContainerRef.value) {
-        tabsContainerRef.value.removeEventListener("scroll", checkScrollState);
+        tabsContainerRef.value.removeEventListener('scroll', checkScrollState);
     }
     if (tableContainerRef.value) {
         tableContainerRef.value.removeEventListener(
-            "scroll",
+            'scroll',
             checkTableScrollState,
         );
     }
-    window.removeEventListener("resize", () => {
+    window.removeEventListener('resize', () => {
         checkScrollState();
         checkTableScrollState();
     });
@@ -323,17 +323,17 @@ const vAutoHideScroll = {
     mounted(el: HTMLElement) {
         let scrollTimeout: ReturnType<typeof setTimeout> | null = null;
         const handleScroll = () => {
-            el.classList.add("is-scrolling");
+            el.classList.add('is-scrolling');
             if (scrollTimeout) {
                 clearTimeout(scrollTimeout);
             }
             scrollTimeout = setTimeout(() => {
-                el.classList.remove("is-scrolling");
+                el.classList.remove('is-scrolling');
             }, 1000);
         };
-        el.addEventListener("scroll", handleScroll, { passive: true });
+        el.addEventListener('scroll', handleScroll, { passive: true });
         (el as any)._onScrollCleanup = () =>
-            el.removeEventListener("scroll", handleScroll);
+            el.removeEventListener('scroll', handleScroll);
     },
     unmounted(el: HTMLElement) {
         if ((el as any)._onScrollCleanup) {
@@ -402,7 +402,7 @@ const vAutoHideScroll = {
             <div
                 @click="setStatus('all')"
                 :class="[
-                    'cursor-pointer flex items-center justify-between rounded-xl border p-4 shadow-xs transition-all hover:shadow-sm',
+                    'flex cursor-pointer items-center justify-between rounded-xl border p-4 shadow-xs transition-all hover:shadow-sm',
                     selectedStatus === 'all'
                         ? 'border-indigo-500 bg-indigo-50/20 dark:border-indigo-500 dark:bg-indigo-950/20'
                         : 'border-slate-200/80 bg-white dark:border-slate-800 dark:bg-slate-900',
@@ -430,7 +430,7 @@ const vAutoHideScroll = {
             <div
                 @click="setStatus('new_lead')"
                 :class="[
-                    'cursor-pointer flex items-center justify-between rounded-xl border p-4 shadow-xs transition-all hover:shadow-sm',
+                    'flex cursor-pointer items-center justify-between rounded-xl border p-4 shadow-xs transition-all hover:shadow-sm',
                     selectedStatus === 'new_lead'
                         ? 'border-blue-500 bg-blue-50/20 dark:border-blue-500 dark:bg-blue-950/20'
                         : 'border-slate-200/80 bg-white dark:border-slate-800 dark:bg-slate-900',
@@ -458,7 +458,7 @@ const vAutoHideScroll = {
             <div
                 @click="setStatus('contacted')"
                 :class="[
-                    'cursor-pointer flex items-center justify-between rounded-xl border p-4 shadow-xs transition-all hover:shadow-sm',
+                    'flex cursor-pointer items-center justify-between rounded-xl border p-4 shadow-xs transition-all hover:shadow-sm',
                     selectedStatus === 'contacted'
                         ? 'border-amber-500 bg-amber-50/20 dark:border-amber-500 dark:bg-amber-950/20'
                         : 'border-slate-200/80 bg-white dark:border-slate-800 dark:bg-slate-900',
@@ -486,7 +486,7 @@ const vAutoHideScroll = {
             <div
                 @click="setStatus('converted')"
                 :class="[
-                    'cursor-pointer flex items-center justify-between rounded-xl border p-4 shadow-xs transition-all hover:shadow-sm',
+                    'flex cursor-pointer items-center justify-between rounded-xl border p-4 shadow-xs transition-all hover:shadow-sm',
                     selectedStatus === 'converted'
                         ? 'border-emerald-500 bg-emerald-50/20 dark:border-emerald-500 dark:bg-emerald-950/20'
                         : 'border-slate-200/80 bg-white dark:border-slate-800 dark:bg-slate-900',
@@ -550,7 +550,7 @@ const vAutoHideScroll = {
                         v-if="canScrollLeft"
                         @click="scrollTabs('left')"
                         type="button"
-                        class="absolute -left-2.5 top-1/2 -translate-y-1/2 z-20 flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-slate-700 shadow-md transition-all hover:bg-white hover:text-indigo-600 dark:border-slate-700 dark:bg-slate-800/95 dark:text-slate-200 dark:hover:bg-slate-700"
+                        class="absolute top-1/2 -left-2.5 z-20 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-slate-700 shadow-md transition-all hover:bg-white hover:text-indigo-600 dark:border-slate-700 dark:bg-slate-800/95 dark:text-slate-200 dark:hover:bg-slate-700"
                         aria-label="Scroll left"
                     >
                         <ChevronLeft class="h-3.5 w-3.5" />
@@ -565,7 +565,7 @@ const vAutoHideScroll = {
                             @click="setStatus('all')"
                             type="button"
                             :class="[
-                                'rounded-md px-3 py-1.5 whitespace-nowrap transition-all shrink-0',
+                                'shrink-0 rounded-md px-3 py-1.5 whitespace-nowrap transition-all',
                                 selectedStatus === 'all'
                                     ? 'bg-white font-semibold text-slate-900 shadow-xs dark:bg-slate-900 dark:text-white'
                                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
@@ -577,7 +577,7 @@ const vAutoHideScroll = {
                             @click="setStatus('new_lead')"
                             type="button"
                             :class="[
-                                'rounded-md px-3 py-1.5 whitespace-nowrap transition-all shrink-0',
+                                'shrink-0 rounded-md px-3 py-1.5 whitespace-nowrap transition-all',
                                 selectedStatus === 'new_lead'
                                     ? 'bg-white font-semibold text-slate-900 shadow-xs dark:bg-slate-900 dark:text-white'
                                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
@@ -589,7 +589,7 @@ const vAutoHideScroll = {
                             @click="setStatus('contacted')"
                             type="button"
                             :class="[
-                                'rounded-md px-3 py-1.5 whitespace-nowrap transition-all shrink-0',
+                                'shrink-0 rounded-md px-3 py-1.5 whitespace-nowrap transition-all',
                                 selectedStatus === 'contacted'
                                     ? 'bg-white font-semibold text-slate-900 shadow-xs dark:bg-slate-900 dark:text-white'
                                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
@@ -601,7 +601,7 @@ const vAutoHideScroll = {
                             @click="setStatus('converted')"
                             type="button"
                             :class="[
-                                'rounded-md px-3 py-1.5 whitespace-nowrap transition-all shrink-0',
+                                'shrink-0 rounded-md px-3 py-1.5 whitespace-nowrap transition-all',
                                 selectedStatus === 'converted'
                                     ? 'bg-white font-semibold text-slate-900 shadow-xs dark:bg-slate-900 dark:text-white'
                                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
@@ -613,7 +613,7 @@ const vAutoHideScroll = {
                             @click="setStatus('lost')"
                             type="button"
                             :class="[
-                                'rounded-md px-3 py-1.5 whitespace-nowrap transition-all shrink-0',
+                                'shrink-0 rounded-md px-3 py-1.5 whitespace-nowrap transition-all',
                                 selectedStatus === 'lost'
                                     ? 'bg-white font-semibold text-slate-900 shadow-xs dark:bg-slate-900 dark:text-white'
                                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
@@ -628,7 +628,7 @@ const vAutoHideScroll = {
                         v-if="canScrollRight"
                         @click="scrollTabs('right')"
                         type="button"
-                        class="absolute -right-2.5 top-1/2 -translate-y-1/2 z-20 flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-slate-700 shadow-md transition-all hover:bg-white hover:text-indigo-600 dark:border-slate-700 dark:bg-slate-800/95 dark:text-slate-200 dark:hover:bg-slate-700"
+                        class="absolute top-1/2 -right-2.5 z-20 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-slate-700 shadow-md transition-all hover:bg-white hover:text-indigo-600 dark:border-slate-700 dark:bg-slate-800/95 dark:text-slate-200 dark:hover:bg-slate-700"
                         aria-label="Scroll right"
                     >
                         <ChevronRight class="h-3.5 w-3.5" />
@@ -661,9 +661,9 @@ const vAutoHideScroll = {
                                 class="mt-0.5 text-xs text-slate-500 dark:text-slate-400"
                             >
                                 {{
-                                    searchQuery || selectedStatus !== "all"
-                                        ? "No records match your filter criteria."
-                                        : "Get started by adding your first client or lead."
+                                    searchQuery || selectedStatus !== 'all'
+                                        ? 'No records match your filter criteria.'
+                                        : 'Get started by adding your first client or lead.'
                                 }}
                             </p>
                         </div>
@@ -698,7 +698,7 @@ const vAutoHideScroll = {
                         v-if="canTableScrollLeft"
                         @click="scrollTable('left')"
                         type="button"
-                        class="absolute left-2 top-1/2 -translate-y-1/2 z-20 hidden md:flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-slate-700 shadow-lg transition-all hover:bg-white hover:text-indigo-600 dark:border-slate-700 dark:bg-slate-800/95 dark:text-slate-200 dark:hover:bg-slate-700"
+                        class="absolute top-1/2 left-2 z-20 hidden h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-slate-700 shadow-lg transition-all hover:bg-white hover:text-indigo-600 md:flex dark:border-slate-700 dark:bg-slate-800/95 dark:text-slate-200 dark:hover:bg-slate-700"
                         aria-label="Scroll table left"
                     >
                         <ChevronLeft class="h-4 w-4" />
@@ -815,7 +815,7 @@ const vAutoHideScroll = {
                                             <span class="truncate font-medium">
                                                 {{
                                                     client.company_name ||
-                                                    "Individual"
+                                                    'Individual'
                                                 }}
                                             </span>
                                         </div>
@@ -947,7 +947,7 @@ const vAutoHideScroll = {
                         v-if="canTableScrollRight"
                         @click="scrollTable('right')"
                         type="button"
-                        class="absolute right-2 top-1/2 -translate-y-1/2 z-20 hidden md:flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-slate-700 shadow-lg transition-all hover:bg-white hover:text-indigo-600 dark:border-slate-700 dark:bg-slate-800/95 dark:text-slate-200 dark:hover:bg-slate-700"
+                        class="absolute top-1/2 right-2 z-20 hidden h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-slate-700 shadow-lg transition-all hover:bg-white hover:text-indigo-600 md:flex dark:border-slate-700 dark:bg-slate-800/95 dark:text-slate-200 dark:hover:bg-slate-700"
                         aria-label="Scroll table right"
                     >
                         <ChevronRight class="h-4 w-4" />
@@ -1061,7 +1061,7 @@ const vAutoHideScroll = {
                             >
                                 <Building2 class="h-3.5 w-3.5 text-slate-400" />
                                 <span>{{
-                                    client.company_name || "Individual"
+                                    client.company_name || 'Individual'
                                 }}</span>
                             </div>
                         </div>
@@ -1171,7 +1171,7 @@ const vAutoHideScroll = {
                                 preserve-scroll
                                 preserve-state
                                 :class="[
-                                    'inline-flex h-8 min-w-[2rem] items-center justify-center rounded-md px-2.5 text-xs font-semibold transition-all',
+                                    'inline-flex h-8 min-w-8 items-center justify-center rounded-md px-2.5 text-xs font-semibold transition-all',
                                     link.active
                                         ? 'bg-indigo-600 text-white shadow-xs'
                                         : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800',
@@ -1180,7 +1180,7 @@ const vAutoHideScroll = {
                             />
                             <span
                                 v-else
-                                class="inline-flex h-8 min-w-[2rem] items-center justify-center px-1 text-xs text-slate-400"
+                                class="inline-flex h-8 min-w-8 items-center justify-center px-1 text-xs text-slate-400"
                                 v-html="link.label"
                             />
                         </template>

@@ -309,7 +309,8 @@ const checkTableScrollState = () => {
     const el = tableContainerRef.value;
     if (!el) return;
     canTableScrollLeft.value = el.scrollLeft > 5;
-    canTableScrollRight.value = el.scrollLeft < el.scrollWidth - el.clientWidth - 5;
+    canTableScrollRight.value =
+        el.scrollLeft < el.scrollWidth - el.clientWidth - 5;
 };
 
 const scrollTabs = (direction: 'left' | 'right') => {
@@ -332,10 +333,16 @@ onMounted(() => {
         checkTableScrollState();
     });
     if (tabsContainerRef.value) {
-        tabsContainerRef.value.addEventListener('scroll', checkScrollState, { passive: true });
+        tabsContainerRef.value.addEventListener('scroll', checkScrollState, {
+            passive: true,
+        });
     }
     if (tableContainerRef.value) {
-        tableContainerRef.value.addEventListener('scroll', checkTableScrollState, { passive: true });
+        tableContainerRef.value.addEventListener(
+            'scroll',
+            checkTableScrollState,
+            { passive: true },
+        );
     }
     window.addEventListener('resize', () => {
         checkScrollState();
@@ -348,7 +355,10 @@ onUnmounted(() => {
         tabsContainerRef.value.removeEventListener('scroll', checkScrollState);
     }
     if (tableContainerRef.value) {
-        tableContainerRef.value.removeEventListener('scroll', checkTableScrollState);
+        tableContainerRef.value.removeEventListener(
+            'scroll',
+            checkTableScrollState,
+        );
     }
     window.removeEventListener('resize', () => {
         checkScrollState();
@@ -370,7 +380,8 @@ const vAutoHideScroll = {
             }, 1000);
         };
         el.addEventListener('scroll', handleScroll, { passive: true });
-        (el as any)._onScrollCleanup = () => el.removeEventListener('scroll', handleScroll);
+        (el as any)._onScrollCleanup = () =>
+            el.removeEventListener('scroll', handleScroll);
     },
     unmounted(el: HTMLElement) {
         if ((el as any)._onScrollCleanup) {
@@ -527,7 +538,7 @@ const vAutoHideScroll = {
                 <div
                     class="flex w-full flex-col gap-2.5 sm:flex-row sm:items-center xl:w-auto"
                 >
-                    <div class="relative w-full sm:w-64 shrink-0">
+                    <div class="relative w-full shrink-0 sm:w-64">
                         <Search
                             class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400"
                         />
@@ -550,12 +561,16 @@ const vAutoHideScroll = {
                     </div>
                     <select
                         v-model="selectedType"
-                        @change="setType(($event.target as HTMLSelectElement).value)"
-                        class="h-9 w-full sm:w-48 shrink-0 rounded-md border border-slate-200 bg-white px-3 text-xs text-slate-700 shadow-xs focus:border-indigo-500 focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
+                        @change="
+                            setType(($event.target as HTMLSelectElement).value)
+                        "
+                        class="h-9 w-full shrink-0 rounded-md border border-slate-200 bg-white px-3 text-xs text-slate-700 shadow-xs focus:border-indigo-500 focus:outline-none sm:w-48 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
                     >
                         <option value="all">All Project Types</option>
                         <option value="client">Client Projects</option>
-                        <option value="internal">Internal Practice Tasks</option>
+                        <option value="internal">
+                            Internal Practice Tasks
+                        </option>
                     </select>
                 </div>
 
@@ -563,13 +578,13 @@ const vAutoHideScroll = {
                 <div
                     class="flex w-full min-w-0 items-center justify-between gap-2.5 xl:w-auto xl:justify-end"
                 >
-                    <div class="relative flex-1 min-w-0 xl:w-auto">
+                    <div class="relative min-w-0 flex-1 xl:w-auto">
                         <!-- Left Scroll Arrow Indicator -->
                         <button
                             v-if="canScrollLeft"
                             @click="scrollTabs('left')"
                             type="button"
-                            class="absolute -left-2.5 top-1/2 -translate-y-1/2 z-20 flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-slate-700 shadow-md transition-all hover:bg-white hover:text-indigo-600 dark:border-slate-700 dark:bg-slate-800/95 dark:text-slate-200 dark:hover:bg-slate-700"
+                            class="absolute top-1/2 -left-2.5 z-20 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-slate-700 shadow-md transition-all hover:bg-white hover:text-indigo-600 dark:border-slate-700 dark:bg-slate-800/95 dark:text-slate-200 dark:hover:bg-slate-700"
                             aria-label="Scroll left"
                         >
                             <ChevronLeft class="h-3.5 w-3.5" />
@@ -584,7 +599,7 @@ const vAutoHideScroll = {
                                 @click="setStatus('all')"
                                 type="button"
                                 :class="[
-                                    'rounded-md px-3 py-1.5 whitespace-nowrap transition-all shrink-0',
+                                    'shrink-0 rounded-md px-3 py-1.5 whitespace-nowrap transition-all',
                                     selectedStatus === 'all'
                                         ? 'bg-white font-semibold text-slate-900 shadow-xs dark:bg-slate-900 dark:text-white'
                                         : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
@@ -596,7 +611,7 @@ const vAutoHideScroll = {
                                 @click="setStatus('in_progress')"
                                 type="button"
                                 :class="[
-                                    'rounded-md px-3 py-1.5 whitespace-nowrap transition-all shrink-0',
+                                    'shrink-0 rounded-md px-3 py-1.5 whitespace-nowrap transition-all',
                                     selectedStatus === 'in_progress'
                                         ? 'bg-white font-semibold text-slate-900 shadow-xs dark:bg-slate-900 dark:text-white'
                                         : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
@@ -608,7 +623,7 @@ const vAutoHideScroll = {
                                 @click="setStatus('planning')"
                                 type="button"
                                 :class="[
-                                    'rounded-md px-3 py-1.5 whitespace-nowrap transition-all shrink-0',
+                                    'shrink-0 rounded-md px-3 py-1.5 whitespace-nowrap transition-all',
                                     selectedStatus === 'planning'
                                         ? 'bg-white font-semibold text-slate-900 shadow-xs dark:bg-slate-900 dark:text-white'
                                         : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
@@ -620,7 +635,7 @@ const vAutoHideScroll = {
                                 @click="setStatus('under_review')"
                                 type="button"
                                 :class="[
-                                    'rounded-md px-3 py-1.5 whitespace-nowrap transition-all shrink-0',
+                                    'shrink-0 rounded-md px-3 py-1.5 whitespace-nowrap transition-all',
                                     selectedStatus === 'under_review'
                                         ? 'bg-white font-semibold text-slate-900 shadow-xs dark:bg-slate-900 dark:text-white'
                                         : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
@@ -632,7 +647,7 @@ const vAutoHideScroll = {
                                 @click="setStatus('completed')"
                                 type="button"
                                 :class="[
-                                    'rounded-md px-3 py-1.5 whitespace-nowrap transition-all shrink-0',
+                                    'shrink-0 rounded-md px-3 py-1.5 whitespace-nowrap transition-all',
                                     selectedStatus === 'completed'
                                         ? 'bg-white font-semibold text-slate-900 shadow-xs dark:bg-slate-900 dark:text-white'
                                         : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
@@ -644,7 +659,7 @@ const vAutoHideScroll = {
                                 @click="setStatus('on_hold')"
                                 type="button"
                                 :class="[
-                                    'rounded-md px-3 py-1.5 whitespace-nowrap transition-all shrink-0',
+                                    'shrink-0 rounded-md px-3 py-1.5 whitespace-nowrap transition-all',
                                     selectedStatus === 'on_hold'
                                         ? 'bg-white font-semibold text-slate-900 shadow-xs dark:bg-slate-900 dark:text-white'
                                         : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
@@ -659,7 +674,7 @@ const vAutoHideScroll = {
                             v-if="canScrollRight"
                             @click="scrollTabs('right')"
                             type="button"
-                            class="absolute -right-2.5 top-1/2 -translate-y-1/2 z-20 flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-slate-700 shadow-md transition-all hover:bg-white hover:text-indigo-600 dark:border-slate-700 dark:bg-slate-800/95 dark:text-slate-200 dark:hover:bg-slate-700"
+                            class="absolute top-1/2 -right-2.5 z-20 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-slate-700 shadow-md transition-all hover:bg-white hover:text-indigo-600 dark:border-slate-700 dark:bg-slate-800/95 dark:text-slate-200 dark:hover:bg-slate-700"
                             aria-label="Scroll right"
                         >
                             <ChevronRight class="h-3.5 w-3.5" />
@@ -668,7 +683,7 @@ const vAutoHideScroll = {
 
                     <!-- Grid vs Table View Switcher -->
                     <div
-                        class="hidden items-center gap-1 shrink-0 rounded-lg border border-slate-200 p-1 sm:flex dark:border-slate-800"
+                        class="hidden shrink-0 items-center gap-1 rounded-lg border border-slate-200 p-1 sm:flex dark:border-slate-800"
                     >
                         <button
                             @click="viewMode = 'table'"
@@ -723,14 +738,20 @@ const vAutoHideScroll = {
                                 class="mt-0.5 text-xs text-slate-500 dark:text-slate-400"
                             >
                                 {{
-                                    searchQuery || selectedStatus !== 'all' || selectedType !== 'all'
+                                    searchQuery ||
+                                    selectedStatus !== 'all' ||
+                                    selectedType !== 'all'
                                         ? 'Try adjusting your search query or filters.'
                                         : 'Get started by creating your first project or task.'
                                 }}
                             </p>
                         </div>
                         <Button
-                            v-if="searchQuery || selectedStatus !== 'all' || selectedType !== 'all'"
+                            v-if="
+                                searchQuery ||
+                                selectedStatus !== 'all' ||
+                                selectedType !== 'all'
+                            "
                             @click="resetAllFilters"
                             variant="outline"
                             size="sm"
@@ -912,7 +933,7 @@ const vAutoHideScroll = {
                         v-if="canTableScrollLeft"
                         @click="scrollTable('left')"
                         type="button"
-                        class="absolute left-2 top-1/2 -translate-y-1/2 z-20 hidden md:flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-slate-700 shadow-lg transition-all hover:bg-white hover:text-indigo-600 dark:border-slate-700 dark:bg-slate-800/95 dark:text-slate-200 dark:hover:bg-slate-700"
+                        class="absolute top-1/2 left-2 z-20 hidden h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-slate-700 shadow-lg transition-all hover:bg-white hover:text-indigo-600 md:flex dark:border-slate-700 dark:bg-slate-800/95 dark:text-slate-200 dark:hover:bg-slate-700"
                         aria-label="Scroll table left"
                     >
                         <ChevronLeft class="h-4 w-4" />
@@ -1012,7 +1033,8 @@ const vAutoHideScroll = {
                                             <span
                                                 class="inline-flex items-center gap-1.5 rounded-md border border-indigo-200/80 bg-indigo-50/60 px-2.5 py-0.5 text-xs font-semibold text-indigo-700 dark:border-indigo-900 dark:bg-indigo-950/60 dark:text-indigo-300"
                                             >
-                                                <Wrench class="h-3 w-3" /> Internal Task
+                                                <Wrench class="h-3 w-3" />
+                                                Internal Task
                                             </span>
                                         </div>
                                     </td>
@@ -1177,7 +1199,7 @@ const vAutoHideScroll = {
                         v-if="canTableScrollRight"
                         @click="scrollTable('right')"
                         type="button"
-                        class="absolute right-2 top-1/2 -translate-y-1/2 z-20 hidden md:flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-slate-700 shadow-lg transition-all hover:bg-white hover:text-indigo-600 dark:border-slate-700 dark:bg-slate-800/95 dark:text-slate-200 dark:hover:bg-slate-700"
+                        class="absolute top-1/2 right-2 z-20 hidden h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-slate-700 shadow-lg transition-all hover:bg-white hover:text-indigo-600 md:flex dark:border-slate-700 dark:bg-slate-800/95 dark:text-slate-200 dark:hover:bg-slate-700"
                         aria-label="Scroll table right"
                     >
                         <ChevronRight class="h-4 w-4" />
@@ -1278,7 +1300,8 @@ const vAutoHideScroll = {
                                     v-else
                                     class="mt-0.5 flex items-center gap-1 text-xs font-medium text-indigo-600 dark:text-indigo-400"
                                 >
-                                    <Wrench class="h-3 w-3" /> Internal Practice Task
+                                    <Wrench class="h-3 w-3" /> Internal Practice
+                                    Task
                                 </p>
                             </div>
 
@@ -1371,7 +1394,10 @@ const vAutoHideScroll = {
 
                         <!-- Numbered Page Links -->
                         <template
-                            v-for="(link, idx) in props.projects.links.slice(1, -1)"
+                            v-for="(link, idx) in props.projects.links.slice(
+                                1,
+                                -1,
+                            )"
                             :key="idx"
                         >
                             <Link

@@ -549,7 +549,9 @@ const deleteInternship = (id: number) => {
                         >
                             <div
                                 class="h-full rounded-full bg-linear-to-r from-cyan-500 to-indigo-500 transition-all duration-500"
-                                :style="{ width: `${metricsData.avg_progress}%` }"
+                                :style="{
+                                    width: `${metricsData.avg_progress}%`,
+                                }"
                             ></div>
                         </div>
                     </div>
@@ -677,7 +679,9 @@ const deleteInternship = (id: number) => {
                 <!-- Track Filter Dropdown -->
                 <select
                     v-model="selectedTrack"
-                    @change="setTrack(($event.target as HTMLSelectElement).value)"
+                    @change="
+                        setTrack(($event.target as HTMLSelectElement).value)
+                    "
                     class="h-10 rounded-xl border border-slate-200/80 bg-slate-50/70 px-3 text-xs font-semibold text-slate-700 dark:border-slate-800 dark:bg-slate-900/90 dark:text-slate-300"
                 >
                     <option value="all">All Learning Tracks</option>
@@ -799,14 +803,20 @@ const deleteInternship = (id: number) => {
                     </h3>
                     <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
                         {{
-                            searchQuery || selectedStatus !== 'all' || selectedTrack !== 'all'
+                            searchQuery ||
+                            selectedStatus !== 'all' ||
+                            selectedTrack !== 'all'
                                 ? 'Try adjusting your search query or filters.'
                                 : 'Get started by creating your first internship training batch.'
                         }}
                     </p>
                 </div>
                 <Button
-                    v-if="searchQuery || selectedStatus !== 'all' || selectedTrack !== 'all'"
+                    v-if="
+                        searchQuery ||
+                        selectedStatus !== 'all' ||
+                        selectedTrack !== 'all'
+                    "
                     @click="resetAllFilters"
                     variant="outline"
                     size="sm"
@@ -1226,11 +1236,20 @@ const deleteInternship = (id: number) => {
         >
             <p class="text-sm text-slate-600 dark:text-slate-400">
                 Showing
-                <span class="font-semibold text-slate-900 dark:text-slate-100">{{ props.internships.from }}</span>
+                <span
+                    class="font-semibold text-slate-900 dark:text-slate-100"
+                    >{{ props.internships.from }}</span
+                >
                 to
-                <span class="font-semibold text-slate-900 dark:text-slate-100">{{ props.internships.to }}</span>
+                <span
+                    class="font-semibold text-slate-900 dark:text-slate-100"
+                    >{{ props.internships.to }}</span
+                >
                 of
-                <span class="font-semibold text-slate-900 dark:text-slate-100">{{ props.internships.total }}</span>
+                <span
+                    class="font-semibold text-slate-900 dark:text-slate-100"
+                    >{{ props.internships.total }}</span
+                >
                 batches
             </p>
 
@@ -1238,17 +1257,42 @@ const deleteInternship = (id: number) => {
                 <!-- Previous Button -->
                 <button
                     :disabled="!props.internships.prev_page_url"
-                    @click="props.internships.prev_page_url && router.get(props.internships.prev_page_url, {}, { preserveState: true, preserveScroll: true, replace: true })"
+                    @click="
+                        props.internships.prev_page_url &&
+                        router.get(
+                            props.internships.prev_page_url,
+                            {},
+                            {
+                                preserveState: true,
+                                preserveScroll: true,
+                                replace: true,
+                            },
+                        )
+                    "
                     class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition-all hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
                 >
                     <ChevronLeft class="h-4 w-4" />
                 </button>
 
                 <!-- Numbered Page Buttons -->
-                <template v-for="(link, i) in props.internships.links.slice(1, -1)" :key="i">
+                <template
+                    v-for="(link, i) in props.internships.links.slice(1, -1)"
+                    :key="i"
+                >
                     <button
                         :disabled="!link.url"
-                        @click="link.url && router.get(link.url, {}, { preserveState: true, preserveScroll: true, replace: true })"
+                        @click="
+                            link.url &&
+                            router.get(
+                                link.url,
+                                {},
+                                {
+                                    preserveState: true,
+                                    preserveScroll: true,
+                                    replace: true,
+                                },
+                            )
+                        "
                         :class="[
                             'inline-flex h-9 min-w-9 items-center justify-center rounded-lg border px-2 text-sm font-medium transition-all',
                             link.active
@@ -1262,7 +1306,18 @@ const deleteInternship = (id: number) => {
                 <!-- Next Button -->
                 <button
                     :disabled="!props.internships.next_page_url"
-                    @click="props.internships.next_page_url && router.get(props.internships.next_page_url, {}, { preserveState: true, preserveScroll: true, replace: true })"
+                    @click="
+                        props.internships.next_page_url &&
+                        router.get(
+                            props.internships.next_page_url,
+                            {},
+                            {
+                                preserveState: true,
+                                preserveScroll: true,
+                                replace: true,
+                            },
+                        )
+                    "
                     class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition-all hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
                 >
                     <ChevronRight class="h-4 w-4" />

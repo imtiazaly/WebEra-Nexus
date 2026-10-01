@@ -70,7 +70,8 @@ const footerNavItems: NavItem[] = [
         href: 'https://weberasolutionspk.com/',
         icon: Globe,
         iconBg: 'bg-emerald-500/10 dark:bg-emerald-500/20 border-emerald-500/25 group-hover:from-emerald-500 group-hover:to-teal-600 group-hover:border-emerald-500',
-        iconColor: 'text-emerald-600 dark:text-emerald-400 group-hover:text-white',
+        iconColor:
+            'text-emerald-600 dark:text-emerald-400 group-hover:text-white',
     },
 ];
 </script>
@@ -80,7 +81,11 @@ const footerNavItems: NavItem[] = [
         <SidebarHeader>
             <SidebarMenu>
                 <SidebarMenuItem>
-                    <SidebarMenuButton size="lg" as-child class="hover:bg-slate-100/80 dark:hover:bg-slate-800/80 rounded-xl p-1.5 transition-all duration-200 group">
+                    <SidebarMenuButton
+                        size="lg"
+                        as-child
+                        class="group rounded-xl p-1.5 transition-all duration-200 hover:bg-slate-100/80 dark:hover:bg-slate-800/80"
+                    >
                         <Link :href="dashboard()">
                             <AppLogo />
                         </Link>
