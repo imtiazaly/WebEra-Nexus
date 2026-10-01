@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { index, create, show, edit, destroy } from '@/routes/clients';
 import { Button } from '@/components/ui/button';
@@ -239,6 +239,42 @@ const deleteClient = (id: number) => {
     }
 };
 
+// Scroll indicators state & handlers for tab filters container
+const tabsContainerRef = ref<HTMLElement | null>(null);
+const canScrollLeft = ref(false);
+const canScrollRight = ref(false);
+
+const checkScrollState = () => {
+    const el = tabsContainerRef.value;
+    if (!el) return;
+    canScrollLeft.value = el.scrollLeft > 5;
+    canScrollRight.value = el.scrollLeft < el.scrollWidth - el.clientWidth - 5;
+};
+
+const scrollTabs = (direction: 'left' | 'right') => {
+    const el = tabsContainerRef.value;
+    if (!el) return;
+    const amount = direction === 'left' ? -200 : 200;
+    el.scrollBy({ left: amount, behavior: 'smooth' });
+};
+
+onMounted(() => {
+    nextTick(() => {
+        checkScrollState();
+    });
+    if (tabsContainerRef.value) {
+        tabsContainerRef.value.addEventListener('scroll', checkScrollState, { passive: true });
+        window.addEventListener('resize', checkScrollState);
+    }
+});
+
+onUnmounted(() => {
+    if (tabsContainerRef.value) {
+        tabsContainerRef.value.removeEventListener('scroll', checkScrollState);
+    }
+    window.removeEventListener('resize', checkScrollState);
+});
+
 // Custom directive for smooth auto-hiding thin scrollbar
 const vAutoHideScroll = {
     mounted(el: HTMLElement) {
@@ -464,69 +500,94 @@ const vAutoHideScroll = {
                 </div>
 
                 <!-- Status Filter Tabs (Directly connected to DB query) -->
-                <div
-                    v-auto-hide-scroll
-                    class="scrollbar-auto-hide flex max-w-full items-center gap-1.5 overflow-x-auto rounded-lg bg-slate-100 p-1 text-xs font-medium dark:bg-slate-800/70"
-                >
+                <div class="relative max-w-full">
+                    <!-- Left Scroll Arrow Indicator -->
                     <button
-                        @click="setStatus('all')"
+                        v-if="canScrollLeft"
+                        @click="scrollTabs('left')"
                         type="button"
-                        :class="[
-                            'rounded-md px-3 py-1.5 whitespace-nowrap transition-all',
-                            selectedStatus === 'all'
-                                ? 'bg-white font-semibold text-slate-900 shadow-xs dark:bg-slate-900 dark:text-white'
-                                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
-                        ]"
+                        class="absolute -left-2.5 top-1/2 -translate-y-1/2 z-20 flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-slate-700 shadow-md transition-all hover:bg-white hover:text-indigo-600 dark:border-slate-700 dark:bg-slate-800/95 dark:text-slate-200 dark:hover:bg-slate-700"
+                        aria-label="Scroll left"
                     >
-                        All ({{ metricsCount.total }})
+                        <ChevronLeft class="h-3.5 w-3.5" />
                     </button>
-                    <button
-                        @click="setStatus('new_lead')"
-                        type="button"
-                        :class="[
-                            'rounded-md px-3 py-1.5 whitespace-nowrap transition-all',
-                            selectedStatus === 'new_lead'
-                                ? 'bg-white font-semibold text-slate-900 shadow-xs dark:bg-slate-900 dark:text-white'
-                                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
-                        ]"
+
+                    <div
+                        ref="tabsContainerRef"
+                        v-auto-hide-scroll
+                        class="scrollbar-auto-hide flex max-w-full items-center gap-1.5 overflow-x-auto rounded-lg bg-slate-100 p-1 text-xs font-medium dark:bg-slate-800/70"
                     >
-                        New Leads ({{ metricsCount.new_leads }})
-                    </button>
+                        <button
+                            @click="setStatus('all')"
+                            type="button"
+                            :class="[
+                                'rounded-md px-3 py-1.5 whitespace-nowrap transition-all shrink-0',
+                                selectedStatus === 'all'
+                                    ? 'bg-white font-semibold text-slate-900 shadow-xs dark:bg-slate-900 dark:text-white'
+                                    : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
+                            ]"
+                        >
+                            All ({{ metricsCount.total }})
+                        </button>
+                        <button
+                            @click="setStatus('new_lead')"
+                            type="button"
+                            :class="[
+                                'rounded-md px-3 py-1.5 whitespace-nowrap transition-all shrink-0',
+                                selectedStatus === 'new_lead'
+                                    ? 'bg-white font-semibold text-slate-900 shadow-xs dark:bg-slate-900 dark:text-white'
+                                    : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
+                            ]"
+                        >
+                            New Leads ({{ metricsCount.new_leads }})
+                        </button>
+                        <button
+                            @click="setStatus('contacted')"
+                            type="button"
+                            :class="[
+                                'rounded-md px-3 py-1.5 whitespace-nowrap transition-all shrink-0',
+                                selectedStatus === 'contacted'
+                                    ? 'bg-white font-semibold text-slate-900 shadow-xs dark:bg-slate-900 dark:text-white'
+                                    : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
+                            ]"
+                        >
+                            Contacted ({{ metricsCount.contacted }})
+                        </button>
+                        <button
+                            @click="setStatus('converted')"
+                            type="button"
+                            :class="[
+                                'rounded-md px-3 py-1.5 whitespace-nowrap transition-all shrink-0',
+                                selectedStatus === 'converted'
+                                    ? 'bg-white font-semibold text-slate-900 shadow-xs dark:bg-slate-900 dark:text-white'
+                                    : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
+                            ]"
+                        >
+                            Converted ({{ metricsCount.converted }})
+                        </button>
+                        <button
+                            @click="setStatus('lost')"
+                            type="button"
+                            :class="[
+                                'rounded-md px-3 py-1.5 whitespace-nowrap transition-all shrink-0',
+                                selectedStatus === 'lost'
+                                    ? 'bg-white font-semibold text-slate-900 shadow-xs dark:bg-slate-900 dark:text-white'
+                                    : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
+                            ]"
+                        >
+                            Lost ({{ metricsCount.lost }})
+                        </button>
+                    </div>
+
+                    <!-- Right Scroll Arrow Indicator -->
                     <button
-                        @click="setStatus('contacted')"
+                        v-if="canScrollRight"
+                        @click="scrollTabs('right')"
                         type="button"
-                        :class="[
-                            'rounded-md px-3 py-1.5 whitespace-nowrap transition-all',
-                            selectedStatus === 'contacted'
-                                ? 'bg-white font-semibold text-slate-900 shadow-xs dark:bg-slate-900 dark:text-white'
-                                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
-                        ]"
+                        class="absolute -right-2.5 top-1/2 -translate-y-1/2 z-20 flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-slate-700 shadow-md transition-all hover:bg-white hover:text-indigo-600 dark:border-slate-700 dark:bg-slate-800/95 dark:text-slate-200 dark:hover:bg-slate-700"
+                        aria-label="Scroll right"
                     >
-                        Contacted ({{ metricsCount.contacted }})
-                    </button>
-                    <button
-                        @click="setStatus('converted')"
-                        type="button"
-                        :class="[
-                            'rounded-md px-3 py-1.5 whitespace-nowrap transition-all',
-                            selectedStatus === 'converted'
-                                ? 'bg-white font-semibold text-slate-900 shadow-xs dark:bg-slate-900 dark:text-white'
-                                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
-                        ]"
-                    >
-                        Converted ({{ metricsCount.converted }})
-                    </button>
-                    <button
-                        @click="setStatus('lost')"
-                        type="button"
-                        :class="[
-                            'rounded-md px-3 py-1.5 whitespace-nowrap transition-all',
-                            selectedStatus === 'lost'
-                                ? 'bg-white font-semibold text-slate-900 shadow-xs dark:bg-slate-900 dark:text-white'
-                                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
-                        ]"
-                    >
-                        Lost ({{ metricsCount.lost }})
+                        <ChevronRight class="h-3.5 w-3.5" />
                     </button>
                 </div>
             </div>
