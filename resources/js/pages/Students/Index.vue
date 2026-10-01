@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { index, create, show, edit, destroy } from '@/routes/students';
 import { Button } from '@/components/ui/button';
@@ -180,6 +180,96 @@ const deleteStudent = (id: number) => {
     if (confirm('Are you sure you want to delete this student record?')) {
         router.delete(destroy.url(id));
     }
+};
+
+// Scroll indicators state & handlers for tab filters & table container
+const tabsContainerRef = ref<HTMLElement | null>(null);
+const canScrollLeft = ref(false);
+const canScrollRight = ref(false);
+
+const tableContainerRef = ref<HTMLElement | null>(null);
+const canTableScrollLeft = ref(false);
+const canTableScrollRight = ref(false);
+
+const checkScrollState = () => {
+    const el = tabsContainerRef.value;
+    if (!el) return;
+    canScrollLeft.value = el.scrollLeft > 5;
+    canScrollRight.value = el.scrollLeft < el.scrollWidth - el.clientWidth - 5;
+};
+
+const checkTableScrollState = () => {
+    const el = tableContainerRef.value;
+    if (!el) return;
+    canTableScrollLeft.value = el.scrollLeft > 5;
+    canTableScrollRight.value = el.scrollLeft < el.scrollWidth - el.clientWidth - 5;
+};
+
+const scrollTabs = (direction: 'left' | 'right') => {
+    const el = tabsContainerRef.value;
+    if (!el) return;
+    const amount = direction === 'left' ? -200 : 200;
+    el.scrollBy({ left: amount, behavior: 'smooth' });
+};
+
+const scrollTable = (direction: 'left' | 'right') => {
+    const el = tableContainerRef.value;
+    if (!el) return;
+    const amount = direction === 'left' ? -250 : 250;
+    el.scrollBy({ left: amount, behavior: 'smooth' });
+};
+
+onMounted(() => {
+    nextTick(() => {
+        checkScrollState();
+        checkTableScrollState();
+    });
+    if (tabsContainerRef.value) {
+        tabsContainerRef.value.addEventListener('scroll', checkScrollState, { passive: true });
+    }
+    if (tableContainerRef.value) {
+        tableContainerRef.value.addEventListener('scroll', checkTableScrollState, { passive: true });
+    }
+    window.addEventListener('resize', () => {
+        checkScrollState();
+        checkTableScrollState();
+    });
+});
+
+onUnmounted(() => {
+    if (tabsContainerRef.value) {
+        tabsContainerRef.value.removeEventListener('scroll', checkScrollState);
+    }
+    if (tableContainerRef.value) {
+        tableContainerRef.value.removeEventListener('scroll', checkTableScrollState);
+    }
+    window.removeEventListener('resize', () => {
+        checkScrollState();
+        checkTableScrollState();
+    });
+});
+
+// Custom directive for smooth auto-hiding thin scrollbar
+const vAutoHideScroll = {
+    mounted(el: HTMLElement) {
+        let scrollTimeout: ReturnType<typeof setTimeout> | null = null;
+        const handleScroll = () => {
+            el.classList.add('is-scrolling');
+            if (scrollTimeout) {
+                clearTimeout(scrollTimeout);
+            }
+            scrollTimeout = setTimeout(() => {
+                el.classList.remove('is-scrolling');
+            }, 1000);
+        };
+        el.addEventListener('scroll', handleScroll, { passive: true });
+        (el as any)._onScrollCleanup = () => el.removeEventListener('scroll', handleScroll);
+    },
+    unmounted(el: HTMLElement) {
+        if ((el as any)._onScrollCleanup) {
+            (el as any)._onScrollCleanup();
+        }
+    },
 };
 </script>
 
@@ -376,77 +466,118 @@ const deleteStudent = (id: number) => {
             </div>
 
             <!-- Pipeline Filter Tabs -->
-            <div
-                class="flex flex-wrap items-center gap-1.5 rounded-xl border border-slate-200/80 bg-slate-100/60 p-1 dark:border-slate-800 dark:bg-slate-900"
-            >
+            <div class="relative max-w-full">
+                <!-- Left Scroll Arrow Indicator -->
                 <button
+                    v-if="canScrollLeft"
+                    @click="scrollTabs('left')"
                     type="button"
-                    @click="setStatus('all')"
-                    :class="[
-                        'rounded-lg px-3 py-1.5 text-xs font-semibold transition-all',
-                        selectedStatus === 'all'
-                            ? 'bg-white text-slate-900 shadow-2xs dark:bg-slate-800 dark:text-white'
-                            : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white',
-                    ]"
+                    class="absolute -left-2.5 top-1/2 -translate-y-1/2 z-20 flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-slate-700 shadow-md transition-all hover:bg-white hover:text-indigo-600 dark:border-slate-700 dark:bg-slate-800/95 dark:text-slate-200 dark:hover:bg-slate-700"
+                    aria-label="Scroll left"
                 >
-                    All Statuses
+                    <ChevronLeft class="h-3.5 w-3.5" />
                 </button>
-                <button
-                    type="button"
-                    @click="setStatus('active')"
-                    :class="[
-                        'rounded-lg px-3 py-1.5 text-xs font-semibold transition-all',
-                        selectedStatus === 'active'
-                            ? 'bg-emerald-500 text-white shadow-2xs'
-                            : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white',
-                    ]"
+
+                <div
+                    ref="tabsContainerRef"
+                    v-auto-hide-scroll
+                    class="scrollbar-auto-hide flex max-w-full items-center gap-1.5 overflow-x-auto rounded-xl border border-slate-200/80 bg-slate-100/60 p-1 dark:border-slate-800 dark:bg-slate-900"
                 >
-                    Active
-                </button>
+                    <button
+                        type="button"
+                        @click="setStatus('all')"
+                        :class="[
+                            'rounded-lg px-3 py-1.5 text-xs font-semibold transition-all shrink-0',
+                            selectedStatus === 'all'
+                                ? 'bg-white text-slate-900 shadow-2xs dark:bg-slate-800 dark:text-white'
+                                : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white',
+                        ]"
+                    >
+                        All Statuses
+                    </button>
+                    <button
+                        type="button"
+                        @click="setStatus('active')"
+                        :class="[
+                            'rounded-lg px-3 py-1.5 text-xs font-semibold transition-all shrink-0',
+                            selectedStatus === 'active'
+                                ? 'bg-emerald-500 text-white shadow-2xs'
+                                : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white',
+                        ]"
+                    >
+                        Active
+                    </button>
+                    <button
+                        type="button"
+                        @click="setStatus('enrolled')"
+                        :class="[
+                            'rounded-lg px-3 py-1.5 text-xs font-semibold transition-all shrink-0',
+                            selectedStatus === 'enrolled'
+                                ? 'bg-sky-600 text-white shadow-2xs'
+                                : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white',
+                        ]"
+                    >
+                        Enrolled
+                    </button>
+                    <button
+                        type="button"
+                        @click="setStatus('completed')"
+                        :class="[
+                            'rounded-lg px-3 py-1.5 text-xs font-semibold transition-all shrink-0',
+                            selectedStatus === 'completed'
+                                ? 'bg-purple-600 text-white shadow-2xs'
+                                : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white',
+                        ]"
+                    >
+                        Completed
+                    </button>
+                    <button
+                        type="button"
+                        @click="setStatus('dropped_out')"
+                        :class="[
+                            'rounded-lg px-3 py-1.5 text-xs font-semibold transition-all shrink-0',
+                            selectedStatus === 'dropped_out'
+                                ? 'bg-rose-600 text-white shadow-2xs'
+                                : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white',
+                        ]"
+                    >
+                        Dropped Out
+                    </button>
+                </div>
+
+                <!-- Right Scroll Arrow Indicator -->
                 <button
+                    v-if="canScrollRight"
+                    @click="scrollTabs('right')"
                     type="button"
-                    @click="setStatus('enrolled')"
-                    :class="[
-                        'rounded-lg px-3 py-1.5 text-xs font-semibold transition-all',
-                        selectedStatus === 'enrolled'
-                            ? 'bg-sky-600 text-white shadow-2xs'
-                            : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white',
-                    ]"
+                    class="absolute -right-2.5 top-1/2 -translate-y-1/2 z-20 flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-slate-700 shadow-md transition-all hover:bg-white hover:text-indigo-600 dark:border-slate-700 dark:bg-slate-800/95 dark:text-slate-200 dark:hover:bg-slate-700"
+                    aria-label="Scroll right"
                 >
-                    Enrolled
-                </button>
-                <button
-                    type="button"
-                    @click="setStatus('completed')"
-                    :class="[
-                        'rounded-lg px-3 py-1.5 text-xs font-semibold transition-all',
-                        selectedStatus === 'completed'
-                            ? 'bg-purple-600 text-white shadow-2xs'
-                            : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white',
-                    ]"
-                >
-                    Completed
-                </button>
-                <button
-                    type="button"
-                    @click="setStatus('dropped_out')"
-                    :class="[
-                        'rounded-lg px-3 py-1.5 text-xs font-semibold transition-all',
-                        selectedStatus === 'dropped_out'
-                            ? 'bg-rose-600 text-white shadow-2xs'
-                            : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white',
-                    ]"
-                >
-                    Dropped Out
+                    <ChevronRight class="h-3.5 w-3.5" />
                 </button>
             </div>
         </div>
 
         <!-- Main Table Card -->
         <Card
-            class="overflow-hidden border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900"
+            class="relative overflow-hidden border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900"
         >
-            <div class="overflow-x-auto">
+            <!-- Left Table Scroll Arrow -->
+            <button
+                v-if="canTableScrollLeft"
+                @click="scrollTable('left')"
+                type="button"
+                class="absolute left-2 top-1/2 -translate-y-1/2 z-20 flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-slate-700 shadow-lg transition-all hover:bg-white hover:text-indigo-600 dark:border-slate-700 dark:bg-slate-800/95 dark:text-slate-200 dark:hover:bg-slate-700"
+                aria-label="Scroll table left"
+            >
+                <ChevronLeft class="h-4 w-4" />
+            </button>
+
+            <div
+                ref="tableContainerRef"
+                v-auto-hide-scroll
+                class="scrollbar-auto-hide overflow-x-auto"
+            >
                 <table class="w-full text-left text-xs">
                     <thead>
                         <tr
@@ -688,6 +819,17 @@ const deleteStudent = (id: number) => {
                 </table>
             </div>
 
+            <!-- Right Table Scroll Arrow -->
+            <button
+                v-if="canTableScrollRight"
+                @click="scrollTable('right')"
+                type="button"
+                class="absolute right-2 top-1/2 -translate-y-1/2 z-20 flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-slate-700 shadow-lg transition-all hover:bg-white hover:text-indigo-600 dark:border-slate-700 dark:bg-slate-800/95 dark:text-slate-200 dark:hover:bg-slate-700"
+                aria-label="Scroll table right"
+            >
+                <ChevronRight class="h-4 w-4" />
+            </button>
+
             <!-- Footer Pagination Controls -->
             <div
                 v-if="props.students.total > 0"
@@ -741,3 +883,52 @@ const deleteStudent = (id: number) => {
         </Card>
     </div>
 </template>
+
+<style scoped>
+/* Ultra-thin Auto-Hiding Horizontal Scrollbar */
+.scrollbar-auto-hide {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+    transition: scrollbar-color 0.5s ease-in-out;
+}
+
+.scrollbar-auto-hide::-webkit-scrollbar {
+    height: 4px;
+    width: 4px;
+}
+
+.scrollbar-auto-hide::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.scrollbar-auto-hide::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    border-radius: 9999px;
+    transition: background-color 0.5s ease-in-out;
+}
+
+/* Show thumb animatedly when scrolling or on hover */
+.scrollbar-auto-hide.is-scrolling::-webkit-scrollbar-thumb,
+.scrollbar-auto-hide:hover::-webkit-scrollbar-thumb {
+    background-color: rgba(99, 102, 241, 0.45);
+}
+
+.dark .scrollbar-auto-hide.is-scrolling::-webkit-scrollbar-thumb,
+.dark .scrollbar-auto-hide:hover::-webkit-scrollbar-thumb {
+    background-color: rgba(129, 140, 248, 0.45);
+}
+
+.scrollbar-auto-hide.is-scrolling::-webkit-scrollbar-thumb:hover,
+.scrollbar-auto-hide:hover::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(99, 102, 241, 0.8);
+}
+
+.dark .scrollbar-auto-hide.is-scrolling::-webkit-scrollbar-thumb:hover,
+.dark .scrollbar-auto-hide:hover::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(129, 140, 248, 0.8);
+}
+
+.scrollbar-auto-hide.is-scrolling {
+    scrollbar-color: rgba(99, 102, 241, 0.45) transparent;
+}
+</style>
