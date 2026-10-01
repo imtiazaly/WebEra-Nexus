@@ -34,6 +34,7 @@ import {
     Sparkles,
     UserX,
     Briefcase,
+    X,
 } from '@lucide/vue';
 
 defineOptions({
@@ -66,31 +67,86 @@ interface Student {
     created_at: string;
 }
 
+interface PaginationLink {
+    url: string | null;
+    label: string;
+    active: boolean;
+}
+
 interface PaginatedStudents {
     data: Student[];
-    links: any[];
+    links: PaginationLink[];
     current_page: number;
     last_page: number;
-    total?: number;
-    from?: number;
-    to?: number;
+    total: number;
+    from: number | null;
+    to: number | null;
+    prev_page_url: string | null;
+    next_page_url: string | null;
 }
 
 interface Stats {
     total_students: number;
     active_students: number;
+    enrolled_students?: number;
     completed_students: number;
+    dropped_out_students?: number;
     avg_progress: number;
+}
+
+interface Filters {
+    status?: string;
+    search?: string;
 }
 
 const props = defineProps<{
     students: PaginatedStudents;
     stats?: Stats;
+    filters?: Filters;
 }>();
 
-// Filter & Search state
-const searchQuery = ref('');
-const selectedStatus = ref<string>('all');
+// Filter & Search state initialized from props
+const searchQuery = ref(props.filters?.search || '');
+const selectedStatus = ref<string>(props.filters?.status || 'all');
+let searchTimeout: ReturnType<typeof setTimeout> | null = null;
+
+const applyServerFilters = () => {
+    router.get(
+        index.url(),
+        {
+            status: selectedStatus.value !== 'all' ? selectedStatus.value : undefined,
+            search: searchQuery.value.trim() !== '' ? searchQuery.value.trim() : undefined,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            replace: true,
+        },
+    );
+};
+
+const setStatus = (status: string) => {
+    selectedStatus.value = status;
+    applyServerFilters();
+};
+
+const handleSearchInput = () => {
+    if (searchTimeout) clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        applyServerFilters();
+    }, 350);
+};
+
+const clearSearch = () => {
+    searchQuery.value = '';
+    applyServerFilters();
+};
+
+const resetAllFilters = () => {
+    searchQuery.value = '';
+    selectedStatus.value = 'all';
+    applyServerFilters();
+};
 
 const getInitials = (name: string) => {
     if (!name) return 'ST';
@@ -119,30 +175,6 @@ const getStatusBadge = (status: string) => {
 const formatStatus = (status: string) => {
     return status.replace('_', ' ').replace(/\b\w/g, (l) => l.toUpperCase());
 };
-
-const filteredStudents = computed(() => {
-    let result = props.students.data;
-
-    if (selectedStatus.value !== 'all') {
-        result = result.filter((s) => s.status === selectedStatus.value);
-    }
-
-    if (searchQuery.value.trim() !== '') {
-        const query = searchQuery.value.toLowerCase().trim();
-        result = result.filter(
-            (s) =>
-                s.name.toLowerCase().includes(query) ||
-                s.email.toLowerCase().includes(query) ||
-                (s.phone && s.phone.toLowerCase().includes(query)) ||
-                (s.internship &&
-                    s.internship.name.toLowerCase().includes(query)) ||
-                (s.internship &&
-                    s.internship.batch_no.toLowerCase().includes(query)),
-        );
-    }
-
-    return result;
-});
 
 const deleteStudent = (id: number) => {
     if (confirm('Are you sure you want to delete this student record?')) {
@@ -329,10 +361,18 @@ const deleteStudent = (id: number) => {
                 />
                 <Input
                     v-model="searchQuery"
+                    @input="handleSearchInput"
                     type="text"
                     placeholder="Search by student name, email, or batch..."
-                    class="h-10 border-slate-200 bg-white pl-10 text-xs shadow-2xs focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
+                    class="h-10 border-slate-200 bg-white pl-10 pr-9 text-xs shadow-2xs focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
                 />
+                <button
+                    v-if="searchQuery"
+                    @click="clearSearch"
+                    class="absolute top-1/2 right-3 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                >
+                    <X class="h-3.5 w-3.5" />
+                </button>
             </div>
 
             <!-- Pipeline Filter Tabs -->
@@ -341,7 +381,7 @@ const deleteStudent = (id: number) => {
             >
                 <button
                     type="button"
-                    @click="selectedStatus = 'all'"
+                    @click="setStatus('all')"
                     :class="[
                         'rounded-lg px-3 py-1.5 text-xs font-semibold transition-all',
                         selectedStatus === 'all'
@@ -353,7 +393,7 @@ const deleteStudent = (id: number) => {
                 </button>
                 <button
                     type="button"
-                    @click="selectedStatus = 'active'"
+                    @click="setStatus('active')"
                     :class="[
                         'rounded-lg px-3 py-1.5 text-xs font-semibold transition-all',
                         selectedStatus === 'active'
@@ -365,7 +405,7 @@ const deleteStudent = (id: number) => {
                 </button>
                 <button
                     type="button"
-                    @click="selectedStatus = 'enrolled'"
+                    @click="setStatus('enrolled')"
                     :class="[
                         'rounded-lg px-3 py-1.5 text-xs font-semibold transition-all',
                         selectedStatus === 'enrolled'
@@ -377,7 +417,7 @@ const deleteStudent = (id: number) => {
                 </button>
                 <button
                     type="button"
-                    @click="selectedStatus = 'completed'"
+                    @click="setStatus('completed')"
                     :class="[
                         'rounded-lg px-3 py-1.5 text-xs font-semibold transition-all',
                         selectedStatus === 'completed'
@@ -389,7 +429,7 @@ const deleteStudent = (id: number) => {
                 </button>
                 <button
                     type="button"
-                    @click="selectedStatus = 'dropped_out'"
+                    @click="setStatus('dropped_out')"
                     :class="[
                         'rounded-lg px-3 py-1.5 text-xs font-semibold transition-all',
                         selectedStatus === 'dropped_out'
@@ -425,7 +465,7 @@ const deleteStudent = (id: number) => {
                     <tbody
                         class="divide-y divide-slate-200/80 dark:divide-slate-800"
                     >
-                        <tr v-if="filteredStudents.length === 0">
+                        <tr v-if="props.students.data.length === 0">
                             <td
                                 colspan="6"
                                 class="py-12 text-center text-slate-400"
@@ -442,15 +482,23 @@ const deleteStudent = (id: number) => {
                                         No student records found.
                                     </p>
                                     <p class="text-xs text-slate-400">
-                                        Try adjusting your search query or
-                                        status filter.
+                                        Try adjusting your search query or status filter.
                                     </p>
+                                    <Button
+                                        v-if="searchQuery || selectedStatus !== 'all'"
+                                        variant="outline"
+                                        size="sm"
+                                        @click="resetAllFilters"
+                                        class="mt-2 text-xs"
+                                    >
+                                        Reset Filters
+                                    </Button>
                                 </div>
                             </td>
                         </tr>
 
                         <tr
-                            v-for="student in filteredStudents"
+                            v-for="student in props.students.data"
                             :key="student.id"
                             class="group transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/50"
                         >
@@ -642,52 +690,52 @@ const deleteStudent = (id: number) => {
 
             <!-- Footer Pagination Controls -->
             <div
-                v-if="students.links && students.links.length > 3"
-                class="flex flex-col items-center justify-between gap-3 border-t border-slate-200/80 px-4 py-3 sm:flex-row dark:border-slate-800"
+                v-if="props.students.total > 0"
+                class="flex flex-col items-center justify-between gap-4 border-t border-slate-200/80 px-6 py-4 sm:flex-row dark:border-slate-800"
             >
-                <div class="text-xs text-slate-500 dark:text-slate-400">
+                <p class="text-sm text-slate-600 dark:text-slate-400">
                     Showing
-                    <span
-                        class="font-semibold text-slate-700 dark:text-slate-200"
-                        >{{ students.from || 1 }}</span
-                    >
+                    <span class="font-semibold text-slate-900 dark:text-slate-100">{{ props.students.from }}</span>
                     to
-                    <span
-                        class="font-semibold text-slate-700 dark:text-slate-200"
-                        >{{ students.to || students.data.length }}</span
-                    >
+                    <span class="font-semibold text-slate-900 dark:text-slate-100">{{ props.students.to }}</span>
                     of
-                    <span
-                        class="font-semibold text-slate-700 dark:text-slate-200"
-                        >{{ students.total || students.data.length }}</span
-                    >
-                    results
-                </div>
+                    <span class="font-semibold text-slate-900 dark:text-slate-100">{{ props.students.total }}</span>
+                    candidates
+                </p>
+
                 <div class="flex items-center gap-1">
-                    <template v-for="(link, i) in students.links" :key="i">
-                        <Button
-                            v-if="
-                                link.url ||
-                                link.label.includes('Previous') ||
-                                link.label.includes('Next')
-                            "
-                            :variant="link.active ? 'default' : 'outline'"
-                            size="sm"
-                            as-child
+                    <!-- Previous Button -->
+                    <button
+                        :disabled="!props.students.prev_page_url"
+                        @click="props.students.prev_page_url && router.get(props.students.prev_page_url, {}, { preserveState: true, preserveScroll: true, replace: true })"
+                        class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition-all hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
+                    >
+                        <ChevronLeft class="h-4 w-4" />
+                    </button>
+
+                    <!-- Numbered Page Buttons -->
+                    <template v-for="(link, i) in props.students.links.slice(1, -1)" :key="i">
+                        <button
                             :disabled="!link.url"
+                            @click="link.url && router.get(link.url, {}, { preserveState: true, preserveScroll: true, replace: true })"
                             :class="[
-                                'h-8 text-xs',
+                                'inline-flex h-9 min-w-[2.25rem] items-center justify-center rounded-lg border px-2 text-sm font-medium transition-all',
                                 link.active
-                                    ? 'bg-indigo-600 text-white hover:bg-indigo-700'
-                                    : 'text-slate-600 dark:text-slate-300',
+                                    ? 'border-indigo-500 bg-indigo-500 text-white shadow-xs'
+                                    : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700',
                             ]"
-                        >
-                            <Link v-if="link.url" :href="link.url">
-                                <span v-html="link.label"></span>
-                            </Link>
-                            <span v-else v-html="link.label"></span>
-                        </Button>
+                            v-html="link.label"
+                        ></button>
                     </template>
+
+                    <!-- Next Button -->
+                    <button
+                        :disabled="!props.students.next_page_url"
+                        @click="props.students.next_page_url && router.get(props.students.next_page_url, {}, { preserveState: true, preserveScroll: true, replace: true })"
+                        class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition-all hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
+                    >
+                        <ChevronRight class="h-4 w-4" />
+                    </button>
                 </div>
             </div>
         </Card>

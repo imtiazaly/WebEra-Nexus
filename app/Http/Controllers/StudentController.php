@@ -15,23 +15,48 @@ use Inertia\Response;
 
 class StudentController extends Controller
 {
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $students = Student::with(['internship:id,name,batch_no', 'projects:id,title'])
-            ->withCount('weeklyReports')
-            ->latest()
-            ->paginate(15);
+        $status = $request->query('status', 'all');
+        $search = $request->query('search', '');
+
+        $query = Student::with(['internship:id,name,batch_no', 'projects:id,title'])
+            ->withCount('weeklyReports');
+
+        if ($status && $status !== 'all') {
+            $query->where('status', $status);
+        }
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%")
+                    ->orWhereHas('internship', function ($iq) use ($search) {
+                        $iq->where('name', 'like', "%{$search}%")
+                            ->orWhere('batch_no', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        $students = $query->latest()->paginate(10)->withQueryString();
 
         $stats = [
             'total_students' => Student::count(),
-            'active_students' => Student::whereIn('status', ['active', 'enrolled'])->count(),
+            'active_students' => Student::where('status', 'active')->count(),
+            'enrolled_students' => Student::where('status', 'enrolled')->count(),
             'completed_students' => Student::where('status', 'completed')->count(),
+            'dropped_out_students' => Student::where('status', 'dropped_out')->count(),
             'avg_progress' => (int) round((float) (Student::avg('overall_progress') ?? 0)),
         ];
 
         return Inertia::render('Students/Index', [
             'students' => $students,
             'stats' => $stats,
+            'filters' => [
+                'status' => $status,
+                'search' => $search,
+            ],
         ]);
     }
 
