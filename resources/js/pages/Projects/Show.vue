@@ -23,8 +23,6 @@ import {
     Briefcase,
     Building2,
     Wrench,
-    CheckCircle2,
-    FolderKanban,
     FileText,
     TrendingUp,
     Target,

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { Head, Link, useForm, router } from '@inertiajs/vue3';
-import { index, edit, show, assignProject } from '@/routes/students';
+import { index, edit, assignProject } from '@/routes/students';
 import {
     store as storeWeeklyReport,
     update as updateWeeklyReport,
@@ -22,7 +22,6 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import InputError from '@/components/InputError.vue';
 import {
     ArrowLeft,
-    User,
     Mail,
     Phone,
     GraduationCap,
@@ -35,14 +34,10 @@ import {
     Plus,
     CheckCircle2,
     AlertTriangle,
-    Clock,
     Award,
     Loader2,
     Send,
-    UserCheck,
-    Layers,
     MessageSquare,
-    ExternalLink,
     Calendar,
     Star,
     ShieldCheck,

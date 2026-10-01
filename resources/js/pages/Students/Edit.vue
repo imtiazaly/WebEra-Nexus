@@ -25,7 +25,6 @@ import {
     Loader2,
     Pencil,
     UserCheck,
-    CheckCircle2,
 } from '@lucide/vue';
 
 defineOptions({

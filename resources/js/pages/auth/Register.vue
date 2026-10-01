@@ -34,11 +34,16 @@ defineOptions({
     >
         <div class="grid gap-4">
             <div class="grid gap-2">
-                <Label for="name" class="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                <Label
+                    for="name"
+                    class="text-xs font-semibold text-slate-700 dark:text-slate-300"
+                >
                     Full Name
                 </Label>
                 <div class="relative flex items-center">
-                    <User class="absolute left-3 size-4 text-slate-400 pointer-events-none" />
+                    <User
+                        class="pointer-events-none absolute left-3 size-4 text-slate-400"
+                    />
                     <Input
                         id="name"
                         type="text"
@@ -48,18 +53,23 @@ defineOptions({
                         autocomplete="name"
                         name="name"
                         placeholder="John Doe"
-                        class="pl-9 h-11 rounded-xl border-slate-200 dark:border-slate-800 focus-visible:ring-purple-500 bg-slate-50/50 dark:bg-slate-900/50"
+                        class="h-11 rounded-xl border-slate-200 bg-slate-50/50 pl-9 focus-visible:ring-purple-500 dark:border-slate-800 dark:bg-slate-900/50"
                     />
                 </div>
                 <InputError :message="errors.name" />
             </div>
 
             <div class="grid gap-2">
-                <Label for="email" class="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                <Label
+                    for="email"
+                    class="text-xs font-semibold text-slate-700 dark:text-slate-300"
+                >
                     Email Address
                 </Label>
                 <div class="relative flex items-center">
-                    <Mail class="absolute left-3 size-4 text-slate-400 pointer-events-none" />
+                    <Mail
+                        class="pointer-events-none absolute left-3 size-4 text-slate-400"
+                    />
                     <Input
                         id="email"
                         type="email"
@@ -68,18 +78,23 @@ defineOptions({
                         autocomplete="email"
                         name="email"
                         placeholder="email@example.com"
-                        class="pl-9 h-11 rounded-xl border-slate-200 dark:border-slate-800 focus-visible:ring-purple-500 bg-slate-50/50 dark:bg-slate-900/50"
+                        class="h-11 rounded-xl border-slate-200 bg-slate-50/50 pl-9 focus-visible:ring-purple-500 dark:border-slate-800 dark:bg-slate-900/50"
                     />
                 </div>
                 <InputError :message="errors.email" />
             </div>
 
             <div class="grid gap-2">
-                <Label for="password" class="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                <Label
+                    for="password"
+                    class="text-xs font-semibold text-slate-700 dark:text-slate-300"
+                >
                     Password
                 </Label>
                 <div class="relative flex items-center">
-                    <Lock class="absolute left-3 size-4 text-slate-400 pointer-events-none z-10" />
+                    <Lock
+                        class="pointer-events-none absolute left-3 z-10 size-4 text-slate-400"
+                    />
                     <PasswordInput
                         id="password"
                         required
@@ -88,18 +103,23 @@ defineOptions({
                         name="password"
                         placeholder="••••••••"
                         :passwordrules="passwordRules"
-                        class="pl-9 h-11 rounded-xl border-slate-200 dark:border-slate-800 focus-visible:ring-purple-500 bg-slate-50/50 dark:bg-slate-900/50 w-full"
+                        class="h-11 w-full rounded-xl border-slate-200 bg-slate-50/50 pl-9 focus-visible:ring-purple-500 dark:border-slate-800 dark:bg-slate-900/50"
                     />
                 </div>
                 <InputError :message="errors.password" />
             </div>
 
             <div class="grid gap-2">
-                <Label for="password_confirmation" class="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                <Label
+                    for="password_confirmation"
+                    class="text-xs font-semibold text-slate-700 dark:text-slate-300"
+                >
                     Confirm Password
                 </Label>
                 <div class="relative flex items-center">
-                    <Lock class="absolute left-3 size-4 text-slate-400 pointer-events-none z-10" />
+                    <Lock
+                        class="pointer-events-none absolute left-3 z-10 size-4 text-slate-400"
+                    />
                     <PasswordInput
                         id="password_confirmation"
                         required
@@ -108,7 +128,7 @@ defineOptions({
                         name="password_confirmation"
                         placeholder="••••••••"
                         :passwordrules="passwordRules"
-                        class="pl-9 h-11 rounded-xl border-slate-200 dark:border-slate-800 focus-visible:ring-purple-500 bg-slate-50/50 dark:bg-slate-900/50 w-full"
+                        class="h-11 w-full rounded-xl border-slate-200 bg-slate-50/50 pl-9 focus-visible:ring-purple-500 dark:border-slate-800 dark:bg-slate-900/50"
                     />
                 </div>
                 <InputError :message="errors.password_confirmation" />
@@ -116,7 +136,7 @@ defineOptions({
 
             <Button
                 type="submit"
-                class="mt-3 h-11 w-full rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-violet-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold shadow-lg shadow-purple-500/25 active:scale-[0.99] transition-all duration-200 text-sm flex items-center justify-center gap-2 group"
+                class="group mt-3 flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-linear-to-r from-purple-600 via-indigo-600 to-violet-600 text-sm font-semibold text-white shadow-lg shadow-purple-500/25 transition-all duration-200 hover:from-purple-700 hover:to-indigo-700 active:scale-[0.99]"
                 tabindex="5"
                 :disabled="processing"
                 data-test="register-user-button"
@@ -124,16 +144,20 @@ defineOptions({
                 <Spinner v-if="processing" />
                 <span v-else class="flex items-center gap-2">
                     Create Account
-                    <ArrowRight class="size-4 transition-transform duration-200 group-hover:translate-x-1" />
+                    <ArrowRight
+                        class="size-4 transition-transform duration-200 group-hover:translate-x-1"
+                    />
                 </span>
             </Button>
         </div>
 
-        <div class="text-center text-xs text-slate-500 dark:text-slate-400 mt-2">
+        <div
+            class="mt-2 text-center text-xs text-slate-500 dark:text-slate-400"
+        >
             Already have an account?
             <TextLink
                 :href="login()"
-                class="ms-1 font-semibold text-purple-600 dark:text-purple-400 hover:underline"
+                class="ms-1 font-semibold text-purple-600 hover:underline dark:text-purple-400"
                 :tabindex="6"
             >
                 Log in

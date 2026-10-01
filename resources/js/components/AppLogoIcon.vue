@@ -21,7 +21,7 @@ const handleError = () => {
 <template>
     <div
         :class="[
-            'relative flex items-center justify-center overflow-hidden shrink-0 select-none',
+            'relative flex shrink-0 items-center justify-center overflow-hidden select-none',
             props.className,
             $attrs.class,
         ]"
@@ -35,7 +35,7 @@ const handleError = () => {
         />
         <div
             v-else
-            class="flex h-full w-full items-center justify-center rounded-lg bg-gradient-to-br from-purple-700 via-indigo-700 to-blue-700 text-white font-black text-xs shadow-inner"
+            class="flex h-full w-full items-center justify-center rounded-lg bg-linear-to-br from-purple-700 via-indigo-700 to-blue-700 text-xs font-black text-white shadow-inner"
         >
             WN
         </div>

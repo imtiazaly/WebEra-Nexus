@@ -22,7 +22,6 @@ import {
     Calendar,
     Clock,
     SlidersHorizontal,
-    FileText,
     Loader2,
     Pencil,
 } from '@lucide/vue';
