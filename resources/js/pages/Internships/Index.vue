@@ -38,6 +38,10 @@ import {
     BookOpen,
     Copy,
     Check,
+    ChevronLeft,
+    ChevronRight,
+    X,
+    Tag,
 } from '@lucide/vue';
 
 import TrackManagerModal from '@/components/TrackManagerModal.vue';
@@ -77,24 +81,50 @@ interface Internship {
     created_at: string;
 }
 
+interface PaginationLink {
+    url: string | null;
+    label: string;
+    active: boolean;
+}
+
 interface PaginatedInternships {
     data: Internship[];
-    links: any[];
+    links: PaginationLink[];
     current_page: number;
     last_page: number;
-    total?: number;
+    total: number;
+    from: number | null;
+    to: number | null;
+    prev_page_url: string | null;
+    next_page_url: string | null;
+}
+
+interface InternshipMetrics {
+    total: number;
+    active: number;
+    upcoming: number;
+    completed: number;
+    total_enrolled: number;
+    avg_progress: number;
+    unique_tracks_count: number;
 }
 
 const props = defineProps<{
     internships: PaginatedInternships;
     all_tracks?: any[];
+    filters?: {
+        status?: string;
+        track?: string;
+        search?: string;
+    };
+    metrics?: InternshipMetrics;
 }>();
 
 // State
-const searchQuery = ref('');
+const searchQuery = ref(props.filters?.search || '');
 const isTrackModalOpen = ref(false);
-const selectedStatus = ref<string>('active');
-const selectedTrack = ref<string>('all');
+const selectedStatus = ref<string>(props.filters?.status || 'all');
+const selectedTrack = ref<string>(props.filters?.track || 'all');
 const viewMode = ref<'grid' | 'timeline'>('grid');
 const copiedBatchId = ref<number | null>(null);
 
@@ -219,43 +249,26 @@ const getStatusConfig = (status: string) => {
     }
 };
 
-// Computed Summary Metrics
-const totalBatches = computed(
-    () => props.internships.total || props.internships.data.length,
-);
-
-const activeBatches = computed(() =>
-    props.internships.data.filter((b) => b.status === 'active'),
-);
-const upcomingBatches = computed(() =>
-    props.internships.data.filter((b) => b.status === 'upcoming'),
-);
-const completedBatches = computed(() =>
-    props.internships.data.filter((b) => b.status === 'completed'),
-);
-
-const totalInternsEnrolled = computed(() => {
-    return props.internships.data.reduce(
-        (sum, b) => sum + (b.total_students_count || 0),
-        0,
+// Metrics with graceful fallbacks from database
+const metricsData = computed(() => {
+    return (
+        props.metrics || {
+            total: props.internships.total || 0,
+            active: 0,
+            upcoming: 0,
+            completed: 0,
+            total_enrolled: 0,
+            avg_progress: 0,
+            unique_tracks_count: props.all_tracks?.length || 0,
+        }
     );
 });
 
-const globalAverageProgress = computed(() => {
-    let allStudents: Student[] = [];
-    props.internships.data.forEach((b) => {
-        if (b.students) allStudents.push(...b.students);
-    });
-    if (allStudents.length === 0) return 0;
-    const sum = allStudents.reduce(
-        (acc, s) => acc + (s.overall_progress || 0),
-        0,
-    );
-    return Math.round(sum / allStudents.length);
-});
-
-// Unique Tracks list for filter
-const uniqueTracks = computed(() => {
+// Unique Tracks list for filter (from all_tracks prop or current data)
+const availableTracks = computed(() => {
+    if (props.all_tracks && props.all_tracks.length > 0) {
+        return props.all_tracks.map((t: any) => t.name);
+    }
     const set = new Set<string>();
     props.internships.data.forEach((b) => {
         if (b.service?.name) set.add(b.service.name);
@@ -263,26 +276,70 @@ const uniqueTracks = computed(() => {
     return Array.from(set);
 });
 
-// Filtered Internships
-const filteredInternships = computed(() => {
-    return props.internships.data.filter((batch) => {
-        const matchesStatus =
-            selectedStatus.value === 'all' ||
-            batch.status === selectedStatus.value;
-        const matchesTrack =
-            selectedTrack.value === 'all' ||
-            batch.service?.name === selectedTrack.value;
+// Database-Driven Server-Side Filtering
+let searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
-        const query = searchQuery.value.toLowerCase().trim();
-        const matchesSearch =
-            !query ||
-            batch.name.toLowerCase().includes(query) ||
-            batch.batch_no.toLowerCase().includes(query) ||
-            (batch.service && batch.service.name.toLowerCase().includes(query));
+const applyServerFilters = (
+    newStatus?: string,
+    newTrack?: string,
+    newSearch?: string,
+) => {
+    const statusToApply =
+        newStatus !== undefined ? newStatus : selectedStatus.value;
+    const trackToApply =
+        newTrack !== undefined ? newTrack : selectedTrack.value;
+    const searchToApply =
+        newSearch !== undefined ? newSearch : searchQuery.value;
 
-        return matchesStatus && matchesTrack && matchesSearch;
-    });
-});
+    router.get(
+        index.url(),
+        {
+            status: statusToApply !== 'all' ? statusToApply : undefined,
+            track: trackToApply !== 'all' ? trackToApply : undefined,
+            search: searchToApply.trim() ? searchToApply.trim() : undefined,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            replace: true,
+        },
+    );
+};
+
+const setStatus = (status: string) => {
+    selectedStatus.value = status;
+    applyServerFilters(status, selectedTrack.value, searchQuery.value);
+};
+
+const setTrack = (track: string) => {
+    selectedTrack.value = track;
+    applyServerFilters(selectedStatus.value, track, searchQuery.value);
+};
+
+const handleSearchInput = () => {
+    if (searchDebounceTimer) {
+        clearTimeout(searchDebounceTimer);
+    }
+    searchDebounceTimer = setTimeout(() => {
+        applyServerFilters(
+            selectedStatus.value,
+            selectedTrack.value,
+            searchQuery.value,
+        );
+    }, 350);
+};
+
+const clearSearch = () => {
+    searchQuery.value = '';
+    applyServerFilters(selectedStatus.value, selectedTrack.value, '');
+};
+
+const resetAllFilters = () => {
+    selectedStatus.value = 'all';
+    selectedTrack.value = 'all';
+    searchQuery.value = '';
+    applyServerFilters('all', 'all', '');
+};
 
 const deleteInternship = (id: number) => {
     if (confirm('Are you sure you want to delete this internship batch?')) {
@@ -347,7 +404,7 @@ const deleteInternship = (id: number) => {
                             class="rounded-xl border-indigo-200/80 bg-white/80 font-bold text-indigo-700 hover:bg-white dark:border-indigo-400/30 dark:bg-slate-900/60 dark:text-indigo-300 dark:hover:bg-slate-800 dark:hover:text-white"
                         >
                             <Layers class="mr-2 h-4 w-4 text-indigo-500" />
-                            <span>Manage Tracks ⚙️</span>
+                            <span>Manage Tracks</span>
                         </Button>
 
                         <Button
@@ -389,12 +446,12 @@ const deleteInternship = (id: number) => {
                             <span
                                 class="text-3xl font-black text-slate-900 dark:text-white"
                             >
-                                {{ activeBatches.length }}
+                                {{ metricsData.active }}
                             </span>
                             <span
                                 class="text-xs font-bold text-emerald-600 dark:text-emerald-400"
                             >
-                                / {{ totalBatches }} Batches
+                                / {{ metricsData.total }} Batches
                             </span>
                         </div>
                         <!-- Micro Progress Pill -->
@@ -405,14 +462,14 @@ const deleteInternship = (id: number) => {
                                 >Upcoming:
                                 <strong
                                     class="text-indigo-600 dark:text-indigo-300"
-                                    >{{ upcomingBatches.length }}</strong
+                                    >{{ metricsData.upcoming }}</strong
                                 ></span
                             >
                             <span
                                 >Completed:
                                 <strong
                                     class="text-purple-600 dark:text-purple-300"
-                                    >{{ completedBatches.length }}</strong
+                                    >{{ metricsData.completed }}</strong
                                 ></span
                             >
                         </div>
@@ -438,7 +495,7 @@ const deleteInternship = (id: number) => {
                             <span
                                 class="text-3xl font-black text-slate-900 dark:text-white"
                             >
-                                {{ totalInternsEnrolled }}
+                                {{ metricsData.total_enrolled }}
                             </span>
                             <span
                                 class="text-xs font-bold text-slate-600 dark:text-slate-300"
@@ -454,7 +511,7 @@ const deleteInternship = (id: number) => {
                             />
                             <span
                                 >Distributed across
-                                {{ totalBatches }} batches</span
+                                {{ metricsData.total }} batches</span
                             >
                         </div>
                     </div>
@@ -479,7 +536,7 @@ const deleteInternship = (id: number) => {
                             <span
                                 class="text-3xl font-black text-slate-900 dark:text-white"
                             >
-                                {{ globalAverageProgress }}%
+                                {{ metricsData.avg_progress }}%
                             </span>
                             <span
                                 class="text-xs font-bold text-cyan-600 dark:text-cyan-300"
@@ -492,7 +549,7 @@ const deleteInternship = (id: number) => {
                         >
                             <div
                                 class="h-full rounded-full bg-linear-to-r from-cyan-500 to-indigo-500 transition-all duration-500"
-                                :style="{ width: `${globalAverageProgress}%` }"
+                                :style="{ width: `${metricsData.avg_progress}%` }"
                             ></div>
                         </div>
                     </div>
@@ -517,7 +574,7 @@ const deleteInternship = (id: number) => {
                             <span
                                 class="text-3xl font-black text-slate-900 dark:text-white"
                             >
-                                {{ uniqueTracks.length }}
+                                {{ metricsData.unique_tracks_count }}
                             </span>
                             <span
                                 class="text-xs font-bold text-purple-600 dark:text-purple-300"
@@ -527,17 +584,17 @@ const deleteInternship = (id: number) => {
                         </div>
                         <div class="mt-2.5 flex flex-wrap gap-1">
                             <span
-                                v-for="track in uniqueTracks.slice(0, 3)"
+                                v-for="track in availableTracks.slice(0, 3)"
                                 :key="track"
                                 class="inline-block rounded-md border border-purple-200 bg-purple-100 px-2 py-0.5 text-[10px] font-bold text-purple-700 dark:border-purple-500/30 dark:bg-purple-500/20 dark:text-purple-200"
                             >
                                 {{ track }}
                             </span>
                             <span
-                                v-if="uniqueTracks.length > 3"
+                                v-if="availableTracks.length > 3"
                                 class="text-[10px] font-semibold text-slate-500 dark:text-slate-400"
                             >
-                                +{{ uniqueTracks.length - 3 }} more
+                                +{{ availableTracks.length - 3 }} more
                             </span>
                         </div>
                     </div>
@@ -555,9 +612,9 @@ const deleteInternship = (id: number) => {
                             Batch Lifecycle Allocation Status
                         </span>
                         <span class="text-slate-500 dark:text-slate-400">
-                            {{ activeBatches.length }} Active •
-                            {{ upcomingBatches.length }} Upcoming •
-                            {{ completedBatches.length }} Graduated
+                            {{ metricsData.active }} Active •
+                            {{ metricsData.upcoming }} Upcoming •
+                            {{ metricsData.completed }} Graduated
                         </span>
                     </div>
                     <div
@@ -566,21 +623,21 @@ const deleteInternship = (id: number) => {
                         <div
                             class="rounded-l-full bg-emerald-500 transition-all duration-500"
                             :style="{
-                                width: `${totalBatches ? (activeBatches.length / totalBatches) * 100 : 0}%`,
+                                width: `${metricsData.total ? (metricsData.active / metricsData.total) * 100 : 0}%`,
                             }"
                             title="Active Batches"
                         ></div>
                         <div
                             class="bg-indigo-500 transition-all duration-500"
                             :style="{
-                                width: `${totalBatches ? (upcomingBatches.length / totalBatches) * 100 : 0}%`,
+                                width: `${metricsData.total ? (metricsData.upcoming / metricsData.total) * 100 : 0}%`,
                             }"
                             title="Upcoming Batches"
                         ></div>
                         <div
                             class="rounded-r-full bg-purple-500 transition-all duration-500"
                             :style="{
-                                width: `${totalBatches ? (completedBatches.length / totalBatches) * 100 : 0}%`,
+                                width: `${metricsData.total ? (metricsData.completed / metricsData.total) * 100 : 0}%`,
                             }"
                             title="Completed Batches"
                         ></div>
@@ -589,7 +646,7 @@ const deleteInternship = (id: number) => {
             </div>
         </div>
 
-        <!-- 🎛️ CONTROLS & FILTERING TOOLBAR -->
+        <!-- CONTROLS & FILTERING TOOLBAR -->
         <div
             class="flex flex-col gap-4 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm lg:flex-row lg:items-center lg:justify-between dark:border-slate-800 dark:bg-slate-900"
         >
@@ -600,21 +657,32 @@ const deleteInternship = (id: number) => {
                 />
                 <Input
                     v-model="searchQuery"
+                    @input="handleSearchInput"
                     type="text"
                     placeholder="Search batch name, code, track..."
-                    class="h-10 border-slate-200 bg-slate-50/70 pl-10 text-xs focus:bg-white dark:border-slate-800 dark:bg-slate-800/50 dark:focus:bg-slate-900"
+                    class="h-10 border-slate-200 bg-slate-50/70 pr-9 pl-10 text-xs focus:bg-white dark:border-slate-800 dark:bg-slate-800/50 dark:focus:bg-slate-900"
                 />
+                <button
+                    v-if="searchQuery"
+                    @click="clearSearch"
+                    type="button"
+                    class="absolute top-1/2 right-3 -translate-y-1/2 rounded-full p-0.5 text-slate-400 hover:bg-slate-200 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-200"
+                    title="Clear search"
+                >
+                    <X class="h-3.5 w-3.5" />
+                </button>
             </div>
 
             <div class="flex flex-wrap items-center gap-3">
                 <!-- Track Filter Dropdown -->
                 <select
                     v-model="selectedTrack"
+                    @change="setTrack(($event.target as HTMLSelectElement).value)"
                     class="h-10 rounded-xl border border-slate-200/80 bg-slate-50/70 px-3 text-xs font-semibold text-slate-700 dark:border-slate-800 dark:bg-slate-900/90 dark:text-slate-300"
                 >
                     <option value="all">All Learning Tracks</option>
                     <option
-                        v-for="track in uniqueTracks"
+                        v-for="track in availableTracks"
                         :key="track"
                         :value="track"
                     >
@@ -627,7 +695,8 @@ const deleteInternship = (id: number) => {
                     class="flex items-center rounded-xl bg-slate-100 p-1 text-xs font-semibold dark:bg-slate-800/80"
                 >
                     <button
-                        @click="selectedStatus = 'all'"
+                        @click="setStatus('all')"
+                        type="button"
                         :class="[
                             'rounded-lg px-3 py-1.5 transition-all',
                             selectedStatus === 'all'
@@ -635,10 +704,11 @@ const deleteInternship = (id: number) => {
                                 : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
                         ]"
                     >
-                        All ({{ totalBatches }})
+                        All ({{ metricsData.total }})
                     </button>
                     <button
-                        @click="selectedStatus = 'active'"
+                        @click="setStatus('active')"
+                        type="button"
                         :class="[
                             'rounded-lg px-3 py-1.5 transition-all',
                             selectedStatus === 'active'
@@ -646,10 +716,11 @@ const deleteInternship = (id: number) => {
                                 : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
                         ]"
                     >
-                        Active ({{ activeBatches.length }})
+                        Active ({{ metricsData.active }})
                     </button>
                     <button
-                        @click="selectedStatus = 'upcoming'"
+                        @click="setStatus('upcoming')"
+                        type="button"
                         :class="[
                             'rounded-lg px-3 py-1.5 transition-all',
                             selectedStatus === 'upcoming'
@@ -657,10 +728,11 @@ const deleteInternship = (id: number) => {
                                 : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
                         ]"
                     >
-                        Upcoming
+                        Upcoming ({{ metricsData.upcoming }})
                     </button>
                     <button
-                        @click="selectedStatus = 'completed'"
+                        @click="setStatus('completed')"
+                        type="button"
                         :class="[
                             'rounded-lg px-3 py-1.5 transition-all',
                             selectedStatus === 'completed'
@@ -668,7 +740,7 @@ const deleteInternship = (id: number) => {
                                 : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
                         ]"
                     >
-                        Completed
+                        Completed ({{ metricsData.completed }})
                     </button>
                 </div>
 
@@ -708,7 +780,7 @@ const deleteInternship = (id: number) => {
 
         <!-- 📦 EMPTY STATE -->
         <div
-            v-if="filteredInternships.length === 0"
+            v-if="props.internships.data.length === 0"
             class="rounded-3xl border border-dashed border-slate-300 p-12 text-center dark:border-slate-800"
         >
             <div
@@ -727,14 +799,23 @@ const deleteInternship = (id: number) => {
                     </h3>
                     <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
                         {{
-                            searchQuery
-                                ? 'Try adjusting your search filters.'
+                            searchQuery || selectedStatus !== 'all' || selectedTrack !== 'all'
+                                ? 'Try adjusting your search query or filters.'
                                 : 'Get started by creating your first internship training batch.'
                         }}
                     </p>
                 </div>
                 <Button
-                    v-if="!searchQuery"
+                    v-if="searchQuery || selectedStatus !== 'all' || selectedTrack !== 'all'"
+                    @click="resetAllFilters"
+                    variant="outline"
+                    size="sm"
+                    class="mt-2"
+                >
+                    Reset Filters
+                </Button>
+                <Button
+                    v-else
                     as-child
                     class="bg-indigo-600 text-white hover:bg-indigo-700"
                 >
@@ -751,7 +832,7 @@ const deleteInternship = (id: number) => {
             class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
         >
             <div
-                v-for="batch in filteredInternships"
+                v-for="batch in props.internships.data"
                 :key="batch.id"
                 :class="[
                     'group relative overflow-hidden rounded-3xl border bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:bg-slate-900/90 dark:backdrop-blur-md',
@@ -776,7 +857,7 @@ const deleteInternship = (id: number) => {
                                 title="Click to copy batch code"
                                 class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 font-mono text-xs font-bold text-slate-800 transition-all hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-800/80 dark:text-slate-200 dark:hover:bg-slate-800"
                             >
-                                <span class="text-indigo-500">🏷️</span>
+                                <Tag class="h-3.5 w-3.5 text-indigo-500" />
                                 <span>{{ batch.batch_no }}</span>
                                 <Check
                                     v-if="copiedBatchId === batch.id"
@@ -1010,7 +1091,7 @@ const deleteInternship = (id: number) => {
                         Chronological Batch Pipeline
                     </h3>
                     <span class="text-xs text-slate-500">
-                        Showing {{ filteredInternships.length }} batches
+                        Showing {{ props.internships.data.length }} batches
                     </span>
                 </div>
 
@@ -1018,7 +1099,7 @@ const deleteInternship = (id: number) => {
                     class="relative ml-4 space-y-8 border-l-2 border-indigo-500/30 pl-6"
                 >
                     <div
-                        v-for="batch in filteredInternships"
+                        v-for="batch in props.internships.data"
                         :key="batch.id"
                         class="group relative"
                     >
@@ -1135,6 +1216,57 @@ const deleteInternship = (id: number) => {
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Pagination Footer -->
+        <div
+            v-if="props.internships.total > 0"
+            class="flex flex-col items-center justify-between gap-4 rounded-2xl border border-slate-200/80 bg-white px-6 py-4 shadow-sm sm:flex-row dark:border-slate-800 dark:bg-slate-900"
+        >
+            <p class="text-sm text-slate-600 dark:text-slate-400">
+                Showing
+                <span class="font-semibold text-slate-900 dark:text-slate-100">{{ props.internships.from }}</span>
+                to
+                <span class="font-semibold text-slate-900 dark:text-slate-100">{{ props.internships.to }}</span>
+                of
+                <span class="font-semibold text-slate-900 dark:text-slate-100">{{ props.internships.total }}</span>
+                batches
+            </p>
+
+            <div class="flex items-center gap-1">
+                <!-- Previous Button -->
+                <button
+                    :disabled="!props.internships.prev_page_url"
+                    @click="props.internships.prev_page_url && router.get(props.internships.prev_page_url, {}, { preserveState: true, preserveScroll: true, replace: true })"
+                    class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition-all hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
+                >
+                    <ChevronLeft class="h-4 w-4" />
+                </button>
+
+                <!-- Numbered Page Buttons -->
+                <template v-for="(link, i) in props.internships.links.slice(1, -1)" :key="i">
+                    <button
+                        :disabled="!link.url"
+                        @click="link.url && router.get(link.url, {}, { preserveState: true, preserveScroll: true, replace: true })"
+                        :class="[
+                            'inline-flex h-9 min-w-[2.25rem] items-center justify-center rounded-lg border px-2 text-sm font-medium transition-all',
+                            link.active
+                                ? 'border-indigo-500 bg-indigo-500 text-white shadow-sm'
+                                : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700',
+                        ]"
+                        v-html="link.label"
+                    ></button>
+                </template>
+
+                <!-- Next Button -->
+                <button
+                    :disabled="!props.internships.next_page_url"
+                    @click="props.internships.next_page_url && router.get(props.internships.next_page_url, {}, { preserveState: true, preserveScroll: true, replace: true })"
+                    class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition-all hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
+                >
+                    <ChevronRight class="h-4 w-4" />
+                </button>
             </div>
         </div>
 
