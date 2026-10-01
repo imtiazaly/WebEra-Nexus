@@ -30,7 +30,7 @@ defineProps<{
                         class="group flex items-center gap-3 transition-transform duration-300 hover:scale-105"
                     >
                         <div
-                            class="flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500/15 via-indigo-500/15 to-slate-900/10 dark:from-purple-500/25 dark:via-indigo-500/25 dark:to-blue-500/25 border border-purple-500/20 dark:border-purple-400/30 shadow-md shadow-purple-500/10 p-1.5"
+                            class="flex size-12 items-center justify-center rounded-2xl bg-linear-to-br from-purple-500/15 via-indigo-500/15 to-slate-900/10 dark:from-purple-500/25 dark:via-indigo-500/25 dark:to-blue-500/25 border border-purple-500/20 dark:border-purple-400/30 shadow-md shadow-purple-500/10 p-1.5"
                         >
                             <AppLogoIcon class="size-8" />
                         </div>
@@ -39,7 +39,7 @@ defineProps<{
                                 class="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white"
                             >
                                 WebEra<span
-                                    class="ms-1 font-black bg-gradient-to-r from-purple-600 via-indigo-600 to-violet-600 dark:from-purple-400 dark:via-indigo-400 dark:to-violet-400 bg-clip-text text-transparent"
+                                    class="ms-1 font-black bg-linear-to-r from-purple-600 via-indigo-600 to-violet-600 dark:from-purple-400 dark:via-indigo-400 dark:to-violet-400 bg-clip-text text-transparent"
                                     >Nexus</span
                                 >
                             </span>

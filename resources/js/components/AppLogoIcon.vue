@@ -35,7 +35,7 @@ const handleError = () => {
         />
         <div
             v-else
-            class="flex h-full w-full items-center justify-center rounded-lg bg-gradient-to-br from-purple-700 via-indigo-700 to-blue-700 text-white font-black text-xs shadow-inner"
+            class="flex h-full w-full items-center justify-center rounded-lg bg-linear-to-br from-purple-700 via-indigo-700 to-blue-700 text-white font-black text-xs shadow-inner"
         >
             WN
         </div>
