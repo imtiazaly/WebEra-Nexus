@@ -62,6 +62,7 @@ defineProps<{
                         autofocus
                         :tabindex="1"
                         autocomplete="email"
+                        default-value="admin@webera.com"
                         placeholder="admin@webera.com"
                         class="h-11 rounded-xl border-slate-200 bg-slate-50/50 pl-9 focus-visible:ring-purple-500 dark:border-slate-800 dark:bg-slate-900/50"
                     />
@@ -95,6 +96,7 @@ defineProps<{
                         name="password"
                         required
                         :tabindex="2"
+                        default-value="12345678"
                         autocomplete="current-password"
                         placeholder="••••••••"
                         class="h-11 w-full rounded-xl border-slate-200 bg-slate-50/50 pl-9 focus-visible:ring-purple-500 dark:border-slate-800 dark:bg-slate-900/50"
