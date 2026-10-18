@@ -118,26 +118,50 @@ WebEra Nexus merges **Executive CRM**, **Delivery Tracking**, **Internship Batch
 ## 🏛️ System Architecture
 
 ```mermaid
-erDiagram
-    USERS ||--o{ PROJECTS : "manages"
-    CLIENTS ||--o{ CLIENT_SERVICES : "requests"
-    SERVICES ||--o{ CLIENT_SERVICES : "offered_to"
-    CLIENTS ||--o{ PROJECTS : "contracts"
-    SERVICES ||--o{ PROJECTS : "categorizes"
+flowchart TD
+    subgraph UsersAuth["🔐 Authentication & Admin"]
+        User["Admin / Mentors"]
+        Settings["System Settings & Config"]
+    end
 
-    SERVICES ||--o{ INTERNSHIPS : "powers track"
-    INTERNSHIPS ||--o{ INTERNSHIP_STUDENT : "enrolls"
-    STUDENTS ||--o{ INTERNSHIP_STUDENT : "participates_in"
+    subgraph CommercialCRM["💼 Commercial CRM & Clients"]
+        Clients["Clients & Leads"]
+        ClientServices["Client Services"]
+    end
 
-    STUDENTS ||--o{ PROJECT_STUDENT : "assigned_to"
-    PROJECTS ||--o{ PROJECT_STUDENT : "utilizes"
+    subgraph DeliveryEngine["🚀 Project Operations Engine"]
+        Projects["Projects Portal (Client & Internal)"]
+        Services["Core Services Catalog"]
+    end
 
-    STUDENTS ||--o{ WEEKLY_REPORTS : "submits"
+    subgraph AcademyModule["🎓 Internship Academy"]
+        Internships["Internship Batches & Cohorts"]
+        Students["Enrolled Students / Interns"]
+        WeeklyReports["Weekly Sprint Reports"]
+    end
 
-    SETTINGS ||..|| GEMINI_AI : "configures"
-    GEMINI_AI ||..o{ CLIENTS : "analyzes leads"
-    GEMINI_AI ||..o{ PROJECTS : "summarizes status"
-    GEMINI_AI ||..o{ WEEKLY_REPORTS : "mentorship insights"
+    subgraph AIEngine["🤖 Google Gemini AI Engine"]
+        GeminiService["Gemini 1.5 Flash Service"]
+    end
+
+    %% Commercial Flow
+    Clients -->|"Requests Services"| ClientServices
+    Services -->|"Defines Offerings"| ClientServices
+    Clients -->|"Contracts"| Projects
+    Services -->|"Categorizes"| Projects
+    User -->|"Manages Operations"| Projects
+
+    %% Academy Flow
+    Services -->|"Powers Track"| Internships
+    Internships -->|"Enrolls"| Students
+    Students -->|"Allocated to Work On"| Projects
+    Students -->|"Submits Logs"| WeeklyReports
+
+    %% AI Integrations
+    Settings -.->|"API Keys & Config"| GeminiService
+    GeminiService -.->|"Generates Strategic Briefs"| Clients
+    GeminiService -.->|"Evaluates Health & Risk"| Projects
+    GeminiService -.->|"Synthesizes Mentorship Briefs"| WeeklyReports
 ```
 
 ---
