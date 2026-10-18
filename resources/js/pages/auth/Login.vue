@@ -1,22 +1,21 @@
 <script setup lang="ts">
-import { Form, Head } from '@inertiajs/vue3';
-import { Mail, Lock, CheckCircle2, ArrowRight } from '@lucide/vue';
-import InputError from '@/components/InputError.vue';
-import PasswordInput from '@/components/PasswordInput.vue';
-import TextLink from '@/components/TextLink.vue';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Spinner } from '@/components/ui/spinner';
-import { register } from '@/routes';
-import { store } from '@/routes/login';
-import { request } from '@/routes/password';
+import { Form, Head } from "@inertiajs/vue3";
+import { Mail, Lock, CheckCircle2, ArrowRight } from "@lucide/vue";
+import InputError from "@/components/InputError.vue";
+import PasswordInput from "@/components/PasswordInput.vue";
+import TextLink from "@/components/TextLink.vue";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Spinner } from "@/components/ui/spinner";
+import { store } from "@/routes/login";
+import { request } from "@/routes/password";
 
 defineOptions({
     layout: {
-        title: 'Welcome Back',
-        description: 'Sign in to access your WebEra Nexus dashboard',
+        title: "Welcome Back",
+        description: "Sign in to access your WebEra Nexus dashboard",
     },
 });
 
@@ -63,6 +62,7 @@ defineProps<{
                         autofocus
                         :tabindex="1"
                         autocomplete="email"
+                        default-value="admin@webera.com"
                         placeholder="admin@webera.com"
                         class="h-11 rounded-xl border-slate-200 bg-slate-50/50 pl-9 focus-visible:ring-purple-500 dark:border-slate-800 dark:bg-slate-900/50"
                     />
@@ -96,6 +96,7 @@ defineProps<{
                         name="password"
                         required
                         :tabindex="2"
+                        default-value="12345678"
                         autocomplete="current-password"
                         placeholder="••••••••"
                         class="h-11 w-full rounded-xl border-slate-200 bg-slate-50/50 pl-9 focus-visible:ring-purple-500 dark:border-slate-800 dark:bg-slate-900/50"
@@ -121,7 +122,7 @@ defineProps<{
 
             <Button
                 type="submit"
-                class="group mt-2 flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-violet-600 text-sm font-semibold text-white shadow-lg shadow-purple-500/25 transition-all duration-200 hover:from-purple-700 hover:to-indigo-700 active:scale-[0.99]"
+                class="group mt-2 flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-linear-to-r from-purple-600 via-indigo-600 to-violet-600 text-sm font-semibold text-white shadow-lg shadow-purple-500/25 transition-all duration-200 hover:from-purple-700 hover:to-indigo-700 active:scale-[0.99]"
                 :tabindex="4"
                 :disabled="processing"
                 data-test="login-button"
@@ -139,14 +140,8 @@ defineProps<{
         <div
             class="mt-2 text-center text-xs text-slate-500 dark:text-slate-400"
         >
-            Don't have an account?
-            <TextLink
-                :href="register()"
-                :tabindex="5"
-                class="ms-1 font-semibold text-purple-600 hover:underline dark:text-purple-400"
-            >
-                Create an account
-            </TextLink>
+            Internal Enterprise Portal • Access restricted to authorized
+            personnel.
         </div>
     </Form>
 </template>
